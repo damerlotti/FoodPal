@@ -1,0 +1,44 @@
+﻿Code Of Honour
+
+Assignment description:
+In your own words, describe what you need to do as a team in this course.
+The main point of the course is to learn how to work as a team. To divide the tasks equally, to communicate professionally and get used to the professional environment. Of course along the way, learn how to use technologies such as gitlabs and maven.
+
+Target or ambition level:
+What grade are you working for?
+If we have to choose a concrete grade, it would be a 7. We want to do things and learn from them, but we also don’t want to use all the free time available to us for this project.
+
+Planning:
+How do you deal with different working hours and working strategies? How do you ensure that each team member finishes their work on time? Who will have a final say in the final deliverable and submits it to Brightspace on behalf of the project team?
+Tasks will be divided to each person in the meetings. For each task, there will be a deadline before it. Within this timeframe, the person can choose to complete it however they wish to and whatever time. In each meeting, we will have a discussion about whether everyone finished their task and what we can do if that’s not the case.
+
+Communication:
+In what ways do you communicate with each other as a team and among yourselves? Zoom,
+MS Teams? What information do you share via WhatsApp, e-mail, telephone?
+Whats app for miscellaneous, such as technical questions. Discord for online calls. Physical for meetings and dividing the tasks.
+
+Collaboration outside of the mandatory meetings:
+How do you want to collaborate outside the mandatory meetings? How do you communicate? Do you want to have additional meetings?
+If we are running behind on schedule, we can make an emergency online meeting in which we quickly discuss how to catch up. Otherwise communication will be minimal to questions and seeing if everybody is alright.
+
+Helping each other:
+If someone struggles to finish a task, how can they get help?
+Ask fellow teammates for help, and if no one in the team can figure it out, ask it to the TA during a meeting.
+
+Work quality:
+How do you determine the quality of the work that each individual team member contributes?
+Abiding our own checkstyle, compiling, passing tests, keeping it simple, writing javadoc.
+
+Decision-making:
+How do you make decisions? By majority vote or by consensus?
+By majority vote. (4/6)
+
+Broken agreements:
+What do you do if someone in the team does not abide by the agreements reached by the
+Team?
+If it’s a one/two off thing, we will discuss it together and try to solve it together as a team. If the person consistently breaks the agreement, we will report it to the TA.
+
+Problem resolution:
+How do you handle disagreements? What do you do if someone is late during a team
+meeting? When do you escalate to external parties or use them as mediators
+If it’s a one/two off thing, we will discuss it together and try to solve it together as a team. If the person consistently breaks the agreement, we will report it to the TA.
