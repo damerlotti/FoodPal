@@ -35,43 +35,62 @@ import jakarta.ws.rs.core.GenericType;
 
 public class ServerUtils {
 
-	private static final String SERVER = "http://localhost:8080/";
+    private static final String SERVER = "http://localhost:8080/";
 
-	public void getQuotesTheHardWay() throws IOException, URISyntaxException {
-		var url = new URI("http://localhost:8080/api/quotes").toURL();
-		var is = url.openConnection().getInputStream();
-		var br = new BufferedReader(new InputStreamReader(is));
-		String line;
-		while ((line = br.readLine()) != null) {
-			System.out.println(line);
-		}
-	}
+    /**
+     * Gets quotes from local host
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    public void getQuotesTheHardWay() throws IOException, URISyntaxException {
+        var url = new URI("http://localhost:8080/api/quotes").toURL();
+        var is = url.openConnection().getInputStream();
+        var br = new BufferedReader(new InputStreamReader(is));
+        String line;
+        while ((line = br.readLine()) != null) {
+            System.out.println(line);
+        }
+    }
 
-	public List<Quote> getQuotes() {
-		return ClientBuilder.newClient(new ClientConfig()) //
-				.target(SERVER).path("api/quotes") //
-				.request(APPLICATION_JSON) //
-				.get(new GenericType<List<Quote>>() {});
-	}
+    /**
+     * Gets all quotes
+     * @return the list of quotes
+     */
+    public List<Quote> getQuotes() {
+        return ClientBuilder.newClient(new ClientConfig()) //
+                .target(SERVER).path("api/quotes") //
+                .request(APPLICATION_JSON) //
+                .get(new GenericType<List<Quote>>() {
+                });
+    }
 
-	public Quote addQuote(Quote quote) {
-		return ClientBuilder.newClient(new ClientConfig()) //
-				.target(SERVER).path("api/quotes") //
-				.request(APPLICATION_JSON) //
-				.post(Entity.entity(quote, APPLICATION_JSON), Quote.class);
-	}
+    /**
+     * Adds a quote
+     * @param quote the quote to add
+     * @return the quote added
+     */
+    public Quote addQuote(Quote quote) {
+        return ClientBuilder.newClient(new ClientConfig()) //
+                .target(SERVER).path("api/quotes") //
+                .request(APPLICATION_JSON) //
+                .post(Entity.entity(quote, APPLICATION_JSON), Quote.class);
+    }
 
-	public boolean isServerAvailable() {
-		try {
-			ClientBuilder.newClient(new ClientConfig()) //
-					.target(SERVER) //
-					.request(APPLICATION_JSON) //
-					.get();
-		} catch (ProcessingException e) {
-			if (e.getCause() instanceof ConnectException) {
-				return false;
-			}
-		}
-		return true;
-	}
+    /**
+     * Checks if the server is available
+     * @return true/false depending on availability
+     */
+    public boolean isServerAvailable() {
+        try {
+            ClientBuilder.newClient(new ClientConfig()) //
+                    .target(SERVER) //
+                    .request(APPLICATION_JSON) //
+                    .get();
+        } catch (ProcessingException e) {
+            if (e.getCause() instanceof ConnectException) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

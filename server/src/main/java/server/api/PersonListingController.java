@@ -30,23 +30,35 @@ import commons.Person;
 @RequestMapping("/api/people")
 public class PersonListingController {
 
-	private List<Person> people = new LinkedList<>();
+    private List<Person> people = new LinkedList<>();
 
-	public PersonListingController() {
-		people.add(new Person("Mickey", "Mouse"));
-		people.add(new Person("Donald", "Duck"));
-	}
+    /**
+     * Constructor for a person listing controller
+     */
+    public PersonListingController() {
+        people.add(new Person("Mickey", "Mouse"));
+        people.add(new Person("Donald", "Duck"));
+    }
 
-	@GetMapping("/")
+    /**
+     * Gets the list of people
+     * @return a list of persons
+     */
+    @GetMapping("/")
 	public List<Person> list() {
-		return people;
-	}
+        return people;
+    }
 
-	@PostMapping("/")
+    /**
+     * Adds a person
+     * @param p the person to add
+     * @return the new list
+     */
+    @PostMapping("/")
 	public List<Person> add(@RequestBody Person p) {
-		if (!people.contains(p)) {
-			people.add(p);
-		}
-		return people;
-	}
+        if (!people.contains(p)) {
+            people.add(p);
+        }
+        return people;
+    }
 }
