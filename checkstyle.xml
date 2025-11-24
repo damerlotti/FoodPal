@@ -7,6 +7,10 @@
     <module name="LineLength">
         <property name="max" value="100"/>
     </module>
+    <module name="SuppressionFilter">
+        <property name="file" value="suppressions.xml"/>
+        <property name="optional" value="true"/>
+    </module>
     <module name="TreeWalker">
         <module name="UnusedImports" />
         <module name="Indentation">
@@ -47,7 +51,8 @@
         </module>
         <module name="DeclarationOrder"/>
         <module name="NeedBraces">
-            <property name="tokens" value="LITERAL_DO, LITERAL_ELSE, LITERAL_FOR, LITERAL_IF, LITERAL_WHILE"/>
+            <property name="tokens"
+                      value="LITERAL_DO, LITERAL_ELSE, LITERAL_FOR, LITERAL_IF, LITERAL_WHILE"/>
         </module>
     </module>
 
