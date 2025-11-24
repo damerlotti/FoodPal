@@ -34,6 +34,12 @@ public class Main extends Application {
     private static final Injector INJECTOR = createInjector(new MyModule());
     private static final MyFXML FXML = new MyFXML(INJECTOR);
 
+    /**
+     *
+     * @param args arguments for the main function
+     * @throws URISyntaxException exception
+     * @throws IOException exception
+     */
     public static void main(String[] args) throws URISyntaxException, IOException {
         launch();
     }
@@ -43,7 +49,8 @@ public class Main extends Application {
 
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
-            var msg = "Server needs to be started before the client, but it does not seem to be available. Shutting down.";
+            var msg = "Server needs to be started before the client, " +
+                    "but it does not seem to be available. Shutting down.";
             System.err.println(msg);
             return;
         }

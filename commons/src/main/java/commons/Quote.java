@@ -31,36 +31,41 @@ import jakarta.persistence.OneToOne;
 @Entity
 public class Quote {
 
-	@Id
+    @Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	public long id;
 
-	@OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = CascadeType.PERSIST)
 	public Person person;
-	public String quote;
+    public String quote;
 
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
 	private Quote() {
-		// for object mappers
-	}
+        // for object mappers
+    }
 
-	public Quote(Person person, String quote) {
-		this.person = person;
-		this.quote = quote;
-	}
+    /**
+     * Constructor for a Quote
+     * @param person the author of the quote
+     * @param quote the quote
+     */
+    public Quote(Person person, String quote) {
+        this.person = person;
+        this.quote = quote;
+    }
 
-	@Override
+    @Override
 	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj);
-	}
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
 
-	@Override
+    @Override
 	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	}
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
 
-	@Override
+    @Override
 	public String toString() {
-		return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
-	}
+        return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
+    }
 }

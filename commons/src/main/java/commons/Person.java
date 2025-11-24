@@ -29,35 +29,40 @@ import jakarta.persistence.Id;
 @Entity
 public class Person {
 
-	@Id
+    @Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	public long id;
 
-	public String firstName;
-	public String lastName;
+    public String firstName;
+    public String lastName;
 
-	@SuppressWarnings("unused")
+    @SuppressWarnings("unused")
 	private Person() {
 		// for object mapper
-	}
+    }
 
-	public Person(String firstName, String lastName) {
-		this.firstName = firstName;
-		this.lastName = lastName;
-	}
+    /**
+     * Constructor for a person
+     * @param firstName the first name of the person
+     * @param lastName the last name of the person
+     */
+    public Person(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
 
-	@Override
+    @Override
 	public boolean equals(Object obj) {
-		return EqualsBuilder.reflectionEquals(this, obj);
-	}
+        return EqualsBuilder.reflectionEquals(this, obj);
+    }
 
-	@Override
+    @Override
 	public int hashCode() {
-		return HashCodeBuilder.reflectionHashCode(this);
-	}
+        return HashCodeBuilder.reflectionHashCode(this);
+    }
 
-	@Override
-	public String toString() {
-		return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
-	}
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, MULTI_LINE_STYLE);
+    }
 }
