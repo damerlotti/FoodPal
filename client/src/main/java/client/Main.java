@@ -22,9 +22,6 @@ import java.net.URISyntaxException;
 
 import com.google.inject.Injector;
 
-import client.scenes.AddQuoteCtrl;
-import client.scenes.MainCtrl;
-import client.scenes.QuoteOverviewCtrl;
 import client.utils.ServerUtils;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -46,7 +43,6 @@ public class Main extends Application {
 
     @Override
 	public void start(Stage primaryStage) throws Exception {
-
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
             var msg = "Server needs to be started before the client, " +
@@ -54,10 +50,7 @@ public class Main extends Application {
             System.err.println(msg);
             return;
         }
-        var overview = FXML.load(QuoteOverviewCtrl.class, "client", "scenes", "QuoteOverview.fxml");
-        var add = FXML.load(AddQuoteCtrl.class, "client", "scenes", "AddQuote.fxml");
 
-        var mainCtrl = INJECTOR.getInstance(MainCtrl.class);
-        mainCtrl.initialize(primaryStage, overview, add);
+        // TODO: Add stuff for client
     }
 }
