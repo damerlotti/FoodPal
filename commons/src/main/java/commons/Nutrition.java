@@ -12,11 +12,11 @@ public class Nutrition {
             name = "fat_value",
             precision = Measurement.MEASUREMENT_PRECISION,
             scale = Measurement.MEASUREMENT_SCALE)
-        ),
+            ),
         @AttributeOverride(name = "unit", column = @Column(
             name = "fat_unit",
             length = Measurement.MEASUREMENT_UNIT_LENGTH)
-        ),
+            ),
     })
     private Measurement fatPer100g;
 
@@ -26,11 +26,11 @@ public class Nutrition {
             name = "protein_value",
             precision = Measurement.MEASUREMENT_PRECISION,
             scale = Measurement.MEASUREMENT_SCALE)
-        ),
+            ),
         @AttributeOverride(name = "unit", column = @Column(
             name = "protein_unit",
             length = Measurement.MEASUREMENT_UNIT_LENGTH)
-        ),
+            ),
     })
     private Measurement proteinPer100g;
 
@@ -40,11 +40,11 @@ public class Nutrition {
             name = "carbs_value",
             precision = Measurement.MEASUREMENT_PRECISION,
             scale = Measurement.MEASUREMENT_SCALE)
-        ),
+            ),
         @AttributeOverride(name = "unit", column = @Column(
             name = "carbs_unit",
             length = Measurement.MEASUREMENT_UNIT_LENGTH)
-        ),
+            ),
     })
     private Measurement carbsPer100g;
 

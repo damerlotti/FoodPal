@@ -27,11 +27,11 @@ public class RecipeIngredient {
             name = "amount_value",
             precision = Measurement.MEASUREMENT_PRECISION,
             scale = Measurement.MEASUREMENT_SCALE)
-        ),
+            ),
         @AttributeOverride(name = "unit", column = @Column(
             name = "amount_unit",
             length = Measurement.MEASUREMENT_UNIT_LENGTH)
-        ),
+            ),
     })
     private Measurement amount;
 
