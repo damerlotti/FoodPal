@@ -23,13 +23,25 @@ public class Measurement {
     @Column(name = "unit", length = MEASUREMENT_UNIT_LENGTH)
     private Unit unit;
 
+    /**
+     * Empty constructor.
+     */
     public Measurement() {}
 
+    /**
+     * Creates a new Measurement, with given value and unit.
+     * @param value The amount of UNIT to hold.
+     * @param unit The unit to store the measurement.
+     */
     public Measurement(BigDecimal value, Unit unit) {
         this.value = value;
         this.unit = unit;
     }
 
+    /**
+     * Returns whether the unit used for measurement is informal.
+     * @return whether the unit used for measurement is informal.
+     */
     // NOTE(calco): Jackson automatically treats any `is/get...` as properties, hence exporting them
     // I don't think this is desired behaviour, as these should be computed with the actual class.
     // Might be worth actually doing this once we transition to clearly defined DTOs & Mappers.
@@ -38,13 +50,18 @@ public class Measurement {
         return this.unit.isInformal();
     }
 
+    /**
+     * Returns the display text to be used for UI / pretty printing.
+     * @return the display text to be used for UI / pretty printing.
+     */
     @JsonIgnore
     public String getDisplayText() {
         // TODO(calco): Actually return display text lmao.
         return "";
     }
 
-    // TODO(calco): We can't really seamlessly convert from all given units, we'd need density data or some bs
+    // TODO(calco):
+    //  We can't really seamlessly convert from all given units, we'd need density data or some bs
     /**
      * Converts the current unit to its base value.
      * @return The converted value from current unit to base unit.
@@ -68,9 +85,8 @@ public class Measurement {
         }
 
         if (this.unit.getDimension() != targetUnit.getDimension()) {
-            throw new IllegalArgumentException(
-                    "Cannot convert from " + this.unit.getDimension() + " to " + targetUnit.getDimension()
-            );
+            throw new IllegalArgumentException("Cannot convert from "
+                    + this.unit.getDimension() + " to " + targetUnit.getDimension());
         }
 
         // Step 1: convert to base unit (grams/ml/count)
@@ -83,18 +99,34 @@ public class Measurement {
         return new Measurement(converted, targetUnit);
     }
 
+    /**
+     * Returns the value.
+     * @return The value.
+     */
     public BigDecimal getValue() {
         return value;
     }
 
+    /**
+     * Sets the value.
+     * @param value The value.
+     */
     public void setValue(BigDecimal value) {
         this.value = value;
     }
 
+    /**
+     * Returns the unit of measurement.
+     * @return The unit of measurement.
+     */
     public Unit getUnit() {
         return unit;
     }
 
+    /**
+     * Sets the unit of measurement.
+     * @param unit The unit of measurement.
+     */
     public void setUnit(Unit unit) {
         this.unit = unit;
     }
@@ -107,8 +139,12 @@ public class Measurement {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Measurement that = (Measurement) o;
         return Objects.equals(value, that.value) &&
