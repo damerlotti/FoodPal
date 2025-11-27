@@ -48,7 +48,8 @@ public class Main {
      * @return a CommandLineRunner with a lambda-implemented run method
      */
     @Bean
-    public CommandLineRunner demo(RecipeRepository recipeRepo, IngredientRepository ingredientRepo) {
+    public CommandLineRunner demo(RecipeRepository recipeRepo,
+                                  IngredientRepository ingredientRepo) {
         return (args) -> {
             // SAFETY CHECK: Only run if the database is empty!
             if (recipeRepo.count() > 0) {
