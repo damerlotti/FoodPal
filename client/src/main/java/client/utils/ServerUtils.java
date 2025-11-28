@@ -17,8 +17,17 @@ package client.utils;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
+import java.io.IOException;
 import java.net.ConnectException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import commons.Recipe;
 import org.glassfish.jersey.client.ClientConfig;
 
 import jakarta.ws.rs.ProcessingException;
@@ -26,7 +35,9 @@ import jakarta.ws.rs.client.ClientBuilder;
 
 public class ServerUtils {
 
-    private static final String SERVER = "http://localhost:8080/";
+    private static final String SERVER_URL = "http://localhost:8080/";
+    private final HttpClient client = HttpClient.newHttpClient();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Checks if the server is available
@@ -35,7 +46,7 @@ public class ServerUtils {
     public boolean isServerAvailable() {
         try {
             ClientBuilder.newClient(new ClientConfig()) //
-                    .target(SERVER) //
+                    .target(SERVER_URL) //
                     .request(APPLICATION_JSON) //
                     .get();
         } catch (ProcessingException e) {
@@ -44,5 +55,32 @@ public class ServerUtils {
             }
         }
         return true;
+    }
+    /**
+     * Asks the server for all recipes.
+     * @return A list of recipes, or null if something breaks.
+     */
+    public List<Recipe> getRecipes() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(SERVER_URL + "recipes/"))
+                    .GET()
+                    .header("Accept", "application/json")
+                    .build();
+
+            HttpResponse<String> response = client
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                System.out.println("Error: " + response.statusCode());
+                return List.of(); // problem => empty list
+            }
+
+            return objectMapper.readValue(response.body(), new TypeReference<List<Recipe>>() {});
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return List.of(); // problem => empty list
+        }
     }
 }
