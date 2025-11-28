@@ -77,9 +77,5 @@ public class Main extends Application {
         // Initialize all scenes inside PrimaryCtrl
         primaryCtrl.init(primaryStage, overview, addRecipe);
 
-        // The controller will now choose the first scene itself
-        primaryStage.setTitle("FoodPal");
-        primaryStage.show();
-
     }
 }

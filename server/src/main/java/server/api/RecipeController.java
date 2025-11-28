@@ -43,6 +43,21 @@ public class RecipeController {
     }
 
     /**
+     * Handler for POST requests to /recipes
+     * @param recipe the JSON body automatically converted to a Recipe object
+     * @return The saved recipe
+     */
+    @PostMapping("/")
+    public Recipe addRecipe(@RequestBody Recipe recipe) {
+
+        if (recipe.getName() == null || recipe.getName().isEmpty()) {
+            return null;
+        }
+        Recipe saved = repo.save(recipe);  // CascadeType.ALL actually means that all the RecipeSteps in it will be saved automatically
+        return saved;  // we return the object with id now
+    }
+
+    /**
      * Retrieves the total count of recipes in the database.
      * @return a String in the format "Total recipes: X" where X is the
      *         number of recipes in the database

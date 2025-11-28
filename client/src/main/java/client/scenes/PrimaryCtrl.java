@@ -26,6 +26,10 @@ public class PrimaryCtrl {
                      Pair<AddRecipeCtrl, Parent> addRecipe) {
 
         this.primaryStage = primaryStage;
+
+        this.overviewCtrl = overview.getKey();
+        this.addRecipeCtrl = addRecipe.getKey();
+
         this.overviewScene = new Scene(overview.getValue());
         this.addRecipeScene = new Scene(addRecipe.getValue());
         showOverview();
@@ -36,8 +40,9 @@ public class PrimaryCtrl {
      * Method to add to the overviewScene
      */
     public void showOverview() {
-        primaryStage.setTitle("Overview");
+        primaryStage.setTitle("FoodPal");
         primaryStage.setScene(overviewScene);
+        overviewCtrl.refresh();
     }
 
     /**

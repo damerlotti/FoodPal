@@ -16,6 +16,7 @@
 package client.utils;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import java.net.http.HttpRequest.BodyPublishers;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -81,6 +82,36 @@ public class ServerUtils {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
             return List.of(); // problem => empty list
+        }
+    }
+
+    /**
+     * Sends a new recipe to the server to be saved.
+     * @param recipe the recipe object to save.
+     * @return the saved recipe (or null if it failed).
+     */
+    public Recipe addRecipe(Recipe recipe) {
+        try {
+            String myJson = objectMapper.writeValueAsString(recipe);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(SERVER_URL + "recipes/"))
+                    .header("Content-Type", "application/json")
+                    .POST(BodyPublishers.ofString(myJson))
+                    .build();
+
+            HttpResponse<String> response = client
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                System.out.println("Error: server returned " + response.statusCode());
+                return null;
+            }
+            return objectMapper.readValue(response.body(), Recipe.class);
+        } catch (Exception e) {
+            System.out.println("Connection error while adding recipe.");
+            e.printStackTrace();
+            return null;
         }
     }
 }
