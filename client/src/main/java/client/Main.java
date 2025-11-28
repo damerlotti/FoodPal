@@ -50,19 +50,19 @@ public class Main extends Application {
             System.err.println(msg);
             return;
         }
-        System.out.println("🔍 TESTING SERVER CONNECTION...");
 
-        // 1. Create the Utils
+        // Some testing for the ServerUtils, to see if we can get all the recipes from the client
+        // Can be removed
+        System.out.println("TESTING SERVER CONNECTION");
+
         client.utils.ServerUtils server = new client.utils.ServerUtils();
 
-        // 2. Ask for data (This uses the code you just wrote!)
         var recipes = server.getRecipes();
 
-        // 3. Print the results
-        System.out.println("✅ Connection successful!");
+        System.out.println("Connection successful!");
         System.out.println("Found " + recipes.size() + " recipes:");
         for (commons.Recipe r : recipes) {
-            System.out.println("   - 🥞 " + r.getName());
+            System.out.println("   - " + r.getName());
         }
 
         // TODO: Add stuff for client

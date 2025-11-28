@@ -1,12 +1,12 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "RecipeIngredients")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class RecipeIngredient {
     @Id
     @GeneratedValue
@@ -14,7 +14,7 @@ public class RecipeIngredient {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipe_id", nullable = false)
-//    @JsonBackReference("recipe-ingredients")
+    @JsonBackReference("recipe-ingredients")
     private Recipe recipe;
 
     @ManyToOne(fetch = FetchType.LAZY)

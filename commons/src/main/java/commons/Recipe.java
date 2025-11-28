@@ -1,6 +1,7 @@
 package commons;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 
@@ -9,7 +10,6 @@ import java.util.List;
 
 @Entity
 @Table(name = "Recipes")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Recipe {
     @Id
     @GeneratedValue
@@ -20,12 +20,12 @@ public class Recipe {
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
-//    @JsonManagedReference("recipe-ingredients")
+    @JsonManagedReference("recipe-ingredients")
     private List<RecipeIngredient> ingredients = new ArrayList<>();
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
-//    @JsonManagedReference("recipe-steps")
+    @JsonManagedReference("recipe-steps")
     private List<RecipeStep> steps = new ArrayList<>();
 
     /**
