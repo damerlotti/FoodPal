@@ -41,13 +41,13 @@ Agenda Items :
     - Agenda - base classes discussion (5 min) 
     - - recipe class by Davide, we should make a menu for all the recipes by esad. Daan pointed out that it might be easier to do that once Davide finishes his recipe class. Serban suggests using an alternative to gitlab like Trello to issue tasks and milestones. Issues and milestones are part of the grading according to the TA.
     - Agenda - ui (opening window, scenes, sidebar, placeholders) (5 min)
-    - - 
+    - - we've established a general structure with option to switch between ingredients and recipes, on the left being the names and on the right information about them (without additional scenes for a specific recipe/ingredient)
     - Agenda - backend (api, recipe/item CRUD, combining ingredients with recipes, converting between measurement units) (3 min)
-    - - 
+    - -  we need to have the actual recipes in order to begin implementing crud operations, we already have conversion between units
     - Agenda - adding ingredient to recipe (2 min)
-    - - 
+    - - We need to finish this quickly, as it's a necessity for the rest
     - Agenda - cloning recipe (2 min)
-    - - 
+    - - Vlad mentioned it, but this will be tackled later
 - Summarize action points : Who, what, when ? (10 min)
 - - Davide will make the additional recipe button and controller, by friday (today) or saturday
 - - Esad will make the menu of the ingredients and recipe steps & for each measurement show the amount, by friday
