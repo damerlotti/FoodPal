@@ -20,10 +20,12 @@ import static com.google.inject.Guice.createInjector;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import client.scenes.OverviewCtrl;
 import com.google.inject.Injector;
 
 import client.utils.ServerUtils;
 import javafx.application.Application;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -65,6 +67,10 @@ public class Main extends Application {
             System.out.println("   - " + r.getName());
         }
 
-        // TODO: Add stuff for client
+        var overview = FXML.load(OverviewCtrl.class, "client", "scenes", "overview.fxml");
+        var scene = new Scene(overview.getValue());
+        primaryStage.setScene(scene);
+        primaryStage.setTitle("FoodPal");
+        primaryStage.show();
     }
 }

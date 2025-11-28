@@ -111,4 +111,9 @@ public class Recipe {
     public void setSteps(List<RecipeStep> steps) {
         this.steps = steps;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
