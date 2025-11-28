@@ -20,6 +20,7 @@ public class AddRecipeCtrl {
         this.primaryCtrl = primaryCtrl;
     }
 
+    //list of steps
     @FXML
     private ListView<String> stepsList;
 
