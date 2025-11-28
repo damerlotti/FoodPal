@@ -27,7 +27,7 @@ public class RecipeController {
      * Gets all recipes
      * @return a list of all recipes, returns an empty list if no recipes exist
      */
-    @GetMapping
+    @GetMapping("/")
     public List<Recipe> getAll() {
         return repo.findAll();
     }
