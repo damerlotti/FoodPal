@@ -53,6 +53,9 @@ public class OverviewCtrl implements Initializable {
         data.addAll(recipes);
     }
 
+    /**
+     * Switches to add recipe
+     */
     @FXML
     public void switchToAddRecipe() {
         primaryCtrl.showAddRecipe();

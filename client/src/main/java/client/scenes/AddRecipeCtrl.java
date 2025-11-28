@@ -3,13 +3,16 @@ package client.scenes;
 import com.google.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
 
 public class AddRecipeCtrl {
 
     private final PrimaryCtrl primaryCtrl;
+
+    //list of steps
+    @FXML
+    private ListView<String> stepsList;
 
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
@@ -20,12 +23,8 @@ public class AddRecipeCtrl {
         this.primaryCtrl = primaryCtrl;
     }
 
-    //list of steps
-    @FXML
-    private ListView<String> stepsList;
-
     /**
-     * When user clicks 'Add Step' textInput  pops up where the user writes/confirms step description
+     * When user clicks 'Add Step' textInput pops up where the user writes/confirms step description
      */
     @FXML
     public void onAddStepClicked() {
