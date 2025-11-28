@@ -3,27 +3,31 @@ package server.api;
 import commons.Recipe;
 import server.database.RecipeRepository;
 import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 
 @RestController
-@RequestMapping("/recipes")
+@RequestMapping("/api/recipes")
 public class RecipeController {
 
     private final RecipeRepository repo;
+    private final EntityManager entityManager;
 
     /**
-     * Constructor which injects the repository
+     * Constructor which injects both the repository and entity manager
      * @param repo the repository of recipes
+     * @param entityManager the EntityManager used for database operations
      */
-    public RecipeController(RecipeRepository repo) {
+    public RecipeController(RecipeRepository repo, EntityManager entityManager) {
         this.repo = repo;
+        this.entityManager = entityManager;
     }
 
     /**
      * Gets all recipes
-     * @return a list of all recipes
+     * @return a list of all recipes, returns an empty list if no recipes exist
      */
-    @GetMapping("/")
+    @GetMapping
     public List<Recipe> getAll() {
         return repo.findAll();
     }
@@ -36,5 +40,17 @@ public class RecipeController {
     @GetMapping("/{id}")
     public Recipe getById(@PathVariable("id") long id) {
         return repo.findById(id).orElse(null);
+    }
+
+    /**
+     * Retrieves the total count of recipes in the database.
+     * @return a String in the format "Total recipes: X" where X is the
+     *         number of recipes in the database
+     */
+    @GetMapping("/count")
+    public String getRecipeCount() {
+        Long count = (Long) entityManager.createQuery("SELECT COUNT(r) FROM Recipe r")
+                .getSingleResult();
+        return "Total recipes: " + count;
     }
 }
