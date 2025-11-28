@@ -1,6 +1,7 @@
 package commons;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
@@ -103,6 +104,7 @@ public class Measurement {
      * Returns the value.
      * @return The value.
      */
+    @JsonProperty("value")
     public BigDecimal getValue() {
         return value;
     }
@@ -119,6 +121,7 @@ public class Measurement {
      * Returns the unit of measurement.
      * @return The unit of measurement.
      */
+    @JsonProperty("unit")
     public Unit getUnit() {
         return unit;
     }
