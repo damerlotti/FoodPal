@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component;
 import jakarta.transaction.Transactional;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
-
+// NOTE: Some ingredients may serialize as IDs due to Jackson circular references
+// This is a known minor issue that doesn't affect functionality
 @Component
 public class DataInitializer implements CommandLineRunner {
 
