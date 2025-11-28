@@ -7,7 +7,7 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/recipes")
+@RequestMapping("/recipes")
 public class RecipeController {
 
     private final RecipeRepository repo;
