@@ -16,6 +16,7 @@ public class OverviewCtrl implements Initializable {
 
     private final ServerUtils server;
     private ObservableList<Recipe> data;
+    private final PrimaryCtrl primaryCtrl;
 
     // fxml link, keep in mind that it must match with the id in scene builder
     @FXML
@@ -24,10 +25,12 @@ public class OverviewCtrl implements Initializable {
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
      * @param server the server
+     * @param primaryCtrl primaryCtrl
      */
     @Inject
-    public OverviewCtrl(ServerUtils server) {
+    public OverviewCtrl(ServerUtils server, PrimaryCtrl primaryCtrl) {
         this.server = server;
+        this.primaryCtrl = primaryCtrl;
     }
 
     // runs immediately when the screen opens
@@ -48,5 +51,13 @@ public class OverviewCtrl implements Initializable {
         var recipes = server.getRecipes();
         data.clear();
         data.addAll(recipes);
+    }
+
+    /**
+     * Switches to add recipe
+     */
+    @FXML
+    public void switchToAddRecipe() {
+        primaryCtrl.showAddRecipe();
     }
 }

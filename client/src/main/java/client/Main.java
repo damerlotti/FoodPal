@@ -20,12 +20,13 @@ import static com.google.inject.Guice.createInjector;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import client.scenes.AddRecipeCtrl;
 import client.scenes.OverviewCtrl;
+import client.scenes.PrimaryCtrl;
 import com.google.inject.Injector;
 
 import client.utils.ServerUtils;
 import javafx.application.Application;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
@@ -37,14 +38,14 @@ public class Main extends Application {
      *
      * @param args arguments for the main function
      * @throws URISyntaxException exception
-     * @throws IOException exception
+     * @throws IOException        exception
      */
     public static void main(String[] args) throws URISyntaxException, IOException {
         launch();
     }
 
     @Override
-	public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) throws Exception {
         var serverUtils = INJECTOR.getInstance(ServerUtils.class);
         if (!serverUtils.isServerAvailable()) {
             var msg = "Server needs to be started before the client, " +
@@ -68,9 +69,17 @@ public class Main extends Application {
         }
 
         var overview = FXML.load(OverviewCtrl.class, "client", "scenes", "overview.fxml");
-        var scene = new Scene(overview.getValue());
-        primaryStage.setScene(scene);
+        var addRecipe = FXML.load(AddRecipeCtrl.class, "client", "scenes", "addRecipe.fxml");
+
+        // Get PrimaryCtrl from Guice
+        var primaryCtrl = INJECTOR.getInstance(PrimaryCtrl.class);
+
+        // Initialize all scenes inside PrimaryCtrl
+        primaryCtrl.init(primaryStage, overview, addRecipe);
+
+        // The controller will now choose the first scene itself
         primaryStage.setTitle("FoodPal");
         primaryStage.show();
+
     }
 }
