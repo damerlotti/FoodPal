@@ -5,7 +5,7 @@ import server.database.RecipeRepository;
 import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.EntityManager;
 import java.util.List;
-
+// this class has been partly made by AI
 @RestController
 @RequestMapping("/recipes")
 public class RecipeController {
