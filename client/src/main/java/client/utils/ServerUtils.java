@@ -28,6 +28,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import commons.Ingredient;
 import commons.Recipe;
 import org.glassfish.jersey.client.ClientConfig;
 
@@ -108,6 +109,65 @@ public class ServerUtils {
                 return null;
             }
             return objectMapper.readValue(response.body(), Recipe.class);
+        } catch (Exception e) {
+            System.out.println("Connection error while adding recipe.");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Asks the server for all ingredients.
+     * @return A list of ingredients, or null if something breaks.
+     */
+    public List<Ingredient> getIngredients() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(SERVER_URL + "ingredients/"))
+                    .GET()
+                    .header("Accept", "application/json")
+                    .build();
+
+            HttpResponse<String> response = client
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                System.out.println("Error: " + response.statusCode());
+                return List.of(); // problem => empty list
+            }
+
+            return objectMapper
+                    .readValue(response.body(), new TypeReference<List<Ingredient>>() {});
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            return List.of(); // problem => empty list
+        }
+    }
+
+    /**
+     * Sends a new ingredient to the server to be saved.
+     * @param ingredient the Ingredient object to save.
+     * @return the saved Ingredient (or null if it failed).
+     */
+    public Ingredient addIngredient(Ingredient ingredient) {
+        try {
+            String myJson = objectMapper.writeValueAsString(ingredient);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(SERVER_URL + "ingredients/"))
+                    .header("Content-Type", "application/json")
+                    .POST(BodyPublishers.ofString(myJson))
+                    .build();
+
+            HttpResponse<String> response = client
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() != 200) {
+                System.out.println("Error: server returned " + response.statusCode());
+                return null;
+            }
+            return objectMapper.readValue(response.body(), Ingredient.class);
         } catch (Exception e) {
             System.out.println("Connection error while adding recipe.");
             e.printStackTrace();

@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import client.scenes.AddRecipeCtrl;
+import client.scenes.MainLayoutCtrl;
 import client.scenes.OverviewCtrl;
 import client.scenes.PrimaryCtrl;
 import com.google.inject.Injector;
@@ -68,14 +69,15 @@ public class Main extends Application {
             System.out.println("   - " + r.getName());
         }
 
-        var overview = FXML.load(OverviewCtrl.class, "client", "scenes", "overview.fxml");
-        var addRecipe = FXML.load(AddRecipeCtrl.class, "client", "scenes", "addRecipe.fxml");
+        var mainLayout = FXML.load(MainLayoutCtrl.class, "client", "scenes", "MainLayout.fxml");
+        var overview = FXML.load(OverviewCtrl.class, "client", "scenes", "Overview.fxml");
+        var addRecipe = FXML.load(AddRecipeCtrl.class, "client", "scenes", "AddRecipe.fxml");
 
         // Get PrimaryCtrl from Guice
         var primaryCtrl = INJECTOR.getInstance(PrimaryCtrl.class);
 
         // Initialize all scenes inside PrimaryCtrl
-        primaryCtrl.init(primaryStage, overview, addRecipe);
+        primaryCtrl.init(primaryStage, mainLayout, overview, addRecipe);
 
     }
 }
