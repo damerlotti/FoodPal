@@ -34,7 +34,7 @@ public class OverviewCtrl implements Initializable {
 
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
-     * @param server the server
+     * @param server the server utils
      * @param primaryCtrl primaryCtrl
      */
     @Inject

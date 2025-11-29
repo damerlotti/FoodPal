@@ -36,6 +36,9 @@ public class IngredientController {
     @PostMapping("/")
     public Ingredient add(@RequestBody Ingredient ingredient) {
         // TODO: maybe we'll need to check for duplicates here
+        if (ingredient.getName() == null || ingredient.getName().isEmpty()) {
+            return null;
+        }
         return repo.save(ingredient);
     }
 

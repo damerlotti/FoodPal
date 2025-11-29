@@ -20,17 +20,22 @@ public class PrimaryCtrl {
     private Scene addRecipeScene;
     private AddRecipeCtrl addRecipeCtrl;
 
+    private Parent ingredientsNode;
+    private IngredientsCtrl ingredientsCtrl;
+
     /**
      * Initializes  primary controller the scenes
      * @param primaryStage the main application window
      * @param mainLayout MainLayout controller
      * @param overview  OverviewCtrl controller
      * @param addRecipe AddRecipe controller
+     * @param ingredients Ingredients controller
      */
     public void init(Stage primaryStage,
                      Pair<MainLayoutCtrl, Parent> mainLayout,
                      Pair<OverviewCtrl, Parent> overview,
-                     Pair<AddRecipeCtrl, Parent> addRecipe) {
+                     Pair<AddRecipeCtrl, Parent> addRecipe,
+                     Pair<IngredientsCtrl, Parent> ingredients) {
 
         this.primaryStage = primaryStage;
 
@@ -43,6 +48,9 @@ public class PrimaryCtrl {
         this.addRecipeNode = addRecipe.getValue();
         this.addRecipeScene = new Scene(addRecipeNode);
 
+        this.ingredientsCtrl = ingredients.getKey();
+        this.ingredientsNode = ingredients.getValue();
+
         primaryStage.setScene(new Scene(mainLayout.getValue()));
         primaryStage.setTitle("FoodPal");
         showOverview();
@@ -50,7 +58,7 @@ public class PrimaryCtrl {
     }
 
     /**
-     * Method to add to the overviewScene
+     * Shows the menu with recipes
      */
     public void showOverview() {
         primaryStage.setTitle("FoodPal - Recipes");
@@ -72,5 +80,14 @@ public class PrimaryCtrl {
         p.setTitle("Add Recipe");
         p.showAndWait();
         overviewCtrl.refresh();
+    }
+
+    /**
+     * Shows the menu with ingredients
+     */
+    public void showIngredients() {
+        primaryStage.setTitle("FoodPal - Ingredients");
+        mainLayoutCtrl.setCenter(ingredientsNode);
+        ingredientsCtrl.refresh();
     }
 }

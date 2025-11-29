@@ -81,4 +81,9 @@ public class Ingredient {
     public void setNutrition(Nutrition nutrition) {
         this.nutrition = nutrition;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

@@ -174,4 +174,20 @@ public class ServerUtils {
             return null;
         }
     }
+
+    /**
+     * Asks the server to delete an ingredient,by sending its id; IngredientController intercepts it
+     * @param ingredient
+     */
+    public void deleteIngredient(Ingredient ingredient) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(SERVER_URL + "ingredients/" + ingredient.getId()))
+                    .DELETE()
+                    .build();
+            client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -39,11 +39,10 @@ public class MainLayoutCtrl {
     }
 
     /**
-     * Targetting the View -> Ingredients menuitem, so we delegate responsibility to primaryCtrl
+     * Targetting the View -> Ingredients menu item, so we delegate responsibility to primaryCtrl
      */
     @FXML
     public void showIngredients() {
-        System.out.println("Switching to Ingredients view...");
-        // primaryCtrl.showIngredients();
+        primaryCtrl.showIngredients();
     }
 }
