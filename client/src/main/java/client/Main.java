@@ -20,9 +20,7 @@ import static com.google.inject.Guice.createInjector;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-import client.scenes.AddRecipeCtrl;
-import client.scenes.OverviewCtrl;
-import client.scenes.PrimaryCtrl;
+import client.scenes.*;
 import com.google.inject.Injector;
 
 import client.utils.ServerUtils;
@@ -68,14 +66,16 @@ public class Main extends Application {
             System.out.println("   - " + r.getName());
         }
 
-        var overview = FXML.load(OverviewCtrl.class, "client", "scenes", "overview.fxml");
-        var addRecipe = FXML.load(AddRecipeCtrl.class, "client", "scenes", "addRecipe.fxml");
+        var mainLayout = FXML.load(MainLayoutCtrl.class, "client", "scenes", "MainLayout.fxml");
+        var overview = FXML.load(OverviewCtrl.class, "client", "scenes", "Overview.fxml");
+        var addRecipe = FXML.load(AddRecipeCtrl.class, "client", "scenes", "AddRecipe.fxml");
+        var ingredients = FXML.load(IngredientsCtrl.class, "client", "scenes", "Ingredients.fxml");
 
         // Get PrimaryCtrl from Guice
         var primaryCtrl = INJECTOR.getInstance(PrimaryCtrl.class);
 
         // Initialize all scenes inside PrimaryCtrl
-        primaryCtrl.init(primaryStage, overview, addRecipe);
+        primaryCtrl.init(primaryStage, mainLayout, overview, addRecipe, ingredients);
 
     }
 }

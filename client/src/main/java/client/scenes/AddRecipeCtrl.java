@@ -106,7 +106,7 @@ public class AddRecipeCtrl {
         }
 
         clearFields();
-        primaryCtrl.showOverview();
+        stepsList.getScene().getWindow().hide();
     }
 
     private void clearFields() {
@@ -121,12 +121,14 @@ public class AddRecipeCtrl {
         alert.showAndWait();
     }
     /**
-     * Calls the switchToOverview method in primaryCtrl to switch to the overview scene
+     * Closes the AddRecipe scene, we don't need to ask PrimaryCtrl to show the overview
+     * because we don't have another scene, and overview will still be the last thing in MainLayout
+     * since we pressed on Add Recipe
      */
     @FXML
-    public void switchToOverview() {
+    public void cancel() {
         clearFields();
-        primaryCtrl.showOverview();
+        stepsList.getScene().getWindow().hide();
     }
 
 }

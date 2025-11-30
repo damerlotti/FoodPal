@@ -11,7 +11,7 @@
       <Label layoutX="229.0" layoutY="35.0" text="Enter the title of the recipe" />
       <TextField fx:id="titleField" layoutX="225.0" layoutY="59.0" />
       <Button layoutX="345.0" layoutY="351.0" mnemonicParsing="false" onAction="#createRecipe" text="Add Recipe" />
-      <Button layoutX="203.0" layoutY="351.0" mnemonicParsing="false" onAction="#switchToOverview" text="Cancel" />
+      <Button layoutX="203.0" layoutY="351.0" mnemonicParsing="false" onAction="#cancel" text="Cancel" />
       <ListView layoutX="200.0" layoutY="122.0" prefHeight="78.0" prefWidth="200.0" />
       <ListView fx:id="stepsList" layoutX="67.0" layoutY="245.0" prefHeight="95.0" prefWidth="347.0" />
       <Label layoutX="246.0" layoutY="97.0" text="Add the recipe ingredients" />
