@@ -2,14 +2,11 @@ package client.scenes;
 
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
-import commons.Recipe;
-import commons.RecipeStep;
+import commons.*;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +21,14 @@ public class AddRecipeCtrl {
     @FXML
     private ListView<String> stepsList;
 
+    @FXML
+    private Button addIngredient;
+
+    @FXML
+    private ListView<String> ingredientList;
+
+    private ArrayList<Ingredient> ingredients;         // actual objects of the ingredients
+
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
      * @param primaryCtrl primaryCtrl
@@ -33,6 +38,7 @@ public class AddRecipeCtrl {
     public AddRecipeCtrl(PrimaryCtrl primaryCtrl, ServerUtils server) {
         this.primaryCtrl = primaryCtrl;
         this.server = server; // Inject server
+        this.ingredients = new ArrayList<>();
     }
 
     /**
@@ -131,4 +137,76 @@ public class AddRecipeCtrl {
         stepsList.getScene().getWindow().hide();
     }
 
+    /**
+     * When user clicks 'Add' next to the 'Add the recipe ingredients',
+     * textInput pops up where the user writes/confirms the ingredient
+     */
+    @FXML
+    public void onAddIngredientClicked() {
+        // popup dialog for ingredient description
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setHeaderText("Enter the ingredient name:");
+        dialog.setGraphic(null);
+        dialog.getDialogPane().setPrefSize(400, 250);
+        // The description
+        var ingredientDiaName = dialog.showAndWait();
+
+        Unit unitAll = Unit.G;
+        Measurement fat = new Measurement(new BigDecimal(-1), unitAll);
+        Measurement protein = new Measurement(new BigDecimal(-1), unitAll);
+        Measurement carb = new Measurement(new BigDecimal(-1), unitAll);
+        BigDecimal kcal = new BigDecimal(-1);
+        dialog.getEditor().clear();
+        String ingredientName = "Standard";
+        if (ingredientDiaName.isPresent()) {
+            ingredientName = ingredientDiaName.get();
+        }
+
+        dialog.getEditor().clear();
+        dialog.setHeaderText("Enter the ingredient fat per 100 g:");
+        var ingredientFat = dialog.showAndWait();
+        if (ingredientFat.isPresent()) {
+            fat = new Measurement(stringToBigDecimal(ingredientFat.get()), unitAll);
+        }
+
+        dialog.getEditor().clear();
+        dialog.setHeaderText("Enter the ingredient protein per 100 g:");
+        var ingredientProtein = dialog.showAndWait();
+        if (ingredientProtein.isPresent()) {
+            protein = new Measurement(stringToBigDecimal(ingredientProtein.get()), unitAll);
+        }
+
+        dialog.getEditor().clear();
+        dialog.setHeaderText("Enter the ingredient carbs per 100 g:");
+        var ingredientCarb = dialog.showAndWait();
+        if (ingredientCarb.isPresent()) {
+            carb = new Measurement(stringToBigDecimal(ingredientCarb.get()), unitAll);
+        }
+
+        dialog.getEditor().clear();
+        dialog.setHeaderText("Enter the ingredient kcal per 100 g:");
+        var ingredientKCal = dialog.showAndWait();
+        if (ingredientKCal.isPresent()) {
+            kcal = stringToBigDecimal(ingredientKCal.get());
+        }
+        Nutrition nutrition = new Nutrition(fat, protein, carb, kcal);
+        Ingredient ingredient = new Ingredient(10000, ingredientName, nutrition);
+        // If user pressed ok and input isn't null
+        ingredients.add(ingredient);
+        ingredientList.getItems().add(ingredient.toString());
+    }
+
+    /**
+     * parses a string into a big decimal
+     * in case of a not valid big decimal, return -1.0
+     * @param string string containing a big decimal
+     * @return the big decimal in the string
+     */
+    public static BigDecimal stringToBigDecimal(String string){
+        try {
+            return new BigDecimal(string);
+        } catch (Exception e) {
+            return new BigDecimal(-1);
+        }
+    }
 }
