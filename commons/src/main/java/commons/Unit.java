@@ -72,4 +72,28 @@ public enum Unit {
     public boolean isInformal() {
         return this.dimension == Dimension.INFORMAL;
     }
+
+    /***
+     *
+     * @return A human-readable version of the unit. 
+     * MG becomes milligram, TSP becomes teaspoon, etc.
+     */
+    public String getHumanReadableName() {
+        switch (this) {
+            case MG: return "milligram";
+            case G: return "gram";
+            case KG: return "kilogram";
+            case OZ: return "ounce";
+            case LB: return "pound";
+
+            case ML: return "milliliter";
+            case L: return "liter";
+            case TSP: return "teaspoon";
+            case TBSP: return "tablespoon";
+            case CUP: return "cup";
+
+            case PIECE: return "";
+            default: return this.name().toLowerCase();
+        }
+    }
 }

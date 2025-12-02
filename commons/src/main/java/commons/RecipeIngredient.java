@@ -123,8 +123,46 @@ public class RecipeIngredient {
         this.orderIndex = orderIndex;
     }
 
+    /**
+     *
+     * @return the recipe ingredient in a human-readable format: value + unit + name
+     */
     @Override
     public String toString() {
-        return ingredient.toString();
+        // If the amount of ingredient are empty, return something accordingly
+        if(amount == null || ingredient == null) {
+            return "Unknown Ingredient";
+        }
+
+        java.math.BigDecimal value = amount.getValue();
+        Unit unit = amount.getUnit();
+        String name = ingredient.getName();
+
+        // Getting rid of the unnecessary 0's: 2.5000 will be 2.5
+        String valueString = value.stripTrailingZeros().toPlainString();
+
+        // "2 eggs" instead of "2 pieces of eggs"
+        if(unit == Unit.PIECE) {
+            return valueString + " " + name;
+        }
+
+        // "salt (to taste)" instead of just "salt"
+        // This is a temporary solution for the informal units
+        if(unit == Unit.INFORMAL) {
+            return ingredient.getName() + " (to taste)";
+        }
+
+        String unitName = unit.getHumanReadableName();
+
+        // if the value is plural, add an "s" after it. "3 cup" will become "3 cups"
+        // NOTE: this logic is me purely relying on the beauty of the English language.
+        // "glass" would become "glasss" instead of "glasses" which is obviously wrong.
+        if(value.compareTo(java.math.BigDecimal.ONE) > 0) {
+            unitName += "s";
+        }
+
+        // value + unit + name = 2.5 cups of All-purpose Flour 
+        // (more human-friendly compared to 2.5 CUP All-purpose Flour)
+        return valueString + " " + unitName + " of " + name;
     }
 }
