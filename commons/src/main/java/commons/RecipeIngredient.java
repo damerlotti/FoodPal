@@ -122,4 +122,9 @@ public class RecipeIngredient {
     public void setOrderIndex(int orderIndex) {
         this.orderIndex = orderIndex;
     }
+
+    @Override
+    public String toString() {
+        return ingredient.toString();
+    }
 }
