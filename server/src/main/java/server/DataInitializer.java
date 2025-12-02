@@ -8,6 +8,7 @@ import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 // NOTE: Some ingredients may serialize as IDs due to Jackson circular references
 // This is a known minor issue that doesn't affect functionality
+// this class has been made by AI
 @Component
 public class DataInitializer implements CommandLineRunner {
 
