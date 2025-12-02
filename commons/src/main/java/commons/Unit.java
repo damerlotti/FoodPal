@@ -75,7 +75,8 @@ public enum Unit {
 
     /***
      *
-     * @return A human-readable version of the unit. MG becomes milligram, TSP becomes teaspoon, etc.
+     * @return A human-readable version of the unit. 
+     * MG becomes milligram, TSP becomes teaspoon, etc.
      */
     public String getHumanReadableName() {
         switch (this) {

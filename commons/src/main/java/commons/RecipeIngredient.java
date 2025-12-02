@@ -161,7 +161,8 @@ public class RecipeIngredient {
             unitName += "s";
         }
 
-        // value + unit + name = 2.5 cups of All-purpose Flour (more human-friendly compared to 2.5 CUP All-purpose Flour)
+        // value + unit + name = 2.5 cups of All-purpose Flour 
+        // (more human-friendly compared to 2.5 CUP All-purpose Flour)
         return valueString + " " + unitName + " of " + name;
     }
 }
