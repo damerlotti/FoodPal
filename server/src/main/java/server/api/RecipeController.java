@@ -1,6 +1,8 @@
 package server.api;
 
 import commons.Recipe;
+import commons.RecipeIngredient;
+import commons.RecipeStep;
 import server.database.RecipeRepository;
 import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.EntityManager;
@@ -68,5 +70,33 @@ public class RecipeController {
         Long count = (Long) entityManager.createQuery("SELECT COUNT(r) FROM Recipe r")
                 .getSingleResult();
         return "Total recipes: " + count;
+    }
+
+    /**
+     * Updates an existing recipe in the database
+     * @param id            the id of the recipe which should already exist
+     * @param updatedRecipe the updated recipe object
+     * @return updated Recipe object after saving or bull if no recipe with that id exists
+     */
+    @PutMapping("/{id}")
+    public Recipe updateRecipe(@PathVariable long id, @RequestBody Recipe updatedRecipe) {
+        Recipe existing = repo.findById(id).orElse(null);
+        if (existing == null) return null;
+        existing.setName(updatedRecipe.getName());
+        existing.getIngredients().clear();
+        if (updatedRecipe.getIngredients() != null) {
+            for (RecipeIngredient ri : updatedRecipe.getIngredients()) {
+                ri.setRecipe(existing);
+                existing.getIngredients().add(ri);
+            }
+        }
+        existing.getSteps().clear();
+        if (updatedRecipe.getSteps() != null) {
+            for (RecipeStep step : updatedRecipe.getSteps()) {
+                step.setRecipe(existing);
+                existing.getSteps().add(step);
+            }
+        }
+        return repo.save(existing);
     }
 }

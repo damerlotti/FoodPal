@@ -3,14 +3,18 @@ package client.scenes;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Recipe;
+import commons.RecipeStep;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextInputDialog;
 
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class OverviewCtrl implements Initializable {
@@ -30,11 +34,12 @@ public class OverviewCtrl implements Initializable {
     @FXML
     private ListView<String> ingredientsList;
     @FXML
-    private ListView<String> stepsList;
+    private ListView<RecipeStep> stepsList;
 
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
-     * @param server the server utils
+     *
+     * @param server      the server utils
      * @param primaryCtrl primaryCtrl
      */
     @Inject
@@ -68,6 +73,7 @@ public class OverviewCtrl implements Initializable {
 
     /**
      * Shows the details of a recipe (ingredients, preparation steps)
+     *
      * @param recipe
      */
     private void showRecipeDetails(Recipe recipe) {
@@ -83,9 +89,192 @@ public class OverviewCtrl implements Initializable {
             ingredientsList.getItems().add(ing.toString());
         }
         stepsList.getItems().clear();
-        for (var step : recipe.getSteps()) {
-            stepsList.getItems().add(step.getText());
+        for (RecipeStep step : recipe.getSteps()) {
+            stepsList.getItems().add(step);  // add RecipeStep objects, not strings
         }
+    }
+
+    /**
+     * When the add button is pressed, the user can add a new step to the recipe.
+     */
+    @FXML
+    public void onAddStepClicked() {
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Recipe Selected");
+            alert.setContentText("Please select a recipe to add a step.");
+            alert.showAndWait();
+            return;
+        }
+
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setHeaderText("Enter the step description:");
+        dialog.setGraphic(null);
+        dialog.getDialogPane().setPrefSize(400, 250);
+
+        Optional<String> result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            String stepText = result.get();
+            if (stepText.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Error");
+                alert.setContentText("Step description cannot be empty.");
+                alert.showAndWait();
+                return;
+            }
+            RecipeStep step = new RecipeStep();
+            step.setText(stepText);
+            step.setOrderIndex(recipe.getSteps().size());
+            step.setRecipe(recipe);
+            recipe.getSteps().add(step);
+
+            try {
+                server.updateRecipe(recipe);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Server Error");
+                alert.setContentText("Could not save the new step to the database.");
+                alert.showAndWait();
+                return;
+            }
+
+            showRecipeDetails(recipe);
+        }
+    }
+
+    /**
+     * When the delete button is clicked and a step is selected, it's deleted the order of steps is recalculated
+     */
+    @FXML
+    public void onDeleteStepClicked() {
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Recipe Selected");
+            alert.setContentText("Please select a recipe to edit.");
+            alert.showAndWait();
+            return;
+        }
+
+        RecipeStep selectedStep = stepsList.getSelectionModel().getSelectedItem();
+        if (selectedStep == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Step Selected");
+            alert.setContentText("Please select a step to delete.");
+            alert.showAndWait();
+            return;
+        }
+
+        recipe.getSteps().remove(selectedStep);
+        for (int i = 0; i < recipe.getSteps().size(); i++) {
+            recipe.getSteps().get(i).setOrderIndex(i);
+        }
+
+        try {
+            server.updateRecipe(recipe);
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Server Error");
+            alert.setContentText("Could not delete the step from the database.");
+            alert.showAndWait();
+            return;
+        }
+
+        showRecipeDetails(recipe);
+    }
+
+    /**
+     * When the edit button is clicked, a text-input box appears containing the description, which can be edited.
+     */
+    @FXML
+    public void onEditStepClicked() {
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Recipe Selected");
+            alert.setContentText("Please select a recipe to edit.");
+            alert.showAndWait();
+            return;
+        }
+        RecipeStep selectedStep = stepsList.getSelectionModel().getSelectedItem();
+        if (selectedStep == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Step Selected");
+            alert.setContentText("Please select a step to modify.");
+            alert.showAndWait();
+            return;
+        }
+
+        TextInputDialog dialog = new TextInputDialog(selectedStep.getText());
+        dialog.setHeaderText("Edit the step description:");
+        dialog.setGraphic(null);
+        dialog.getDialogPane().setPrefSize(400, 250);
+
+        java.util.Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            String newText = result.get().trim();
+            if (newText.isEmpty()) {
+                return;
+            }
+
+            selectedStep.setText(newText);
+
+            try {
+                server.updateRecipe(recipe);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Server Error");
+                alert.setContentText("Could not update the step in the database.");
+                alert.showAndWait();
+                return;
+            }
+
+            showRecipeDetails(recipe);
+        }
+    }
+
+    /**
+     * When the edit button is pressed the user can edit the title of the existing recipe
+     */
+    @FXML
+    public void onEditTitleClicked() {
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Recipe Selected");
+            alert.setContentText("Please select a recipe to edit its title.");
+            alert.showAndWait();
+        }
+        TextInputDialog dialog = new TextInputDialog(recipe.getName());
+        dialog.setHeaderText("Edit the recipe title:");
+        dialog.setGraphic(null);
+        dialog.getDialogPane().setPrefSize(400, 150);
+
+        java.util.Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            String newTitle = result.get().trim();
+            if (newTitle.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Invalid Title");
+                alert.setContentText("Title cannot be empty.");
+                alert.showAndWait();
+                return;
+            }
+            recipe.setName(newTitle);
+            try {
+                server.updateRecipe(recipe);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Server Error");
+                alert.setContentText("Could not update the recipe title in the database.");
+                alert.showAndWait();
+                return;
+            }
+            showRecipeDetails(recipe);
+        }
+
     }
 
     /**
