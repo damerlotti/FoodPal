@@ -145,7 +145,7 @@ public class OverviewCtrl implements Initializable {
     }
 
     /**
-     * When the delete button is clicked and a step is selected, it's deleted the order of steps is recalculated
+     * When delete button is clicked and the step is deleted
      */
     @FXML
     public void onDeleteStepClicked() {
@@ -186,7 +186,7 @@ public class OverviewCtrl implements Initializable {
     }
 
     /**
-     * When the edit button is clicked, a text-input box appears containing the description, which can be edited.
+     * Edit button is clicked, a box appears where uses edits step.
      */
     @FXML
     public void onEditStepClicked() {
