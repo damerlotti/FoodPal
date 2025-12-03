@@ -73,15 +73,17 @@ public class RecipeController {
     }
 
     /**
-     * Updates an existing recipe in the database
-     * @param id            the id of the recipe which should already exist
-     * @param updatedRecipe the updated recipe object
-     * @return updated Recipe object after saving or bull if no recipe with that id exists
+     * Updates an existing recipe in the database.
+     * @param id of recipe to update
+     * @param updatedRecipe recipe containing updated data
+     * @return updated recipe, or null if id doesn't exist
      */
-    @PutMapping("/{id}")
+    @PutMapping
     public Recipe updateRecipe(@PathVariable long id, @RequestBody Recipe updatedRecipe) {
         Recipe existing = repo.findById(id).orElse(null);
-        if (existing == null) return null;
+        if (existing == null) {
+            return null;
+        }
         existing.setName(updatedRecipe.getName());
         existing.getIngredients().clear();
         if (updatedRecipe.getIngredients() != null) {
