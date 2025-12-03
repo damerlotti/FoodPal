@@ -181,7 +181,6 @@ public class OverviewCtrl implements Initializable {
             alert.showAndWait();
             return;
         }
-
         showRecipeDetails(recipe);
     }
 
@@ -230,7 +229,6 @@ public class OverviewCtrl implements Initializable {
                 alert.showAndWait();
                 return;
             }
-
             showRecipeDetails(recipe);
         }
     }
@@ -273,6 +271,8 @@ public class OverviewCtrl implements Initializable {
                 return;
             }
             showRecipeDetails(recipe);
+            refresh();
+            recipeList.getSelectionModel().select(recipe);
         }
 
     }

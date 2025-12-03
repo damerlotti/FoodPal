@@ -78,7 +78,7 @@ public class RecipeController {
      * @param updatedRecipe recipe containing updated data
      * @return updated recipe, or null if id doesn't exist
      */
-    @PutMapping
+    @PutMapping("/{id}")
     public Recipe updateRecipe(@PathVariable long id, @RequestBody Recipe updatedRecipe) {
         Recipe existing = repo.findById(id).orElse(null);
         if (existing == null) {
