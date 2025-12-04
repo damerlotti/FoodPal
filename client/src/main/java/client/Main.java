@@ -56,12 +56,13 @@ public class Main extends Application {
         var recipes = FXML.load(RecipesCtrl.class, "client", "scenes", "Recipes.fxml");
         var addRecipe = FXML.load(AddRecipeCtrl.class, "client", "scenes", "AddRecipe.fxml");
         var ingredients = FXML.load(IngredientsCtrl.class, "client", "scenes", "Ingredients.fxml");
-
+        var addIngredient = FXML.load(AddIngredientCtrl.class,
+                "client", "scenes", "AddIngredient.fxml");
         // Get PrimaryCtrl from Guice
         var primaryCtrl = INJECTOR.getInstance(PrimaryCtrl.class);
 
         // Initialize all scenes inside PrimaryCtrl
-        primaryCtrl.init(primaryStage, mainLayout, recipes, addRecipe, ingredients);
+        primaryCtrl.init(primaryStage, mainLayout, recipes, addRecipe, ingredients, addIngredient);
 
     }
 }

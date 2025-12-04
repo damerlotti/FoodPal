@@ -8,9 +8,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
 import javafx.fxml.Initializable;
-
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -18,9 +16,7 @@ public class IngredientsCtrl implements Initializable {
 
     private final ServerUtils server;
     private ObservableList<Ingredient> data;
-
-    @FXML
-    private TextField nameField;
+    private final PrimaryCtrl primaryCtrl;
 
     @FXML
     private ListView<Ingredient> ingredientsList;
@@ -28,10 +24,12 @@ public class IngredientsCtrl implements Initializable {
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
      * @param server the server utils
+     * @param primaryCtrl primaryCtrl
      */
     @Inject
-    public IngredientsCtrl(ServerUtils server) {
+    public IngredientsCtrl(ServerUtils server, PrimaryCtrl primaryCtrl) {
         this.server = server;
+        this.primaryCtrl = primaryCtrl;
     }
 
     @Override
@@ -52,22 +50,6 @@ public class IngredientsCtrl implements Initializable {
     }
 
     /**
-     * Adds an ingredient based on the name in the TextField
-     * should probably do a separate window to add an ingredient
-     */
-    public void addIngredient() {
-        String name = nameField.getText();
-        if (name == null || name.trim().isEmpty()) {
-            return;
-        }
-        Ingredient i = new Ingredient();
-        i.setName(name);
-        server.addIngredient(i);
-        nameField.clear();
-        refresh();
-    }
-
-    /**
      * Removes a certain ingredient from the database
      */
     public void removeIngredient() {
@@ -80,5 +62,12 @@ public class IngredientsCtrl implements Initializable {
         }
         server.deleteIngredient(selected);
         refresh();
+    }
+    /**
+     * Switches to add ingredient
+     */
+    @FXML
+    public void switchToAddIngredient() {
+        primaryCtrl.showAddIngredient();
     }
 }
