@@ -10,13 +10,11 @@
         <Label layoutX="249.0" layoutY="33.0" prefHeight="30.0" prefWidth="90.0" text="New Ingredient" />
         <Button layoutX="246.0" layoutY="333.0" mnemonicParsing="false" onAction="#addIngredient" prefHeight="25.0" prefWidth="97.0" text="Add" />
         <TextField fx:id="nameIngredient" layoutX="225.0" layoutY="63.0" />
-        <TextField fx:id="kCalIngredient" layoutX="225.0" layoutY="253.0" />
         <TextField fx:id="carbsIngredient" layoutX="225.0" layoutY="166.0" />
         <TextField fx:id="proteinIngredient" layoutX="225.0" layoutY="205.0" />
         <TextField fx:id="fatIngredient" layoutX="225.0" layoutY="120.0" />
         <Label layoutX="150.0" layoutY="121.0" prefHeight="30.0" prefWidth="59.0" text="Fat g/100g" />
         <Label layoutX="140.0" layoutY="201.0" prefHeight="30.0" prefWidth="83.0" text="Protein g/100g" />
         <Label layoutX="141.0" layoutY="164.0" prefHeight="30.0" prefWidth="76.0" text="Carbs g/100g" />
-        <Label layoutX="153.0" layoutY="253.0" prefHeight="30.0" prefWidth="65.0" text="Kcal/100g" />
     </children>
 </AnchorPane>

@@ -24,8 +24,6 @@ public class AddIngredientCtrl {
     private TextField proteinIngredient;
     @FXML
     private TextField carbsIngredient;
-    @FXML
-    private TextField kCalIngredient;
 
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
@@ -45,27 +43,25 @@ public class AddIngredientCtrl {
         String fat = fatIngredient.getText();
         String protein = proteinIngredient.getText();
         String carbs = carbsIngredient.getText();
-        String kcal = kCalIngredient.getText();
         //verify they are not empty or null
         if (name == null || name.trim().isEmpty() ||
                 fat == null || fat.trim().isEmpty() ||
                 protein == null || protein.trim().isEmpty() ||
-                carbs == null || carbs.trim().isEmpty() ||
-                kcal == null || kcal.trim().isEmpty()) {
+                carbs == null || carbs.trim().isEmpty()) {
             return;
         }
         //Check if they are all valid
         if (!(isStringBigDecimal(fat) && isStringBigDecimal(protein) &&
-                isStringBigDecimal(protein) && isStringBigDecimal(carbs) &&
-                isStringBigDecimal(kcal))) {
+                isStringBigDecimal(protein) && isStringBigDecimal(carbs))) {
             return;
         }
-        Unit unitAll = Unit.G;
         Nutrition nutrition = new Nutrition(
                 new BigDecimal(fat),
                 new BigDecimal(protein),
-                new BigDecimal(carbs),
-                new BigDecimal(kcal));
+                new BigDecimal(carbs));
+        BigDecimal kCal = nutrition.computeKcalPer100g();
+        nutrition.setKcalPer100g(kCal);
+
         Ingredient i = new Ingredient();
         i.setName(name);
         i.setNutrition(nutrition);
@@ -83,7 +79,6 @@ public class AddIngredientCtrl {
         fatIngredient.clear();
         proteinIngredient.clear();
         carbsIngredient.clear();
-        kCalIngredient.clear();
     }
 
     /**

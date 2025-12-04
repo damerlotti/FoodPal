@@ -52,22 +52,8 @@ public class Main extends Application {
             return;
         }
 
-        // Some testing for the ServerUtils, to see if we can get all the recipes from the client
-        // Can be removed
-        System.out.println("TESTING SERVER CONNECTION");
-
-        client.utils.ServerUtils server = new client.utils.ServerUtils();
-
-        var recipes = server.getRecipes();
-
-        System.out.println("Connection successful!");
-        System.out.println("Found " + recipes.size() + " recipes:");
-        for (commons.Recipe r : recipes) {
-            System.out.println("   - " + r.getName());
-        }
-
         var mainLayout = FXML.load(MainLayoutCtrl.class, "client", "scenes", "MainLayout.fxml");
-        var overview = FXML.load(OverviewCtrl.class, "client", "scenes", "Overview.fxml");
+        var recipes = FXML.load(RecipesCtrl.class, "client", "scenes", "Recipes.fxml");
         var addRecipe = FXML.load(AddRecipeCtrl.class, "client", "scenes", "AddRecipe.fxml");
         var ingredients = FXML.load(IngredientsCtrl.class, "client", "scenes", "Ingredients.fxml");
         var addIngredient = FXML.load(AddIngredientCtrl.class,
@@ -76,7 +62,7 @@ public class Main extends Application {
         var primaryCtrl = INJECTOR.getInstance(PrimaryCtrl.class);
 
         // Initialize all scenes inside PrimaryCtrl
-        primaryCtrl.init(primaryStage, mainLayout, overview, addRecipe, ingredients, addIngredient);
+        primaryCtrl.init(primaryStage, mainLayout, recipes, addRecipe, ingredients);
 
     }
 }
