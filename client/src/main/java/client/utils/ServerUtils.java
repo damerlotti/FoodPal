@@ -117,6 +117,32 @@ public class ServerUtils {
     }
 
     /**
+     * Sends the update recipe to the server to be saved
+     * @param recipe the recipe object to save
+     */
+    public void updateRecipe(Recipe recipe) {
+        try {
+            String json = objectMapper.writeValueAsString(recipe);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(SERVER_URL + "recipes/" + recipe.getId()))
+                    .header("Content-Type", "application/json")
+                    .PUT(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                System.out.println("Error updating recipe: " + response.statusCode());
+                return;
+            }
+            objectMapper.readValue(response.body(), Recipe.class);
+
+        } catch (Exception e) {
+            System.out.println("Connection error while updating recipe.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Asks the server for all ingredients.
      * @return A list of ingredients, or null if something breaks.
      */

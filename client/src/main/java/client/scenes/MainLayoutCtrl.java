@@ -35,7 +35,7 @@ public class MainLayoutCtrl {
      */
     @FXML
     public void showRecipes() {
-        primaryCtrl.showOverview();
+        primaryCtrl.showRecipes();
     }
 
     /**
