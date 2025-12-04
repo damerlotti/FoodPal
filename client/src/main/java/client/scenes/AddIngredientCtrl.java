@@ -12,10 +12,9 @@ import javafx.stage.Stage;
 
 import java.math.BigDecimal;
 
-public class IngredientAddCtrl {
+public class AddIngredientCtrl {
 
     private final ServerUtils server;
-    private Stage stage; // Add this field
 
     @FXML
     private TextField nameIngredient;
@@ -33,7 +32,7 @@ public class IngredientAddCtrl {
      * @param server the server utils
      */
     @Inject
-    public IngredientAddCtrl(ServerUtils server) {
+    public AddIngredientCtrl(ServerUtils server) {
         this.server = server;
     }
     /**
@@ -63,9 +62,9 @@ public class IngredientAddCtrl {
         }
         Unit unitAll = Unit.G;
         Nutrition nutrition = new Nutrition(
-                new Measurement(new BigDecimal(fat), unitAll),
-                new Measurement(new BigDecimal(protein), unitAll),
-                new Measurement(new BigDecimal(carbs), unitAll),
+                new BigDecimal(fat),
+                new BigDecimal(protein),
+                new BigDecimal(carbs),
                 new BigDecimal(kcal));
         Ingredient i = new Ingredient();
         i.setName(name);

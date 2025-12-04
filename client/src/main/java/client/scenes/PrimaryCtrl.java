@@ -23,9 +23,9 @@ public class PrimaryCtrl {
     private Parent ingredientsNode;
     private IngredientsCtrl ingredientsCtrl;
 
-    private Parent ingredientAddNode;
-    private Scene ingredientAddScene;
-    private IngredientAddCtrl ingredientAddCtrl;
+    private Parent addIngredientNode;
+    private Scene addIngredientScene;
+    private AddIngredientCtrl addIngredientCtrl;
 
     /**
      * Initializes  primary controller the scenes
@@ -41,7 +41,7 @@ public class PrimaryCtrl {
                      Pair<OverviewCtrl, Parent> overview,
                      Pair<AddRecipeCtrl, Parent> addRecipe,
                      Pair<IngredientsCtrl, Parent> ingredients,
-                     Pair<IngredientAddCtrl, Parent> ingredientAdd) {
+                     Pair<AddIngredientCtrl, Parent> ingredientAdd) {
 
         this.primaryStage = primaryStage;
 
@@ -57,9 +57,9 @@ public class PrimaryCtrl {
         this.ingredientsCtrl = ingredients.getKey();
         this.ingredientsNode = ingredients.getValue();
 
-        this.ingredientAddCtrl = ingredientAdd.getKey();
-        this.ingredientAddNode = ingredientAdd.getValue();
-        this.ingredientAddScene = new Scene(ingredientAddNode);
+        this.addIngredientCtrl = ingredientAdd.getKey();
+        this.addIngredientNode = ingredientAdd.getValue();
+        this.addIngredientScene = new Scene(addIngredientNode);
 
         primaryStage.setScene(new Scene(mainLayout.getValue()));
         primaryStage.setTitle("FoodPal");
@@ -108,7 +108,7 @@ public class PrimaryCtrl {
         Stage p = new Stage();
         p.initModality(Modality.APPLICATION_MODAL);
         p.initOwner(primaryStage);
-        p.setScene(ingredientAddScene);
+        p.setScene(addIngredientScene);
         p.setTitle("Add Ingredient");
         p.showAndWait();
         ingredientsCtrl.refresh();

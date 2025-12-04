@@ -70,7 +70,7 @@ public class Main extends Application {
         var overview = FXML.load(OverviewCtrl.class, "client", "scenes", "Overview.fxml");
         var addRecipe = FXML.load(AddRecipeCtrl.class, "client", "scenes", "AddRecipe.fxml");
         var ingredients = FXML.load(IngredientsCtrl.class, "client", "scenes", "Ingredients.fxml");
-        var addIngredient = FXML.load(IngredientAddCtrl.class,
+        var addIngredient = FXML.load(AddIngredientCtrl.class,
                 "client", "scenes", "AddIngredient.fxml");
         // Get PrimaryCtrl from Guice
         var primaryCtrl = INJECTOR.getInstance(PrimaryCtrl.class);
