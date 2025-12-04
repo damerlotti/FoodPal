@@ -62,7 +62,7 @@ public class Main extends Application {
         var primaryCtrl = INJECTOR.getInstance(PrimaryCtrl.class);
 
         // Initialize all scenes inside PrimaryCtrl
-        primaryCtrl.init(primaryStage, mainLayout, recipes, addRecipe, ingredients);
+        primaryCtrl.init(primaryStage, mainLayout, recipes, addRecipe, ingredients, addIngredient);
 
     }
 }
