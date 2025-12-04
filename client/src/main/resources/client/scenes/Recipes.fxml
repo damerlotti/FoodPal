@@ -36,7 +36,7 @@
                      <children>
                         <HBox prefHeight="29.0" prefWidth="296.0" spacing="20.0">
                            <children>
-                              <Label fx:id="recipeTitle" prefHeight="30.0" prefWidth="237.0" text="Label">
+                              <Label fx:id="recipeTitle" prefHeight="30.0" prefWidth="237.0" text="Select a recipe">
                                  <font>
                                     <Font name="System Bold" size="20.0" />
                                  </font>
