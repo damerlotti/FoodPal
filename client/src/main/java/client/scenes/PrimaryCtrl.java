@@ -23,6 +23,10 @@ public class PrimaryCtrl {
     private Parent ingredientsNode;
     private IngredientsCtrl ingredientsCtrl;
 
+    private Parent ingredientAddNode;
+    private Scene ingredientAddScene;
+    private IngredientAddCtrl ingredientAddCtrl;
+
     /**
      * Initializes  primary controller the scenes
      * @param primaryStage the main application window
@@ -30,12 +34,14 @@ public class PrimaryCtrl {
      * @param overview  OverviewCtrl controller
      * @param addRecipe AddRecipe controller
      * @param ingredients Ingredients controller
+     * @param ingredientAdd IngredientAdd controller
      */
     public void init(Stage primaryStage,
                      Pair<MainLayoutCtrl, Parent> mainLayout,
                      Pair<OverviewCtrl, Parent> overview,
                      Pair<AddRecipeCtrl, Parent> addRecipe,
-                     Pair<IngredientsCtrl, Parent> ingredients) {
+                     Pair<IngredientsCtrl, Parent> ingredients,
+                     Pair<IngredientAddCtrl, Parent> ingredientAdd) {
 
         this.primaryStage = primaryStage;
 
@@ -50,6 +56,10 @@ public class PrimaryCtrl {
 
         this.ingredientsCtrl = ingredients.getKey();
         this.ingredientsNode = ingredients.getValue();
+
+        this.ingredientAddCtrl = ingredientAdd.getKey();
+        this.ingredientAddNode = ingredientAdd.getValue();
+        this.ingredientAddScene = new Scene(ingredientAddNode);
 
         primaryStage.setScene(new Scene(mainLayout.getValue()));
         primaryStage.setTitle("FoodPal");
@@ -88,6 +98,19 @@ public class PrimaryCtrl {
     public void showIngredients() {
         primaryStage.setTitle("FoodPal - Ingredients");
         mainLayoutCtrl.setCenter(ingredientsNode);
+        ingredientsCtrl.refresh();
+    }
+
+    /**
+     * Shows the add ingredient scene
+     */
+    public void showAddIngredient() { //AI generated this
+        Stage p = new Stage();
+        p.initModality(Modality.APPLICATION_MODAL);
+        p.initOwner(primaryStage);
+        p.setScene(ingredientAddScene);
+        p.setTitle("Add Ingredient");
+        p.showAndWait();
         ingredientsCtrl.refresh();
     }
 }

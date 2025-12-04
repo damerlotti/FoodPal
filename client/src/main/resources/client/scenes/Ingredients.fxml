@@ -1,25 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.IngredientsCtrl">
     <children>
         <ListView fx:id="ingredientsList" layoutX="46.0" layoutY="43.0" prefHeight="236.0" prefWidth="200.0" />
-        <Label layoutX="407.0" layoutY="29.0" prefHeight="30.0" prefWidth="90.0" text="New Ingredient" />
-        <Button layoutX="403.0" layoutY="335.0" mnemonicParsing="false" onAction="#addIngredient" prefHeight="25.0" prefWidth="97.0" text="Add" />
+        <Button layoutX="375.0" layoutY="336.0" mnemonicParsing="false" onAction="#switchToAddIngredient" prefHeight="25.0" prefWidth="97.0" text="Add" />
         <Button layoutX="108.0" layoutY="348.0" mnemonicParsing="false" onAction="#removeIngredient" text="Delete Selected" />
-        <TextField fx:id="nameIngredient" layoutX="383.0" layoutY="59.0" />
-        <TextField fx:id="kCalIngredient" layoutX="383.0" layoutY="249.0" />
-        <TextField fx:id="carbsIngredient" layoutX="383.0" layoutY="162.0" />
-        <TextField fx:id="proteinIngredient" layoutX="383.0" layoutY="201.0" />
-        <TextField fx:id="fatIngredient" layoutX="383.0" layoutY="116.0" />
-        <Label layoutX="308.0" layoutY="117.0" prefHeight="30.0" prefWidth="59.0" text="Fat g/100g" />
-        <Label layoutX="298.0" layoutY="197.0" prefHeight="30.0" prefWidth="83.0" text="Protein g/100g" />
-        <Label layoutX="299.0" layoutY="160.0" prefHeight="30.0" prefWidth="76.0" text="Carbs g/100g" />
-        <Label layoutX="311.0" layoutY="249.0" prefHeight="30.0" prefWidth="65.0" text="Kcal/100g" />
     </children>
 </AnchorPane>
