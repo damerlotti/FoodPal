@@ -102,4 +102,14 @@ public class RecipeStep {
     public void setOrderIndex(int orderIndex) {
         this.orderIndex = orderIndex;
     }
+
+    /**
+     * toString method which shows the step description and the stp number
+     * @return the step number followed by the step description
+     */
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(orderIndex + 1).append(". ").append(text);
+        return sb.toString();
+    }
 }
