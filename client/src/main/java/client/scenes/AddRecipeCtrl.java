@@ -121,8 +121,8 @@ public class AddRecipeCtrl {
         alert.showAndWait();
     }
     /**
-     * Closes the AddRecipe scene, we don't need to ask PrimaryCtrl to show the overview
-     * because we don't have another scene, and overview will still be the last thing in MainLayout
+     * Closes the AddRecipe scene, we don't need to ask PrimaryCtrl to show the recipes
+     * because we don't have another scene, and recipes will still be the last thing in MainLayout
      * since we pressed on Add Recipe
      */
     @FXML

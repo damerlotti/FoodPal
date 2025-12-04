@@ -17,7 +17,7 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class OverviewCtrl implements Initializable {
+public class RecipesCtrl implements Initializable {
 
     private final ServerUtils server;
     private ObservableList<Recipe> data;
@@ -43,7 +43,7 @@ public class OverviewCtrl implements Initializable {
      * @param primaryCtrl primaryCtrl
      */
     @Inject
-    public OverviewCtrl(ServerUtils server, PrimaryCtrl primaryCtrl) {
+    public RecipesCtrl(ServerUtils server, PrimaryCtrl primaryCtrl) {
         this.server = server;
         this.primaryCtrl = primaryCtrl;
     }

@@ -6,49 +6,19 @@ import java.math.BigDecimal;
 
 @Embeddable
 public class Nutrition {
-    @Enumerated(EnumType.STRING)
-    @AttributeOverrides({
-        @AttributeOverride(name = "value", column = @Column(
-            name = "fat_value",
-            precision = Measurement.MEASUREMENT_PRECISION,
+    @Column(name = "fat", precision = Measurement.MEASUREMENT_PRECISION,
             scale = Measurement.MEASUREMENT_SCALE)
-            ),
-        @AttributeOverride(name = "unit", column = @Column(
-            name = "fat_unit",
-            length = Measurement.MEASUREMENT_UNIT_LENGTH)
-            ),
-    })
-    private Measurement fatPer100g;
+    private BigDecimal fatPer100g;
 
-    @Enumerated(EnumType.STRING)
-    @AttributeOverrides({
-        @AttributeOverride(name = "value", column = @Column(
-            name = "protein_value",
-            precision = Measurement.MEASUREMENT_PRECISION,
+    @Column(name = "protein", precision = Measurement.MEASUREMENT_PRECISION,
             scale = Measurement.MEASUREMENT_SCALE)
-            ),
-        @AttributeOverride(name = "unit", column = @Column(
-            name = "protein_unit",
-            length = Measurement.MEASUREMENT_UNIT_LENGTH)
-            ),
-    })
-    private Measurement proteinPer100g;
+    private BigDecimal proteinPer100g;
 
-    @Enumerated(EnumType.STRING)
-    @AttributeOverrides({
-        @AttributeOverride(name = "value", column = @Column(
-            name = "carbs_value",
-            precision = Measurement.MEASUREMENT_PRECISION,
+    @Column(name = "carbs", precision = Measurement.MEASUREMENT_PRECISION,
             scale = Measurement.MEASUREMENT_SCALE)
-            ),
-        @AttributeOverride(name = "unit", column = @Column(
-            name = "carbs_unit",
-            length = Measurement.MEASUREMENT_UNIT_LENGTH)
-            ),
-    })
-    private Measurement carbsPer100g;
+    private BigDecimal carbsPer100g;
 
-    @Column(name = "kcal_per_100g",
+    @Column(name = "kcal",
             precision = Measurement.MEASUREMENT_PRECISION,
             scale = Measurement.MEASUREMENT_SCALE)
     private BigDecimal kcalPer100g;
@@ -66,35 +36,18 @@ public class Nutrition {
      * @param proteinPer100g Amount of protein per 100 grams of ingredient.
      * @param carbsPer100g Amount of carbs per 100 grams of ingredient.
      */
-    public Nutrition(Measurement fatPer100g, Measurement proteinPer100g, Measurement carbsPer100g) {
+    public Nutrition(BigDecimal fatPer100g, BigDecimal proteinPer100g, BigDecimal carbsPer100g) {
         this.fatPer100g = fatPer100g;
         this.proteinPer100g = proteinPer100g;
         this.carbsPer100g = carbsPer100g;
-        this.kcalPer100g = computeKcalPer100gIfMissing();
-    }
-
-    /**
-     * Creates a new Nutrition with the specified parameters.
-     * Hard sets the kilocalories.
-     *
-     * @param fatPer100g Amount of fat per 100 grams of ingredient.
-     * @param proteinPer100g Amount of protein per 100 grams of ingredient.
-     * @param carbsPer100g Amount of carbs per 100 grams of ingredient.
-     * @param kcalPer100g Amount of kilocalories per 100 grams of ingredient.
-     */
-    public Nutrition(Measurement fatPer100g, Measurement proteinPer100g, Measurement carbsPer100g,
-                     BigDecimal kcalPer100g) {
-        this.fatPer100g = fatPer100g;
-        this.proteinPer100g = proteinPer100g;
-        this.carbsPer100g = carbsPer100g;
-        this.kcalPer100g = kcalPer100g;
+        this.kcalPer100g = computeKcalPer100g();
     }
 
     /**
      * Returns the fat / 100g.
      * @return The fat / 100g.
      */
-    public Measurement getFatPer100g() {
+    public BigDecimal getFatPer100g() {
         return fatPer100g;
     }
 
@@ -102,15 +55,16 @@ public class Nutrition {
      * Sets the fat / 100g.
      * @param fatPer100g The fat / 100g.
      */
-    public void setFatPer100g(Measurement fatPer100g) {
+    public void setFatPer100g(BigDecimal fatPer100g) {
         this.fatPer100g = fatPer100g;
+        kcalPer100g = computeKcalPer100g();
     }
 
     /**
      * Returns the protein / 100g.
      * @return The protein / 100g.
      */
-    public Measurement getProteinPer100g() {
+    public BigDecimal getProteinPer100g() {
         return proteinPer100g;
     }
 
@@ -118,15 +72,16 @@ public class Nutrition {
      * Sets the protein / 100g.
      * @param proteinPer100g The protein / 100g.
      */
-    public void setProteinPer100g(Measurement proteinPer100g) {
+    public void setProteinPer100g(BigDecimal proteinPer100g) {
         this.proteinPer100g = proteinPer100g;
+        kcalPer100g = computeKcalPer100g();
     }
 
     /**
      * Returns the carbs / 100g.
      * @return The carbs / 100g.
      */
-    public Measurement getCarbsPer100g() {
+    public BigDecimal getCarbsPer100g() {
         return carbsPer100g;
     }
 
@@ -134,8 +89,9 @@ public class Nutrition {
      * Sets the carbs / 100g.
      * @param carbsPer100g The carbs / 100g.
      */
-    public void setCarbsPer100g(Measurement carbsPer100g) {
+    public void setCarbsPer100g(BigDecimal carbsPer100g) {
         this.carbsPer100g = carbsPer100g;
+        kcalPer100g = computeKcalPer100g();
     }
 
     /**
@@ -158,22 +114,14 @@ public class Nutrition {
      * Computes the number of kilocalories / 100g based on the given fat, protein and carbs values.
      * @return The number of kilocalories / 100g.
      */
-    // TODO(calco): Actually look into how to implement this lol
-    public BigDecimal computeKcalPer100gIfMissing() {
-//        if (kcalPer100g != null) {
-//            return kcalPer100g;
-//        }
-//        BigDecimal fat = fatPer100g.getBaseUnitSafeValue();
-//        BigDecimal protein = proteinPer100g.getBaseUnitSafeValue();
-//        BigDecimal carbs = carbsPer100g.getSafeValue();
-//        if (fat == null && protein == null && carbs == null) {
-//            return null;
-//        }
-//        BigDecimal kcal = BigDecimal.ZERO;
-//        if (fat != null) kcal = kcal.add(fat.multiply(BigDecimal.valueOf(9)));
-//        if (protein != null) kcal = kcal.add(protein.multiply(BigDecimal.valueOf(4)));
-//        if (carbs != null) kcal = kcal.add(carbs.multiply(BigDecimal.valueOf(4)));
-//        return kcal;
-        return BigDecimal.ZERO;
+    public BigDecimal computeKcalPer100g() {
+        BigDecimal fat = (fatPer100g != null) ? fatPer100g : BigDecimal.ZERO;
+        BigDecimal protein = (proteinPer100g != null) ? proteinPer100g : BigDecimal.ZERO;
+        BigDecimal carbs = (carbsPer100g != null) ? carbsPer100g : BigDecimal.ZERO;
+        BigDecimal kcal = BigDecimal.ZERO;
+        kcal = kcal.add(fat.multiply(BigDecimal.valueOf(9)));
+        kcal = kcal.add(protein.multiply(BigDecimal.valueOf(4)));
+        kcal = kcal.add(carbs.multiply(BigDecimal.valueOf(4)));
+        return kcal;
     }
 }
