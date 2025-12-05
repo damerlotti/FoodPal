@@ -294,7 +294,26 @@ public class RecipesCtrl implements Initializable {
      */
     @FXML
     public void onClonePressed() {
-        System.out.println("CLONE CLONE");
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Recipe Selected");
+            alert.setContentText("Please select a recipe to clone.");
+            alert.showAndWait();
+            return;
+        }
+
+        // TODO(calco): When adding a recipe, do we clone the ingredients and steps as well?
+        // "[...] so I can give it my own twist without changing the original [...]"
+
+        Recipe clonedRecipe = recipe.cloneRecipe();
+        
+//        try {
+//            server.addRecipe(r);
+//        } catch (Exception e) {
+//            showAlert("Server Error", "Could not save recipe.");
+//            return;
+//        }
     }
 
     /**

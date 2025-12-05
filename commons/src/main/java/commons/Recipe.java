@@ -160,4 +160,34 @@ public class Recipe {
 
         return sb.toString();
     }
+
+    /**
+     * Clones the recipe, creating a fully new copy, without any ties to the original
+     * @return The duplicated recipe
+     */
+    public Recipe cloneRecipe() {
+        Recipe r = new Recipe();
+        r.setName(name);
+
+        List<RecipeStep> rSteps = new ArrayList<>();
+        for (RecipeStep step : steps) {
+            RecipeStep rStep = new RecipeStep();
+            rStep.setText(step.getText());
+            rStep.setOrderIndex(step.getOrderIndex());
+            rStep.setRecipe(r);
+            rSteps.add(rStep);
+        }
+        r.setSteps(rSteps);
+
+        List<RecipeIngredient> rIngredients = new ArrayList<>();
+        for  (RecipeIngredient ingredient : ingredients) {
+            RecipeIngredient rIngredient = new RecipeIngredient();
+            rIngredients.add(rIngredient);
+            rIngredient.setRecipe(r);
+            rIngredients.add(rIngredient);
+        }
+        r.setIngredients(rIngredients);
+
+        return r;
+    }
 }
