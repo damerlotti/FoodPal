@@ -3,6 +3,7 @@ package client.scenes;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Recipe;
+import commons.RecipeIngredient;
 import commons.RecipeStep;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,7 +33,7 @@ public class RecipesCtrl implements Initializable {
     @FXML
     private Label recipeTitle;
     @FXML
-    private ListView<String> ingredientsList;
+    private ListView<RecipeIngredient> ingredientsList;
     @FXML
     private ListView<RecipeStep> stepsList;
 
@@ -86,7 +87,7 @@ public class RecipesCtrl implements Initializable {
         recipeTitle.setText(recipe.getName());
         ingredientsList.getItems().clear();
         for (var ing : recipe.getIngredients()) {
-            ingredientsList.getItems().add(ing.toString());
+            ingredientsList.getItems().add(ing);
         }
         stepsList.getItems().clear();
         for (RecipeStep step : recipe.getSteps()) {
@@ -166,6 +167,14 @@ public class RecipesCtrl implements Initializable {
             alert.showAndWait();
             return;
         }
+
+        Alert alert1 = new Alert(Alert.AlertType.CONFIRMATION);
+        alert1.setTitle("Delete Recipe Step");
+        alert1.setHeaderText("Are you sure?");
+        alert1.setContentText("You are about to delete the following step from the recipe: \n"
+                + selectedStep);
+
+        java.util.Optional<javafx.scene.control.ButtonType> result = alert1.showAndWait();
 
         recipe.getSteps().remove(selectedStep);
         for (int i = 0; i < recipe.getSteps().size(); i++) {
@@ -283,5 +292,50 @@ public class RecipesCtrl implements Initializable {
     @FXML
     public void switchToAddRecipe() {
         primaryCtrl.showAddRecipe();
+    }
+
+    /**
+     * Deletes the selected ingredient from the recipe.
+     */
+    @FXML
+    public void onDeleteIngredientClicked() {
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Recipe Selected");
+            return;
+        }
+
+        RecipeIngredient selectedIng = ingredientsList.getSelectionModel().getSelectedItem();
+
+        if (selectedIng == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Ingredient Selected");
+            alert.setContentText("Please select an ingredient to delete.");
+            alert.showAndWait();
+            return;
+        }
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Delete Ingredient");
+        alert.setHeaderText("Are you sure?");
+        alert.setContentText("You are about to delete the following ingredient from the recipe: \n"
+                + selectedIng.toString());
+
+        java.util.Optional<javafx.scene.control.ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.OK) {
+            recipe.getIngredients().remove(selectedIng);
+
+            try {
+                server.updateRecipe(recipe);
+            } catch (Exception e) {
+                Alert alert1 = new Alert(Alert.AlertType.ERROR);
+                alert1.setTitle("Server Error");
+                alert1.setContentText("Could not update the recipe in the database.");
+                return;
+            }
+            showRecipeDetails(recipe);
+        }
     }
 }

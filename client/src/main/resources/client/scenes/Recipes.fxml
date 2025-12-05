@@ -54,7 +54,7 @@
                            <children>
                               <Button mnemonicParsing="false" text="Add" />
                               <Button mnemonicParsing="false" text="Edit" />
-                              <Button mnemonicParsing="false" text="Delete" />
+                              <Button mnemonicParsing="false" onAction="#onDeleteIngredientClicked" text="Delete" />
                            </children>
                            <VBox.margin>
                               <Insets />
