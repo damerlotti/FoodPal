@@ -4,6 +4,7 @@ import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Recipe;
 import commons.RecipeStep;
+import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -14,6 +15,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import javafx.util.Duration;
 
 import java.io.*;
 import java.net.URL;
@@ -307,13 +309,51 @@ public class RecipesCtrl implements Initializable {
         // "[...] so I can give it my own twist without changing the original [...]"
 
         Recipe clonedRecipe = recipe.cloneRecipe();
-        
-//        try {
-//            server.addRecipe(r);
-//        } catch (Exception e) {
-//            showAlert("Server Error", "Could not save recipe.");
-//            return;
-//        }
+
+
+        // TODO(calco): This shouldn't be as hard coded
+        TextInputDialog dialog = new TextInputDialog(clonedRecipe.getName() + " Clone");
+        dialog.setHeaderText("Enter the cloned recipe name:");
+        dialog.setGraphic(null);
+        dialog.getDialogPane().setPrefSize(400, 250);
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            String newName = result.get();
+            if (newName.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Error Cloning Recipe");
+                alert.setContentText("No new name was provided.");
+                alert.showAndWait();
+                return;
+            }
+
+            clonedRecipe.setName(newName);
+
+            try {
+                Recipe rServer = server.addRecipe(clonedRecipe);
+
+                // TODO(calco): Stupid workaround for stuff
+                refresh();
+                Recipe toSelect = null;
+                for (Recipe r : data) {
+                    if (r.getId() == rServer.getId()) {
+                        toSelect = r;
+                        break;
+                    }
+                }
+                recipeList.getSelectionModel().select(toSelect);
+                recipeList.scrollTo(toSelect);
+                recipeList.refresh();
+                recipeList.requestFocus();
+                showRecipeDetails(toSelect);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Server Error");
+                alert.setContentText("Could not save the cloned recipe to the database.");
+                alert.showAndWait();
+            }
+        }
     }
 
     /**

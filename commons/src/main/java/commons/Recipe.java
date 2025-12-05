@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "Recipes")
@@ -182,7 +183,8 @@ public class Recipe {
         List<RecipeIngredient> rIngredients = new ArrayList<>();
         for  (RecipeIngredient ingredient : ingredients) {
             RecipeIngredient rIngredient = new RecipeIngredient();
-            rIngredients.add(rIngredient);
+            rIngredient.setAmount(ingredient.getAmount());
+            rIngredient.setIngredient(ingredient.getIngredient());
             rIngredient.setRecipe(r);
             rIngredients.add(rIngredient);
         }
