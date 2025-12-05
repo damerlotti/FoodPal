@@ -4,7 +4,6 @@ import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Recipe;
 import commons.RecipeStep;
-import javafx.animation.PauseTransition;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -15,7 +14,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import javafx.util.Duration;
 
 import java.io.*;
 import java.net.URL;
@@ -357,7 +355,8 @@ public class RecipesCtrl implements Initializable {
     }
 
     /**
-     * Opens a new dialogue to save a file with all recipe information in a user specified ocation and format.
+     * Opens a new dialogue to save a file with all recipe information
+     * in a user specified ocation and format.
      */
     @FXML
     public void onPrintPressed() {
@@ -387,7 +386,8 @@ public class RecipesCtrl implements Initializable {
             } catch (IOException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Save Failed");
-                alert.setHeaderText("Could not save the recipe to the file.\nUnable to write to the file.");
+                alert.setHeaderText("Could not save the recipe to the file."
+                        + "\nUnable to write to the file.");
                 // TODO(calco): Should probably show a more human readable message
                 alert.setContentText("Error: " + e.getMessage());
                 alert.showAndWait();
