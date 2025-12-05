@@ -116,4 +116,48 @@ public class Recipe {
     public String toString() {
         return name;
     }
+
+    /**
+     * Returns a string representing all information about the recipe in a Markdown format.
+     * @return The markdown string.
+     */
+    public String toExportableMarkdown() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("# ").append(name).append("\n\n");
+
+        sb.append("## Ingredients\n");
+        for (RecipeIngredient ingredient : ingredients) {
+            sb.append("- ") .append(ingredient.toString()).append("\n");
+        }
+        sb.append("\n");
+
+        sb.append("## Steps\n");
+        for (RecipeStep step : steps) {
+            sb.append(step.toString()).append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Returns a string representing all information about the recipe in a plaintext format.
+     * @return The plaintext string
+     */
+    public String toExportablePlaintext() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(name).append("\n\n");
+
+        sb.append("Ingredients\n");
+        for (RecipeIngredient ingredient : ingredients) {
+            sb.append("- ") .append(ingredient.toString()).append("\n");
+        }
+        sb.append("\n");
+
+        sb.append("Steps\n");
+        for (RecipeStep step : steps) {
+            sb.append(step.toString()).append("\n");
+        }
+
+        return sb.toString();
+    }
 }

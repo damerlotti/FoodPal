@@ -12,7 +12,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
+import java.io.*;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -298,6 +301,40 @@ public class RecipesCtrl implements Initializable {
      */
     @FXML
     public void onPrintPressed() {
-        System.out.println("PRINT PRINT");
+//        System.out.println("PRINT PRINT");
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Recipe to File");
+        fileChooser.setInitialFileName(recipe.getName());
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Text Files (*.txt)", "*.txt"),
+                new FileChooser.ExtensionFilter("Markdown (*.md)", "*.md")
+//              TODO(calco): Add support for PDF export (use markdown to pdf storage)
+//               new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf"),
+        );
+
+        Window owner = recipeList.getScene().getWindow();
+        File file = fileChooser.showSaveDialog(owner);
+
+        if (file != null) {
+            System.out.println("SELECTED + " + file.getName());
+            try (PrintWriter out = new PrintWriter(file, "UTF-8")) {
+                if (file.getName().endsWith(".md")) {
+                    out.print(recipe.toExportableMarkdown());
+                }
+                else if (file.getName().endsWith(".txt")) {
+                    out.print(recipe.toExportablePlaintext());
+                }
+            } catch (IOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Save Failed");
+                alert.setHeaderText("Could not save the recipe to the file.\nUnable to write to the file.");
+                // TODO(calco): Should probably show a more human readable message
+                alert.setContentText("Error: " + e.getMessage());
+                alert.showAndWait();
+                return;
+            }
+        }
     }
 }
