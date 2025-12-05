@@ -41,6 +41,7 @@ public class AddIngredientCtrl {
         String fat = fatIngredient.getText();
         String protein = proteinIngredient.getText();
         String carbs = carbsIngredient.getText();
+
         //verify they are not empty or null
         if (name == null || name.trim().isEmpty() ||
                 fat == null || fat.trim().isEmpty() ||
