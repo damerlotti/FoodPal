@@ -116,7 +116,7 @@ public class Nutrition {
      */
     public BigDecimal computeKcalPer100g() {
         BigDecimal fat = (fatPer100g != null) ? fatPer100g : BigDecimal.ZERO;
-        BigDecimal proteingi = (proteinPer100g != null) ? proteinPer100g : BigDecimal.ZERO;
+        BigDecimal protein = (proteinPer100g != null) ? proteinPer100g : BigDecimal.ZERO;
         BigDecimal carbs = (carbsPer100g != null) ? carbsPer100g : BigDecimal.ZERO;
         BigDecimal kcal = BigDecimal.ZERO;
         kcal = kcal.add(fat.multiply(BigDecimal.valueOf(9)));
