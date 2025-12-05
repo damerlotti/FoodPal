@@ -284,4 +284,20 @@ public class RecipesCtrl implements Initializable {
     public void switchToAddRecipe() {
         primaryCtrl.showAddRecipe();
     }
+
+    /**
+     * Clones the recipe, making a new recipe with same data and selecting it in the view.
+     */
+    @FXML
+    public void onClonePressed() {
+        System.out.println("CLONE CLONE");
+    }
+
+    /**
+     * Opens a new dialogue to save a file with all recipe information in a user specified ocation and format.
+     */
+    @FXML
+    public void onPrintPressed() {
+        System.out.println("PRINT PRINT");
+    }
 }
