@@ -2,16 +2,14 @@ package client.scenes;
 
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
-import commons.Recipe;
-import commons.RecipeStep;
+import commons.*;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class AddRecipeCtrl {
 
@@ -19,6 +17,9 @@ public class AddRecipeCtrl {
     private final ServerUtils server;
     @FXML
     private TextField titleField;
+
+    @FXML
+    private ListView<RecipeIngredient> ingredientsList;
 
     //list of steps
     @FXML
@@ -35,6 +36,15 @@ public class AddRecipeCtrl {
         this.server = server; // Inject server
     }
 
+    /**
+     * The user adds an ingredient while creating the recipe
+     */
+    @FXML
+    public void onAddIngredient() {
+        var allIngredients = server.getIngredients();
+        Optional<RecipeIngredient> res = IngredientDialog.show(allIngredients, server);
+        res.ifPresent(x -> ingredientsList.getItems().add(x));
+    }
     /**
      * When user clicks 'Add Step' textInput pops up where the user writes/confirms step description
      */
@@ -85,18 +95,25 @@ public class AddRecipeCtrl {
         Recipe r = new Recipe();
         r.setName(title);
 
-        List<RecipeStep> dbSteps = new ArrayList<>();
+        List<RecipeStep> steps = new ArrayList<>();
         int index = 0;
-
-        for (String text : stepsList.getItems()) {
+        for (String text: stepsList.getItems()) {
             RecipeStep step = new RecipeStep();
             step.setText(text);
             step.setOrderIndex(index++);
             step.setRecipe(r); // link child back to parent
-            dbSteps.add(step);
+            steps.add(step);
         }
+        r.setSteps(steps);
 
-        r.setSteps(dbSteps);
+        List<RecipeIngredient> ingredients = new ArrayList<>();
+        index = 0;
+        for (RecipeIngredient x: ingredientsList.getItems()) {
+            x.setRecipe(r);
+            x.setOrderIndex(index++);
+            ingredients.add(x);
+        }
+        r.setIngredients(ingredients);
 
         try {
             server.addRecipe(r);
@@ -112,6 +129,7 @@ public class AddRecipeCtrl {
     private void clearFields() {
         titleField.clear();
         stepsList.getItems().clear();
+        ingredientsList.getItems().clear();
     }
 
     private void showAlert(String title, String content) {
@@ -130,5 +148,4 @@ public class AddRecipeCtrl {
         clearFields();
         stepsList.getScene().getWindow().hide();
     }
-
 }

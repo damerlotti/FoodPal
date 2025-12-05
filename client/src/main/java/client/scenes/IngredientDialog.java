@@ -1,0 +1,147 @@
+package client.scenes;
+
+import client.utils.ServerUtils;
+import commons.*;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+
+public class IngredientDialog {
+    private static BigDecimal check(String text) {
+        if (text == null || text.trim().isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        try {
+            return new BigDecimal(text.trim());
+        } catch (NumberFormatException e) {
+            return BigDecimal.ZERO;
+        }
+    }
+    private static void setFieldsLocked(boolean locked, TextField... fields) {
+        for (TextField f : fields) {
+            f.setDisable(locked);
+            if (locked) {
+                f.setStyle("-fx-opacity: 0.7; -fx-background-color: #eee;");
+            }
+            else {
+                f.setStyle("");
+            }
+        }
+    }
+    private static String removeZeros(BigDecimal number) {
+        if (number == null) {
+            return "0";
+        }
+        return number.stripTrailingZeros().toPlainString();
+    }
+    /**
+     * Shows a customized dialogue in which the user can configure the ingredient
+     * @param allIngredients all our existing ingredients from which the user can choose
+     * @param server injection of the server, to be able to save the newly created ingredient
+     * @return a potential RecipeIngredient, if the user inputs correct values
+     */
+    public static Optional<RecipeIngredient> show(List<Ingredient> allIngredients,
+                                                  ServerUtils server) {
+        Dialog<RecipeIngredient> dialog = new Dialog<>();
+        dialog.setTitle("Add Ingredient");
+        dialog.setHeaderText("Select existing or create new:");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);  // gap between all the items in the dialog
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));  // padding, clockwise direction(top, right..)
+
+        ComboBox<Ingredient> name = new ComboBox<>();
+        name.setEditable(true);  // so we can also type sth
+        name.getItems().addAll(allIngredients);
+        grid.add(new Label("Ingredient:"), 0, 0);  // first is column, second is line
+        grid.add(name, 1, 0);
+
+        TextField amount = new TextField();
+        ComboBox<Unit> unit = new ComboBox<>();
+        unit.getItems().addAll(Unit.values());
+        unit.setValue(Unit.G);
+        grid.add(new Label("Amount:"), 0, 1);
+        grid.add(amount, 1, 1);
+        grid.add(unit, 2, 1);
+
+        TextField fatField = new TextField();
+        TextField proteinField = new TextField();
+        TextField carbsField = new TextField();
+        grid.add(new Label("Fat: (per 100g)"), 0, 2); grid.add(fatField, 1, 2);
+        grid.add(new Label("Protein: (per 100g)"), 0, 3); grid.add(proteinField, 1, 3);
+        grid.add(new Label("Carbs: (per 100g)"), 0, 4); grid.add(carbsField, 1, 4);
+
+        // this happens when anything changes in the name field
+        name.getEditor().textProperty().addListener((obs, oldText, newText) -> {
+            // checking if what the user types matches sth from the list of existing ingredients
+            Ingredient match = allIngredients.stream()
+                    .filter(i -> i.getName().equalsIgnoreCase(newText.trim()))
+                    .findFirst()
+                    .orElse(null);
+            if (match != null) {  // existing ingredient, so we lock the values in place
+                fatField.setText(removeZeros(match.getNutrition().getFatPer100g()));
+                proteinField.setText(removeZeros(match.getNutrition().getProteinPer100g()));
+                carbsField.setText(removeZeros(match.getNutrition().getCarbsPer100g()));
+                setFieldsLocked(true, fatField, proteinField, carbsField);
+            }
+            else {  // new ingredient
+                if (fatField.isDisable()) {
+                    fatField.clear();
+                    proteinField.clear();
+                    carbsField.clear();
+                }
+                setFieldsLocked(false, fatField, proteinField, carbsField);  // unlock them
+            }
+        });
+
+        dialog.getDialogPane().setContent(grid);
+
+        // this is returned when the user clicks on 'Add'
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == ButtonType.OK) {
+                try {   // construct the recipe ingredient
+                    String n = name.getEditor().getText();
+                    Ingredient finalIng;
+                    Ingredient existing = name.getItems().stream()
+                            .filter(i -> i.getName().equalsIgnoreCase(n))
+                            .findFirst()
+                            .orElse(null);
+
+                    if (existing != null) {  // existing ingredient
+                        finalIng = existing;
+                    }
+                    else {
+                        finalIng = new Ingredient();
+                        finalIng.setName(n);
+
+                        BigDecimal fat = check(fatField.getText());
+                        BigDecimal protein = check(proteinField.getText());
+                        BigDecimal carbs = check(carbsField.getText());
+
+                        Nutrition nut = new Nutrition(fat, protein, carbs);
+                        finalIng.setNutrition(nut);
+                        finalIng = server.addIngredient(finalIng);
+                    }
+                    BigDecimal a = check(amount.getText());
+                    Measurement m = new Measurement(a, unit.getValue());
+
+                    RecipeIngredient ans = new RecipeIngredient();
+                    ans.setIngredient(finalIng);
+                    ans.setAmount(m);
+                    return ans;
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+            return null;
+        });
+
+        return dialog.showAndWait();
+    }
+}
