@@ -17,6 +17,7 @@ import javafx.stage.Window;
 
 import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -301,7 +302,6 @@ public class RecipesCtrl implements Initializable {
      */
     @FXML
     public void onPrintPressed() {
-//        System.out.println("PRINT PRINT");
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
 
         FileChooser fileChooser = new FileChooser();
@@ -318,8 +318,7 @@ public class RecipesCtrl implements Initializable {
         File file = fileChooser.showSaveDialog(owner);
 
         if (file != null) {
-            System.out.println("SELECTED + " + file.getName());
-            try (PrintWriter out = new PrintWriter(file, "UTF-8")) {
+            try (PrintWriter out = new PrintWriter(file, StandardCharsets.UTF_8)) {
                 if (file.getName().endsWith(".md")) {
                     out.print(recipe.toExportableMarkdown());
                 }
@@ -333,7 +332,6 @@ public class RecipesCtrl implements Initializable {
                 // TODO(calco): Should probably show a more human readable message
                 alert.setContentText("Error: " + e.getMessage());
                 alert.showAndWait();
-                return;
             }
         }
     }
