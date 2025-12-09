@@ -27,7 +27,13 @@
                         <Button mnemonicParsing="false" onAction="#refresh" text="Refresh" />
                      </children>
                   </VBox>
-                  <Button layoutX="29.0" layoutY="359.0" mnemonicParsing="false" onAction="#switchToAddRecipe" text="Add Recipe" />
+                   <HBox alignment="CENTER" layoutX="29.0" layoutY="359.0" prefHeight="25.0" prefWidth="237.0" spacing="30.0">
+                       <children>
+                           <Button mnemonicParsing="false" onAction="#switchToAddRecipe" text="Add Recipe" />
+                           <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#onClonePressed" text="Clone" />
+                           <Button layoutX="87.0" layoutY="10.0" mnemonicParsing="false" onAction="#onPrintPressed" text="Print" />
+                       </children>
+                   </HBox>
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="455.0" prefWidth="80.0">

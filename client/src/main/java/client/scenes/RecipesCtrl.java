@@ -12,8 +12,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
+import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -283,5 +287,111 @@ public class RecipesCtrl implements Initializable {
     @FXML
     public void switchToAddRecipe() {
         primaryCtrl.showAddRecipe();
+    }
+
+    /**
+     * Clones the recipe, making a new recipe with same data and selecting it in the view.
+     */
+    @FXML
+    public void onClonePressed() {
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Recipe Selected");
+            alert.setContentText("Please select a recipe to clone.");
+            alert.showAndWait();
+            return;
+        }
+
+        // TODO(calco): When adding a recipe, do we clone the ingredients and steps as well?
+        // "[...] so I can give it my own twist without changing the original [...]"
+
+        Recipe clonedRecipe = recipe.cloneRecipe();
+
+
+        // TODO(calco): This shouldn't be as hard coded
+        TextInputDialog dialog = new TextInputDialog(clonedRecipe.getName() + " Clone");
+        dialog.setHeaderText("Enter the cloned recipe name:");
+        dialog.setGraphic(null);
+        dialog.getDialogPane().setPrefSize(400, 250);
+
+        Optional<String> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            String newName = result.get();
+            if (newName.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Error Cloning Recipe");
+                alert.setContentText("No new name was provided.");
+                alert.showAndWait();
+                return;
+            }
+
+            clonedRecipe.setName(newName);
+
+            try {
+                Recipe rServer = server.addRecipe(clonedRecipe);
+
+                // TODO(calco): Stupid workaround for stuff
+                refresh();
+                Recipe toSelect = null;
+                for (Recipe r : data) {
+                    if (r.getId() == rServer.getId()) {
+                        toSelect = r;
+                        break;
+                    }
+                }
+                recipeList.getSelectionModel().select(toSelect);
+                recipeList.scrollTo(toSelect);
+                recipeList.refresh();
+                recipeList.requestFocus();
+                showRecipeDetails(toSelect);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Server Error");
+                alert.setContentText("Could not save the cloned recipe to the database.");
+                alert.showAndWait();
+            }
+        }
+    }
+
+    /**
+     * Opens a new dialogue to save a file with all recipe information
+     * in a user specified ocation and format.
+     */
+    @FXML
+    public void onPrintPressed() {
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Recipe to File");
+        fileChooser.setInitialFileName(recipe.getName());
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Text Files (*.txt)", "*.txt"),
+                new FileChooser.ExtensionFilter("Markdown (*.md)", "*.md")
+//              TODO(calco): Add support for PDF export (use markdown to pdf storage)
+//               new FileChooser.ExtensionFilter("PDF (*.pdf)", "*.pdf"),
+        );
+
+        Window owner = recipeList.getScene().getWindow();
+        File file = fileChooser.showSaveDialog(owner);
+
+        if (file != null) {
+            try (PrintWriter out = new PrintWriter(file, StandardCharsets.UTF_8)) {
+                if (file.getName().endsWith(".md")) {
+                    out.print(recipe.toExportableMarkdown());
+                }
+                else if (file.getName().endsWith(".txt")) {
+                    out.print(recipe.toExportablePlaintext());
+                }
+            } catch (IOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Save Failed");
+                alert.setHeaderText("Could not save the recipe to the file."
+                        + "\nUnable to write to the file.");
+                // TODO(calco): Should probably show a more human readable message
+                alert.setContentText("Error: " + e.getMessage());
+                alert.showAndWait();
+            }
+        }
     }
 }
