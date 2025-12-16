@@ -8,10 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -379,8 +376,7 @@ public class RecipesCtrl implements Initializable {
             try (PrintWriter out = new PrintWriter(file, StandardCharsets.UTF_8)) {
                 if (file.getName().endsWith(".md")) {
                     out.print(recipe.toExportableMarkdown());
-                }
-                else if (file.getName().endsWith(".txt")) {
+                } else if (file.getName().endsWith(".txt")) {
                     out.print(recipe.toExportablePlaintext());
                 }
             } catch (IOException e) {
@@ -394,4 +390,45 @@ public class RecipesCtrl implements Initializable {
             }
         }
     }
+
+    /**
+     * when a recipe is selected and the button is pressed, it gets deleted.
+     */
+    @FXML
+    public void onDeleteRecipePressed() {
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Recipe Selected");
+            alert.setContentText("Please select a recipe to delete.");
+            alert.showAndWait();
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Delete Recipe");
+        confirm.setHeaderText("Are you sure you want to delete this recipe?");
+        confirm.setContentText("This action cannot be undone.");
+
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
+        }
+
+        try {
+            server.deleteRecipe(recipe);
+        } catch (Exception e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Server Error");
+            alert.setHeaderText("Could not delete the recipe from the database.");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+            return;
+        }
+
+        refresh();
+        recipeList.getSelectionModel().clearSelection();
+        showRecipeDetails(null);
+    }
+
 }
