@@ -168,11 +168,6 @@ public class RecipesCtrl implements Initializable {
             return;
         }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Delete Step");
-        confirm.setHeaderText("Are you sure you want to delete this step?");
-        confirm.setContentText("This action cannot be undone.");
-
         recipe.getSteps().remove(selectedStep);
         for (int i = 0; i < recipe.getSteps().size(); i++) {
             recipe.getSteps().get(i).setOrderIndex(i);
