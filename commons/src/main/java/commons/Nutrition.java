@@ -3,6 +3,7 @@ package commons;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Embeddable
 public class Nutrition {
@@ -123,5 +124,22 @@ public class Nutrition {
         kcal = kcal.add(protein.multiply(BigDecimal.valueOf(4)));
         kcal = kcal.add(carbs.multiply(BigDecimal.valueOf(4)));
         return kcal;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Nutrition nutrition = (Nutrition) o;
+        return Objects.equals(fatPer100g, nutrition.fatPer100g)
+                && Objects.equals(proteinPer100g, nutrition.proteinPer100g)
+                && Objects.equals(carbsPer100g, nutrition.carbsPer100g)
+                && Objects.equals(kcalPer100g, nutrition.kcalPer100g);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fatPer100g, proteinPer100g, carbsPer100g, kcalPer100g);
     }
 }

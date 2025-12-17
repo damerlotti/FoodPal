@@ -4,14 +4,17 @@ import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Nutrition;
+import commons.Recipe;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.fxml.Initializable;
-import javafx.scene.control.TextArea;
+
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class IngredientsCtrl implements Initializable {
@@ -79,8 +82,40 @@ public class IngredientsCtrl implements Initializable {
             alert.showAndWait();
             return;
         }
-        server.deleteIngredient(selected);
-        refresh();
+        if (checkIngredientUsed(selected)) {    //Used AI to generate those 2 if statements
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Warning");
+            alert.setHeaderText("Ingredient is used in recipes!");
+            alert.setContentText("Are you sure you want to delete it?");
+            Optional<ButtonType> result = alert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                server.deleteIngredient(selected);
+                refresh();
+            }
+        } else {
+            server.deleteIngredient(selected);
+            refresh();
+        }
+    }
+
+    /**
+     * returns true if the ingredient given is used in a recipe
+     * @param ingredient ingredient given
+     * @return true if the ingredient given is used, otherwise false
+     */
+    public boolean checkIngredientUsed(Ingredient ingredient) {
+        List<Recipe> recipes = server.getRecipes();
+        ArrayList<Ingredient> ingredients = new ArrayList<>();
+        for(int i = 0; i < recipes.size(); i++) {
+            Recipe temmpRecipe = recipes.get(i);
+            for(int e = 0; e < temmpRecipe.getIngredients().size(); e++) {
+                ingredients.add(temmpRecipe.getIngredients().get(e).getIngredient());
+            }
+        }
+        if(ingredients.contains(ingredient)) {
+            return true;
+        }
+        return false;
     }
     /**
      * Switches to add ingredient

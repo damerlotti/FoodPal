@@ -3,6 +3,8 @@ package commons;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "Ingredients")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
@@ -80,6 +82,20 @@ public class Ingredient {
      */
     public void setNutrition(Nutrition nutrition) {
         this.nutrition = nutrition;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Ingredient that = (Ingredient) o;
+        return id == that.id && Objects.equals(name, that.name)
+                && Objects.equals(nutrition, that.nutrition);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, nutrition);
     }
 
     @Override
