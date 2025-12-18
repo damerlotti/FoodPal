@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -24,6 +25,7 @@
                            </font>
                         </Label>
                         <ListView fx:id="recipeList" prefHeight="135.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                        <ToggleButton fx:id="favoritesToggle" mnemonicParsing="false" onAction="#toggleFavoritesFilter" prefHeight="18.0" prefWidth="102.0" text="Show Favourite" />
                         <Button mnemonicParsing="false" onAction="#refresh" text="Refresh" />
                      </children>
                   </VBox>

@@ -6,12 +6,10 @@ import commons.Recipe;
 import commons.RecipeStep;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
@@ -24,7 +22,6 @@ import java.util.ResourceBundle;
 public class RecipesCtrl implements Initializable {
 
     private final ServerUtils server;
-    private ObservableList<Recipe> data;
     private final PrimaryCtrl primaryCtrl;
 
     // fxml link, keep in mind that it must match with the id in scene builder
@@ -39,6 +36,11 @@ public class RecipesCtrl implements Initializable {
     private ListView<String> ingredientsList;
     @FXML
     private ListView<RecipeStep> stepsList;
+    @FXML
+    private ToggleButton favoritesToggle;
+
+    private ObservableList<Recipe> allRecipes;
+    private FilteredList<Recipe> filteredRecipes;
 
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
@@ -56,8 +58,9 @@ public class RecipesCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // special javafx list that updates the UI automatically
-        data = FXCollections.observableArrayList();
-        recipeList.setItems(data);
+        allRecipes = FXCollections.observableArrayList();
+        filteredRecipes = new FilteredList<>(allRecipes);
+        recipeList.setItems(filteredRecipes);
         recipeList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showRecipeDetails(newValue)
         );
@@ -72,10 +75,30 @@ public class RecipesCtrl implements Initializable {
     public void refresh() {
         //System.out.println("Refreshing list...");
         var recipes = server.getRecipes();
-        data.clear();
-        data.addAll(recipes);
+        allRecipes.clear();
+        allRecipes.addAll(recipes);
+        // Same filter in toggleFavoritesFilter
+        if (favoritesToggle.isSelected()) {
+            filteredRecipes.setPredicate(recipe ->
+                    RecipeListCellFactory.isFavorite(recipe.getId())
+            );
+        }
     }
-
+    /**
+     * Toggle between showing all recipes and favorites only
+     */
+    @FXML
+    public void toggleFavoritesFilter() {
+        if (favoritesToggle.isSelected()) {
+            filteredRecipes.setPredicate(recipe ->
+                    RecipeListCellFactory.isFavorite(recipe.getId())
+            );
+            favoritesToggle.setText("Show All");
+        } else {
+            filteredRecipes.setPredicate(null);
+            favoritesToggle.setText("Show Favourite");
+        }
+    }
     /**
      * Shows the details of a recipe (ingredients, preparation steps)
      *
@@ -335,7 +358,7 @@ public class RecipesCtrl implements Initializable {
                 // TODO(calco): Stupid workaround for stuff
                 refresh();
                 Recipe toSelect = null;
-                for (Recipe r : data) {
+                for (Recipe r : allRecipes) {
                     if (r.getId() == rServer.getId()) {
                         toSelect = r;
                         break;
