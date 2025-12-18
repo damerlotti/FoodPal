@@ -409,9 +409,14 @@ public class RecipesCtrl implements Initializable {
         confirm.setTitle("Delete Recipe");
         confirm.setHeaderText("Are you sure you want to delete this recipe?");
         confirm.setContentText("This action cannot be undone.");
+        confirm.setGraphic(null);
+        
+        ButtonType deleteButton = new ButtonType("Delete Recipe", ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        confirm.getButtonTypes().setAll(deleteButton, cancelButton);
 
         Optional<ButtonType> result = confirm.showAndWait();
-        if (result.isEmpty() || result.get() != ButtonType.OK) {
+        if (result.isEmpty() || result.get() != deleteButton) {
             return;
         }
 
