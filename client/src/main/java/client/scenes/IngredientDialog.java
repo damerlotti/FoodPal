@@ -39,7 +39,7 @@ public class IngredientDialog {
         return number.stripTrailingZeros().toPlainString();
     }
     /**
-     * Shows a customized dialogue in which the user can configure the ingredient
+     * Shows a customized dialog in which the user can configure the ingredient
      * @param allIngredients all our existing ingredients from which the user can choose
      * @param server injection of the server, to be able to save the newly created ingredient
      * @return a potential RecipeIngredient, if the user inputs correct values
@@ -143,5 +143,50 @@ public class IngredientDialog {
         });
 
         return dialog.showAndWait();
+    }
+
+    /**
+     * Shows a simple dialog in which the user can edit the amount of an ingredient inside a recipe
+     * @param currentAmount the current amount of that ingredient, for the user to know
+     * @return the new measurement (value and unit)
+     */
+    public static Optional<Measurement> showEditAmount(Measurement currentAmount) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Edit Amount");
+        dialog.setHeaderText("Update quantity:");
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10); grid.setVgap(10);
+        grid.setPadding(new Insets(20, 20, 10, 10));
+
+        TextField amtField = new TextField();
+        ComboBox<Unit> units = new ComboBox<>();
+        units.getItems().addAll(Unit.values());
+
+        if (currentAmount != null) {
+            amtField.setText(currentAmount.getValue().toString());
+            units.setValue(currentAmount.getUnit());
+        }
+
+        grid.add(new Label("Amount:"), 0, 0);
+        grid.add(amtField, 1, 0);
+        grid.add(units, 2, 0);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Optional<ButtonType> buttonClicked = dialog.showAndWait();
+
+        if (buttonClicked.isPresent() && buttonClicked.get() == ButtonType.OK) {
+            try {
+                BigDecimal val = check(amtField.getText());
+                Unit unit = units.getValue();
+                return Optional.of(new Measurement(val, unit));
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.empty();
     }
 }
