@@ -7,11 +7,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.util.StringConverter;
 
 import java.net.URL;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class MainLayoutCtrl implements Initializable {
@@ -36,17 +40,18 @@ public class MainLayoutCtrl implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Initialise combo box
-        
-//        languageCombo.setItems(FXCollections.observableArrayList());
+
         languageCombo.getItems().setAll(I18nConfig.SUPPORTED);
+        languageCombo.setCellFactory(_lv -> createFlagCell());
+        
         languageCombo.getSelectionModel().select(I18n.getLocale());
-        
-        languageCombo.valueProperty().addListener((obs, oldL, newL) -> {
-            if (newL != null) {
-                I18n.setLocale(newL);
-            }
-        });
-        
+//        
+//        languageCombo.valueProperty().addListener((obs, oldL, newL) -> {
+//            if (newL != null) {
+//                I18n.setLocale(newL);
+//            }
+//        });
+//        
         // show language name in its own language
         languageCombo.setConverter(new StringConverter<>() {
             @Override public String toString(Locale locale) {
@@ -59,14 +64,14 @@ public class MainLayoutCtrl implements Initializable {
                 return null;
             }
         });
-        
-        languageCombo.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
-            @Override protected void updateItem(Locale item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : capitalize(item.getDisplayName(item)));
-            }
-        });
-        
+//        
+//        languageCombo.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
+//            @Override protected void updateItem(Locale item, boolean empty) {
+//                super.updateItem(item, empty);
+//                setText(empty || item == null ? null : capitalize(item.getDisplayName(item)));
+//            }
+//        });
+//        
         languageCombo.setButtonCell(languageCombo.getCellFactory().call(null));
     }
 
@@ -105,5 +110,47 @@ public class MainLayoutCtrl implements Initializable {
             return s;
         }
         return s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+
+    /**
+     * @return The 
+     */
+    private ListCell<Locale> createFlagCell() {
+        return new ListCell<>() {
+            private final ImageView iv = new ImageView();
+
+            {
+                iv.setFitWidth(20);
+                iv.setFitHeight(14);
+                iv.setPreserveRatio(true);
+            }
+
+            @Override
+            protected void updateItem(Locale locale, boolean empty) {
+                super.updateItem(locale, empty);
+
+                if (empty || locale == null) {
+                    setText(null);
+                    setGraphic(null);
+                    setTooltip(null);
+                    return;
+                }
+
+                String path = client.i18n.Flags.flagPathFor(locale);
+                if (path != null) {
+                    Image img = new Image(Objects.requireNonNull(
+                            getClass().getClassLoader().getResourceAsStream(path),
+                            "Missing flag resource: " + path
+                    ));
+                    iv.setImage(img);
+                    setGraphic(iv);
+                } else {
+                    setGraphic(null); // fallback if missing image
+                }
+
+                setText(null); // flags only
+                setTooltip(new javafx.scene.control.Tooltip(locale.getDisplayName(locale)));
+            }
+        };
     }
 }
