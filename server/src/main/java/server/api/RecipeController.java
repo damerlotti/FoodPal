@@ -4,6 +4,7 @@ import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.RecipeStep;
 import server.database.RecipeRepository;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.EntityManager;
 
@@ -16,15 +17,19 @@ public class RecipeController {
 
     private final RecipeRepository repo;
     private final EntityManager entityManager;
+    private final SimpMessagingTemplate msg;
 
     /**
      * Constructor which injects both the repository and entity manager
-     * @param repo          the repository of recipes
+     * @param repo the repository of recipes
      * @param entityManager the EntityManager used for database operations
+     * @param msg the SimpMessagingTemplate helps to send updates when there are changes
      */
-    public RecipeController(RecipeRepository repo, EntityManager entityManager) {
+    public RecipeController(RecipeRepository repo, EntityManager entityManager,
+                            SimpMessagingTemplate msg) {
         this.repo = repo;
         this.entityManager = entityManager;
+        this.msg = msg;
     }
 
     /**
@@ -59,6 +64,9 @@ public class RecipeController {
         }
         // CascadeType.ALL actually means that all the RecipeSteps in it will be saved automatically
         Recipe saved = repo.save(recipe);
+
+        // this is the main list channel, and those who listen should reload
+        msg.convertAndSend("/topic/recipes", saved);
         return saved;  // we return the object with id now
     }
 
@@ -101,7 +109,10 @@ public class RecipeController {
                 existing.getSteps().add(step);
             }
         }
-        return repo.save(existing);
+        Recipe saved = repo.save(existing);
+        msg.convertAndSend("/topic/recipes", saved);  // maybe the title changed
+        msg.convertAndSend("/topic/recipes/" + id, saved); // or maybe just step/ingredients changed
+        return saved;
     }
 
     /**
@@ -111,6 +122,7 @@ public class RecipeController {
     @DeleteMapping("/{id}")
     public void deleteRecipe(@PathVariable long id) {
         repo.deleteById(id);
+        msg.convertAndSend("/topic/recipes/delete", id);  // special delete channel
     }
 
 }
