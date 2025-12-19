@@ -6,7 +6,9 @@ import commons.RecipeStep;
 import server.database.RecipeRepository;
 import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.EntityManager;
+
 import java.util.List;
+
 // this class has been partly made by AI
 @RestController
 @RequestMapping("/recipes")
@@ -17,7 +19,7 @@ public class RecipeController {
 
     /**
      * Constructor which injects both the repository and entity manager
-     * @param repo the repository of recipes
+     * @param repo          the repository of recipes
      * @param entityManager the EntityManager used for database operations
      */
     public RecipeController(RecipeRepository repo, EntityManager entityManager) {
@@ -63,7 +65,7 @@ public class RecipeController {
     /**
      * Retrieves the total count of recipes in the database.
      * @return a String in the format "Total recipes: X" where X is the
-     *         number of recipes in the database
+     * number of recipes in the database
      */
     @GetMapping("/count")
     public String getRecipeCount() {
@@ -74,7 +76,7 @@ public class RecipeController {
 
     /**
      * Updates an existing recipe in the database.
-     * @param id of recipe to update
+     * @param id            of recipe to update
      * @param updatedRecipe recipe containing updated data
      * @return updated recipe, or null if id doesn't exist
      */
@@ -101,4 +103,14 @@ public class RecipeController {
         }
         return repo.save(existing);
     }
+
+    /**
+     * Handles the delete recipe request
+     * @param id is the id of teh recipe to delete
+     */
+    @DeleteMapping("/{id}")
+    public void deleteRecipe(@PathVariable long id) {
+        repo.deleteById(id);
+    }
+
 }

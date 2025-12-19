@@ -16,6 +16,7 @@
 package client.utils;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+
 import java.net.http.HttpRequest.BodyPublishers;
 
 import java.io.IOException;
@@ -58,6 +59,7 @@ public class ServerUtils {
         }
         return true;
     }
+
     /**
      * Asks the server for all recipes.
      * @return A list of recipes, or null if something breaks.
@@ -78,7 +80,8 @@ public class ServerUtils {
                 return List.of(); // problem => empty list
             }
 
-            return objectMapper.readValue(response.body(), new TypeReference<List<Recipe>>() {});
+            return objectMapper.readValue(response.body(), new TypeReference<List<Recipe>>() {
+            });
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -163,7 +166,8 @@ public class ServerUtils {
             }
 
             return objectMapper
-                    .readValue(response.body(), new TypeReference<List<Ingredient>>() {});
+                    .readValue(response.body(), new TypeReference<List<Ingredient>>() {
+                    });
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -216,4 +220,23 @@ public class ServerUtils {
             e.printStackTrace();
         }
     }
+
+    /**
+     * Asks the server to delete a recipe by sending its id
+     * @param recipe is the recipe being deleted
+     */
+    public void deleteRecipe(Recipe recipe) {
+        try {
+            URI uri = URI.create(SERVER_URL + "recipes/" + recipe.getId());
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .DELETE()
+                    .build();
+            client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
