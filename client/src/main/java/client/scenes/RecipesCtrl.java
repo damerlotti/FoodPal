@@ -36,6 +36,8 @@ public class RecipesCtrl implements Initializable {
     @FXML
     private Label recipeTitle;
     @FXML
+    private Label recipeKcal;
+    @FXML
     private ListView<String> ingredientsList;
     @FXML
     private ListView<RecipeStep> stepsList;
@@ -88,6 +90,9 @@ public class RecipesCtrl implements Initializable {
             return;
         }
         recipeTitle.setText(recipe.getName());
+        recipeKcal.setText("Kcal/100g: " + recipe.estimatedRecipeKcal()
+                .stripTrailingZeros()
+                .toPlainString());
         ingredientsList.getItems().clear();
         for (var ing : recipe.getIngredients()) {
             ingredientsList.getItems().add(ing.toString());

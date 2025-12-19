@@ -3,6 +3,8 @@ package commons;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -188,5 +190,17 @@ public class Recipe {
         r.setIngredients(rIngredients);
 
         return r;
+    }
+
+    /**
+     * Estimates the amount of kcal per 100g of recipe
+     * @return the amount of kcal as BigDecimal
+     */
+    public BigDecimal estimatedRecipeKcal() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (RecipeIngredient ingredient: ingredients) {
+            total = total.add(ingredient.calculateKcal());
+        }
+        return total.setScale(0, RoundingMode.DOWN); // rounding
     }
 }
