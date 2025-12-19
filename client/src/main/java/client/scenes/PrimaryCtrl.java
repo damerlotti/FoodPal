@@ -122,6 +122,9 @@ public class PrimaryCtrl {
         ingredientsCtrl.refresh();
     }
 
+    /**
+     * Shows the Shopping List scene
+     */
     public void showShoppingList() {
         primaryStage.setTitle("FoodPal - Shopping List");
         mainLayoutCtrl.setCenter(shoppingListNode);

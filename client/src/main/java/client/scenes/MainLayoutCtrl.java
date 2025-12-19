@@ -46,6 +46,9 @@ public class MainLayoutCtrl {
         primaryCtrl.showIngredients();
     }
 
+    /**
+     * Targetting the View -> ShoppingList menu item, so we delegate responsibility to primaryCtrl
+     */
     @FXML
     public void showShoppingList() {
         primaryCtrl.showShoppingList();
