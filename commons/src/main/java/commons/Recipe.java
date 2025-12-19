@@ -98,10 +98,11 @@ public class Recipe {
 
     /**
      * Sets the list of recipe ingredients, by reference.
+     * Null value will be converted to an empty list to avoid NPEs.
      * @param ingredients The list of recipe ingredients.
      */
     public void setIngredients(List<RecipeIngredient> ingredients) {
-        this.ingredients = ingredients;
+        this.ingredients = (ingredients == null) ? new ArrayList<>() : ingredients;
     }
 
     /**
@@ -114,10 +115,11 @@ public class Recipe {
 
     /**
      * Set the preparation steps of the recipe, by reference.
+     * Null value will be converted to an empty list to avoid NPEs.
      * @param steps The preparation steps of the recipe
      */
     public void setSteps(List<RecipeStep> steps) {
-        this.steps = steps;
+        this.steps = (steps == null) ? new ArrayList<>() : steps;
     }
 
     /**
@@ -130,11 +132,13 @@ public class Recipe {
 
     /**
      * Sets the BCP-47 language tag of the recipe.
+     * If the provided tag is null/blank we fallback to English rather than throwing.
      * @param languageTag language tag (e.g. "en", "ro-RO")
      */
     public void setLanguageTag(String languageTag) {
         if (languageTag == null || languageTag.isBlank()) {
-            throw new IllegalArgumentException("languageTag must not be null/blank");
+            this.languageTag = Locale.ENGLISH.toLanguageTag();
+            return;
         }
         this.languageTag = languageTag;
     }
@@ -150,12 +154,14 @@ public class Recipe {
 
     /**
      * Convenience setter to work with Locale in code.
+     * If null is provided we fallback to English.
      * @param locale locale to store
      */
     @JsonIgnore
     public void setLocale(Locale locale) {
         if (locale == null) {
-            throw new IllegalArgumentException("locale must not be null");
+            this.languageTag = Locale.ENGLISH.toLanguageTag();
+            return;
         }
         this.languageTag = locale.toLanguageTag();
     }

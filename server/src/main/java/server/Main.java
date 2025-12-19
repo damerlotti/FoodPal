@@ -40,46 +40,4 @@ public class Main {
     public static void main(String[] args) {
         SpringApplication.run(Main.class, args);
     }
-
-    /**
-     * Method which creates initial data
-     * @param recipeRepo the repository of recipes
-     * @param ingredientRepo the repository of ingredients
-     * @return a CommandLineRunner with a lambda-implemented run method
-     */
-    @Bean
-    public CommandLineRunner demo(RecipeRepository recipeRepo,
-                                  IngredientRepository ingredientRepo) {
-        return (args) -> {
-            // SAFETY CHECK: Only run if the database is empty!
-            if (recipeRepo.count() > 0) {
-                System.out.println("Database already has data.");
-                return;
-            }
-
-            Ingredient milk = new Ingredient();
-            milk.setName("Milk");
-            ingredientRepo.save(milk);
-
-            Recipe pancakes = new Recipe();
-            pancakes.setName("Grandma's Pancakes");
-
-            RecipeStep step1 = new RecipeStep();
-            step1.setText("Mix it all up");
-            step1.setOrderIndex(0);
-            step1.setRecipe(pancakes);
-
-            RecipeIngredient usage = new RecipeIngredient();
-            usage.setIngredient(milk);
-            usage.setRecipe(pancakes);
-            usage.setOrderIndex(0);
-
-            pancakes.setSteps(List.of(step1));
-            pancakes.setIngredients(List.of(usage));
-
-            recipeRepo.save(pancakes);
-
-            System.out.println("Created initial data.");
-        };
-    }
 }
