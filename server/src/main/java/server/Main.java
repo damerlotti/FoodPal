@@ -15,19 +15,9 @@
  */
 package server;
 
-import commons.Ingredient;
-import commons.Recipe;
-import commons.RecipeIngredient;
-import commons.RecipeStep;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.Bean;
-import server.database.IngredientRepository;
-import server.database.RecipeRepository;
-
-import java.util.List;
 
 @SpringBootApplication
 @EntityScan(basePackages = { "commons", "server" })

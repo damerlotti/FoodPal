@@ -43,47 +43,68 @@ class RecipeTest {
         Recipe cloned = original.cloneRecipe();
 
         // Basic checks
-        assertNotSame(original, cloned, "Cloned recipe must be a different instance");
-        assertEquals(original.getName(), cloned.getName(), "Name should be copied");
-        assertEquals(original.getLanguageTag(), cloned.getLanguageTag(), "Language tag should be copied");
+        assertNotSame(original, cloned,
+                "Cloned recipe must be a different instance");
+        assertEquals(original.getName(), cloned.getName(),
+                "Name should be copied");
+        assertEquals(
+                original.getLanguageTag(),
+                cloned.getLanguageTag(),
+                "Language tag should be copied");
 
         // Id should not be copied (cloneRecipe does not set id)
-        assertEquals(0L, cloned.getId(), "Cloned recipe id should be default (0)");
+        assertEquals(0L, cloned.getId(),
+                "Cloned recipe id should be default (0)");
 
         // Ingredients list should be a different list instance with cloned items
-        assertNotSame(original.getIngredients(), cloned.getIngredients(), "Ingredients list should be a different instance");
-        assertEquals(original.getIngredients().size(), cloned.getIngredients().size(), "Ingredients size should match");
+        assertNotSame(original.getIngredients(), cloned.getIngredients(),
+                "Ingredients list should be a different instance");
+        assertEquals(original.getIngredients().size(), cloned.getIngredients().size(),
+                "Ingredients size should match");
 
         RecipeIngredient originalRI = original.getIngredients().get(0);
         RecipeIngredient clonedRI = cloned.getIngredients().get(0);
 
-        assertNotSame(originalRI, clonedRI, "Each RecipeIngredient should be a different instance");
+        assertNotSame(originalRI, clonedRI,
+                "Each RecipeIngredient should be a different instance");
         // Ingredient (the referenced Ingredient) is intentionally the same instance
-        assertSame(originalRI.getIngredient(), clonedRI.getIngredient(), "Referenced Ingredient should be the same instance");
+        assertSame(originalRI.getIngredient(), clonedRI.getIngredient(),
+                "Referenced Ingredient should be the same instance");
         // Measurement is copied by reference in cloneRecipe
-        assertSame(originalRI.getAmount(), clonedRI.getAmount(), "Measurement instance is reused by the clone");
+        assertSame(originalRI.getAmount(), clonedRI.getAmount(),
+                "Measurement instance is reused by the clone");
         // The recipe reference on the cloned ingredient must point to the cloned recipe
-        assertSame(cloned, clonedRI.getRecipe(), "Cloned RecipeIngredient must reference the cloned recipe");
+        assertSame(cloned, clonedRI.getRecipe(),
+                "Cloned RecipeIngredient must reference the cloned recipe");
 
         // Steps checks
-        assertNotSame(original.getSteps(), cloned.getSteps(), "Steps list should be a different instance");
-        assertEquals(original.getSteps().size(), cloned.getSteps().size(), "Steps size should match");
+        assertNotSame(original.getSteps(), cloned.getSteps(),
+                "Steps list should be a different instance");
+        assertEquals(original.getSteps().size(), cloned.getSteps().size(),
+                "Steps size should match");
 
         RecipeStep originalStep = original.getSteps().get(0);
         RecipeStep clonedStep = cloned.getSteps().get(0);
 
-        assertNotSame(originalStep, clonedStep, "Each RecipeStep should be a different instance");
-        assertEquals(originalStep.getText(), clonedStep.getText(), "Step text should be copied");
-        assertEquals(originalStep.getOrderIndex(), clonedStep.getOrderIndex(), "Step orderIndex should be copied");
-        assertSame(cloned, clonedStep.getRecipe(), "Cloned RecipeStep must reference the cloned recipe");
+        assertNotSame(originalStep, clonedStep,
+                "Each RecipeStep should be a different instance");
+        assertEquals(originalStep.getText(), clonedStep.getText(),
+                "Step text should be copied");
+        assertEquals(originalStep.getOrderIndex(), clonedStep.getOrderIndex(),
+                "Step orderIndex should be copied");
+        assertSame(cloned, clonedStep.getRecipe(),
+                "Cloned RecipeStep must reference the cloned recipe");
 
         // Mutating the clone should not affect the original
         cloned.setName("Changed");
         clonedStep.setText("Changed step");
         clonedRI.setOrderIndex(5);
 
-        assertNotEquals(original.getName(), cloned.getName(), "Changing cloned name must not change original");
-        assertNotEquals(originalStep.getText(), clonedStep.getText(), "Changing cloned step text must not change original step text");
-        assertNotEquals(originalRI.getOrderIndex(), clonedRI.getOrderIndex(), "Changing cloned ingredient orderIndex must not change original");
+        assertNotEquals(original.getName(), cloned.getName(),
+                "Changing cloned name must not change original");
+        assertNotEquals(originalStep.getText(), clonedStep.getText(),
+                "Changing cloned step text must not change original step text");
+        assertNotEquals(originalRI.getOrderIndex(), clonedRI.getOrderIndex(),
+                "Changing cloned ingredient orderIndex must not change original");
     }
 }
