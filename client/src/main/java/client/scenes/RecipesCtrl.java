@@ -67,6 +67,13 @@ public class RecipesCtrl implements Initializable {
         refresh();
     }
 
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
     /**
      * The logic linked to the refresh button
      */
@@ -99,6 +106,7 @@ public class RecipesCtrl implements Initializable {
             stepsList.getItems().add(step);  // add RecipeStep objects, not strings
         }
     }
+
 
     /**
      * When the edit button for an ingredient is pressed, the user can edit the amount
