@@ -15,12 +15,10 @@
       <ListView fx:id="ingredientsList" layoutX="200.0" layoutY="122.0" prefHeight="78.0" prefWidth="200.0" />
       <ListView fx:id="stepsList" layoutX="67.0" layoutY="245.0" prefHeight="95.0" prefWidth="347.0" />
       <Label layoutX="246.0" layoutY="97.0" text="Add the recipe ingredients" />
-      <Button fx:id="addStepButton" layoutX="429.0" layoutY="245.0" mnemonicParsing="false" onAction="#onAddStepClicked" text="Add" />
-      <Button layoutX="429.0" layoutY="272.0" mnemonicParsing="false" text="Modify" />
-      <Button layoutX="429.0" layoutY="298.0" mnemonicParsing="false" onAction="#onDeleteStepClicked" text="Delete" />
+      <Button fx:id="addStepButton" layoutX="429.0" layoutY="259.0" mnemonicParsing="false" onAction="#onAddStepClicked" text="Add" />
+      <Button layoutX="429.0" layoutY="293.0" mnemonicParsing="false" onAction="#onDeleteStepClicked" text="Delete" />
       <Label layoutX="270.0" layoutY="229.0" text="Add the recipe steps" />
-      <Button layoutX="435.0" layoutY="114.0" mnemonicParsing="false" onAction="#onAddIngredient" text="Add" />
-      <Button layoutX="439.0" layoutY="149.0" mnemonicParsing="false" text="Modify" />
-      <Button layoutX="440.0" layoutY="188.0" mnemonicParsing="false" text="Delete" />
+      <Button layoutX="429.0" layoutY="122.0" mnemonicParsing="false" onAction="#onAddIngredient" text="Add" />
+      <Button layoutX="429.0" layoutY="155.0" mnemonicParsing="false" text="Delete" />
    </children>
 </AnchorPane>

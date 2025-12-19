@@ -2,7 +2,9 @@ package client.scenes;
 
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
+import commons.Measurement;
 import commons.Recipe;
+import commons.RecipeIngredient;
 import commons.RecipeStep;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -36,7 +38,7 @@ public class RecipesCtrl implements Initializable {
     @FXML
     private Label recipeTitle;
     @FXML
-    private ListView<String> ingredientsList;
+    private ListView<RecipeIngredient> ingredientsList;
     @FXML
     private ListView<RecipeStep> stepsList;
 
@@ -90,12 +92,51 @@ public class RecipesCtrl implements Initializable {
         recipeTitle.setText(recipe.getName());
         ingredientsList.getItems().clear();
         for (var ing : recipe.getIngredients()) {
-            ingredientsList.getItems().add(ing.toString());
+            ingredientsList.getItems().add(ing);  // add RecipeIngredient objects, not strings
         }
         stepsList.getItems().clear();
         for (RecipeStep step : recipe.getSteps()) {
             stepsList.getItems().add(step);  // add RecipeStep objects, not strings
         }
+    }
+
+    /**
+     * When the edit button for an ingredient is pressed, the user can edit the amount
+     */
+    @FXML
+    public void editIngredient() {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        RecipeIngredient selectedItem = ingredientsList.getSelectionModel().getSelectedItem();
+
+        if (currentRecipe == null || selectedItem == null) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setContentText("Please select a recipe and an ingredient.");
+            alert.showAndWait();
+            return;
+        }
+
+        Optional<Measurement> result = IngredientDialog.showEditAmount(selectedItem.getAmount());
+        result.ifPresent(newMeasurement -> {
+            selectedItem.setAmount(newMeasurement);
+            try {
+                server.updateRecipe(currentRecipe);
+                refresh();
+                Recipe newInstance = recipeList.getItems().stream()
+                        .filter(r -> r.getId() == currentRecipe.getId())
+                        .findFirst()
+                        .orElse(null);
+                recipeList.scrollTo(newInstance);
+                recipeList.getSelectionModel().select(newInstance);
+                recipeList.requestFocus();
+                showRecipeDetails(newInstance);
+            } catch (Exception e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Server Error");
+                alert.setContentText("Could not edit the ingredient.");
+                alert.showAndWait();
+            }
+        });
     }
 
     /**

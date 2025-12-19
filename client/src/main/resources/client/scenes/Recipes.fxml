@@ -59,7 +59,7 @@
                         <HBox prefHeight="27.0" prefWidth="296.0" spacing="35.0">
                            <children>
                               <Button mnemonicParsing="false" text="Add" />
-                              <Button mnemonicParsing="false" text="Edit" />
+                              <Button mnemonicParsing="false" onAction="#editIngredient" text="Edit" />
                               <Button mnemonicParsing="false" text="Delete" />
                            </children>
                            <VBox.margin>
