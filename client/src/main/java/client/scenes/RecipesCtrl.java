@@ -2,7 +2,9 @@ package client.scenes;
 
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
+import commons.Measurement;
 import commons.Recipe;
+import commons.RecipeIngredient;
 import commons.RecipeStep;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -33,7 +35,7 @@ public class RecipesCtrl implements Initializable {
     @FXML
     private Label recipeTitle;
     @FXML
-    private ListView<String> ingredientsList;
+    private ListView<RecipeIngredient> ingredientsList;
     @FXML
     private ListView<RecipeStep> stepsList;
     @FXML
@@ -67,6 +69,13 @@ public class RecipesCtrl implements Initializable {
         recipeList.setCellFactory(new RecipeListCellFactory());
         // the ui list contains our data, currently empty
         refresh();
+    }
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     /**
@@ -114,12 +123,63 @@ public class RecipesCtrl implements Initializable {
         recipeTitle.setText(recipe.getName());
         ingredientsList.getItems().clear();
         for (var ing : recipe.getIngredients()) {
-            ingredientsList.getItems().add(ing.toString());
+            ingredientsList.getItems().add(ing);  // add RecipeIngredient objects, not strings
         }
         stepsList.getItems().clear();
         for (RecipeStep step : recipe.getSteps()) {
             stepsList.getItems().add(step);  // add RecipeStep objects, not strings
         }
+    }
+
+
+    /**
+     * When the add button for an ingredient is pressed, the user can add a new ingredient
+     * in an identical fashion as when creating a recipe
+     */
+    @FXML
+    public void addIngredient() {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        if (currentRecipe == null) {
+            showAlert("No Selection", "Please select a recipe first.");
+            return;
+        }
+        var allIngredients = server.getIngredients();
+        Optional<RecipeIngredient> result = IngredientDialog.show(allIngredients, server);
+        result.ifPresent(recIng -> {
+            try {
+                recIng.setRecipe(currentRecipe);
+                currentRecipe.getIngredients().add(recIng);
+                server.updateRecipe(currentRecipe);
+            } catch (Exception e) {
+                showAlert("Error", "Could not add the ingredient.");
+            }
+            showRecipeDetails(currentRecipe);
+        });
+    }
+
+    /**
+     * When the edit button for an ingredient is pressed, the user can edit the amount
+     */
+    @FXML
+    public void editIngredient() {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        RecipeIngredient selectedItem = ingredientsList.getSelectionModel().getSelectedItem();
+
+        if (currentRecipe == null || selectedItem == null) {
+            showAlert("Error", "Please select a recipe and an ingredient");
+            return;
+        }
+
+        Optional<Measurement> result = IngredientDialog.showEditAmount(selectedItem.getAmount());
+        result.ifPresent(newMeasurement -> {
+            selectedItem.setAmount(newMeasurement);
+            try {
+                server.updateRecipe(currentRecipe);
+            } catch (Exception e) {
+                showAlert("Server Error", "Could not edit the ingredient");
+            }
+            showRecipeDetails(currentRecipe);
+        });
     }
 
     /**
@@ -129,10 +189,7 @@ public class RecipesCtrl implements Initializable {
     public void onAddStepClicked() {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Recipe Selected");
-            alert.setContentText("Please select a recipe to add a step.");
-            alert.showAndWait();
+            showAlert("No Recipe selected", "Please select a recipe to add a step");
             return;
         }
 
@@ -146,10 +203,7 @@ public class RecipesCtrl implements Initializable {
         if (result.isPresent()) {
             String stepText = result.get();
             if (stepText.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Error");
-                alert.setContentText("Step description cannot be empty.");
-                alert.showAndWait();
+                showAlert("Error", "Step description cannot be empty");
                 return;
             }
             RecipeStep step = new RecipeStep();
@@ -161,10 +215,7 @@ public class RecipesCtrl implements Initializable {
             try {
                 server.updateRecipe(recipe);
             } catch (Exception e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Server Error");
-                alert.setContentText("Could not save the new step to the database.");
-                alert.showAndWait();
+                showAlert("Server Error", "Could not save the new step to the database");
                 return;
             }
 
@@ -179,19 +230,13 @@ public class RecipesCtrl implements Initializable {
     public void onDeleteStepClicked() {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Recipe Selected");
-            alert.setContentText("Please select a recipe to edit.");
-            alert.showAndWait();
+            showAlert("No Recipe selected", "Please select a recipe to edit");
             return;
         }
 
         RecipeStep selectedStep = stepsList.getSelectionModel().getSelectedItem();
         if (selectedStep == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Step Selected");
-            alert.setContentText("Please select a step to delete.");
-            alert.showAndWait();
+            showAlert("No step selected", "Please select a step to delete");
             return;
         }
 
@@ -203,10 +248,7 @@ public class RecipesCtrl implements Initializable {
         try {
             server.updateRecipe(recipe);
         } catch (Exception e) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Server Error");
-            alert.setContentText("Could not delete the step from the database.");
-            alert.showAndWait();
+            showAlert("Server error", "Could not delete the step from the database.");
             return;
         }
         showRecipeDetails(recipe);
@@ -219,18 +261,12 @@ public class RecipesCtrl implements Initializable {
     public void onEditStepClicked() {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Recipe Selected");
-            alert.setContentText("Please select a recipe to edit.");
-            alert.showAndWait();
+            showAlert("No Recipe selected", "Please select a recipe to edit.");
             return;
         }
         RecipeStep selectedStep = stepsList.getSelectionModel().getSelectedItem();
         if (selectedStep == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Step Selected");
-            alert.setContentText("Please select a step to modify.");
-            alert.showAndWait();
+            showAlert("No step selected", "Please select a step to modify.");
             return;
         }
 
@@ -251,10 +287,7 @@ public class RecipesCtrl implements Initializable {
             try {
                 server.updateRecipe(recipe);
             } catch (Exception e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Server Error");
-                alert.setContentText("Could not update the step in the database.");
-                alert.showAndWait();
+                showAlert("Server Error", "Could not update the step in the database");
                 return;
             }
             showRecipeDetails(recipe);
@@ -268,10 +301,7 @@ public class RecipesCtrl implements Initializable {
     public void onEditTitleClicked() {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Recipe Selected");
-            alert.setContentText("Please select a recipe to edit its title.");
-            alert.showAndWait();
+            showAlert("No recipe selected", "Please select a recipe to edit its title");
         }
         TextInputDialog dialog = new TextInputDialog(recipe.getName());
         dialog.setHeaderText("Edit the recipe title:");
@@ -282,20 +312,14 @@ public class RecipesCtrl implements Initializable {
         if (result.isPresent()) {
             String newTitle = result.get().trim();
             if (newTitle.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Invalid Title");
-                alert.setContentText("Title cannot be empty.");
-                alert.showAndWait();
+                showAlert("Invalid title", "Title cannot be empty");
                 return;
             }
             recipe.setName(newTitle);
             try {
                 server.updateRecipe(recipe);
             } catch (Exception e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Server Error");
-                alert.setContentText("Could not update the recipe title in the database.");
-                alert.showAndWait();
+                showAlert("Server Error", "Could not update the recipe title in the database.");
                 return;
             }
             showRecipeDetails(recipe);
@@ -320,10 +344,7 @@ public class RecipesCtrl implements Initializable {
     public void onClonePressed() {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Recipe Selected");
-            alert.setContentText("Please select a recipe to clone.");
-            alert.showAndWait();
+            showAlert("No Recipe Selected", "Please select a recipe to clone.");
             return;
         }
 
@@ -343,10 +364,7 @@ public class RecipesCtrl implements Initializable {
         if (result.isPresent()) {
             String newName = result.get();
             if (newName.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Error Cloning Recipe");
-                alert.setContentText("No new name was provided.");
-                alert.showAndWait();
+                showAlert("Error Cloning Recipe", "No new name was provided.");
                 return;
             }
 
@@ -370,10 +388,7 @@ public class RecipesCtrl implements Initializable {
                 recipeList.requestFocus();
                 showRecipeDetails(toSelect);
             } catch (Exception e) {
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Server Error");
-                alert.setContentText("Could not save the cloned recipe to the database.");
-                alert.showAndWait();
+                showAlert("Server Error", "Could not save the cloned recipe to the database.");
             }
         }
     }
