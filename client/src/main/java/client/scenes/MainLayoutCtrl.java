@@ -3,7 +3,6 @@ package client.scenes;
 import client.i18n.I18n;
 import client.i18n.I18nConfig;
 import com.google.inject.Inject;
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
@@ -102,7 +101,9 @@ public class MainLayoutCtrl implements Initializable {
      * @return The properly capitalised string
      */
     private static String capitalize(String s) {
-        if (s == null || s.isBlank()) return s;
+        if (s == null || s.isBlank()) {
+            return s;
+        }
         return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
 }

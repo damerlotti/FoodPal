@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Locale;
 
 public final class I18nConfig {
-    private I18nConfig() {}
-
     public static final Locale DEFAULT = Locale.ENGLISH;
 
     public static final List<Locale> SUPPORTED = List.of(
@@ -13,4 +11,6 @@ public final class I18nConfig {
             Locale.forLanguageTag("ro-RO"),
             Locale.forLanguageTag("nl-NL")
     );
+    
+    private I18nConfig() {}
 }
