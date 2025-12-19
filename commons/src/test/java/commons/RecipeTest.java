@@ -31,6 +31,6 @@ class RecipeTest {
         recipe.setIngredients(List.of(ri1, ri2));
 
         // Total kcal = 100 + 100 = 200
-        assertEquals(new BigDecimal("220"), recipe.estimatedRecipeKcal());
+        assertEquals(new BigDecimal("146"), recipe.estimatedRecipeKcal());
     }
 }

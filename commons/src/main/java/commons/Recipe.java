@@ -197,10 +197,21 @@ public class Recipe {
      * @return the amount of kcal as BigDecimal
      */
     public BigDecimal estimatedRecipeKcal() {
-        BigDecimal total = BigDecimal.ZERO;
-        for (RecipeIngredient ingredient: ingredients) {
-            total = total.add(ingredient.calculateKcal());
+        BigDecimal totalKcal = BigDecimal.ZERO;
+        BigDecimal totalGrams = BigDecimal.ZERO;
+
+        for (RecipeIngredient ingredient : ingredients) {
+            BigDecimal kcal = ingredient.calculateKcal();
+            BigDecimal grams = ingredient.getAmount().toBaseUnit();
+            totalKcal = totalKcal.add(kcal);
+            totalGrams = totalGrams.add(grams);
         }
-        return total.setScale(0, RoundingMode.DOWN); // rounding
+
+        if (totalGrams.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+
+        return totalKcal.multiply(BigDecimal.valueOf(100))
+                .divide(totalGrams, 0, RoundingMode.DOWN);
     }
 }
