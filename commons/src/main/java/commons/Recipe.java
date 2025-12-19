@@ -1,10 +1,12 @@
 package commons;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Entity
 @Table(name = "Recipes")
@@ -26,6 +28,9 @@ public class Recipe {
     @JsonManagedReference("recipe-steps")
     private List<RecipeStep> steps = new ArrayList<>();
 
+    @Column(name = "language_tag", nullable = false, length = 35)
+    private String languageTag = Locale.ENGLISH.toLanguageTag();
+
     /**
      * Parameter-less constructor.
      */
@@ -35,13 +40,18 @@ public class Recipe {
      * Creates a new Recipe.
      * @param id The id of the Recipe, used for DB indexing.
      * @param name Display name of the recipe.
+     * @param languageTag The BCP-47 language tag of the recipe.
      * @param ingredients Ordered list of ingredients used by the recipe.
      * @param steps Ordered list of steps to prepare the recipe.
      */
-    public Recipe(long id, String name,
+    public Recipe(long id, String name, String languageTag,
                   List<RecipeIngredient> ingredients, List<RecipeStep> steps) {
         this.id = id;
         this.name = name;
+        // We assume English as a default language if the tag is null or blank
+        this.languageTag = languageTag == null || languageTag.isBlank()
+                ? Locale.ENGLISH.toLanguageTag()
+                : languageTag;
         this.ingredients = ingredients;
         this.steps = steps;
     }
@@ -110,6 +120,46 @@ public class Recipe {
         this.steps = steps;
     }
 
+    /**
+     * Returns the BCP-47 language tag of the recipe (e.g. "en", "ro-RO").
+     * @return language tag
+     */
+    public String getLanguageTag() {
+        return languageTag;
+    }
+
+    /**
+     * Sets the BCP-47 language tag of the recipe.
+     * @param languageTag language tag (e.g. "en", "ro-RO")
+     */
+    public void setLanguageTag(String languageTag) {
+        if (languageTag == null || languageTag.isBlank()) {
+            throw new IllegalArgumentException("languageTag must not be null/blank");
+        }
+        this.languageTag = languageTag;
+    }
+
+    /**
+     * Convenience getter to work with Locale in code.
+     * @return locale for the stored language tag
+     */
+    @JsonIgnore
+    public Locale getLocale() {
+        return Locale.forLanguageTag(languageTag);
+    }
+
+    /**
+     * Convenience setter to work with Locale in code.
+     * @param locale locale to store
+     */
+    @JsonIgnore
+    public void setLocale(Locale locale) {
+        if (locale == null) {
+            throw new IllegalArgumentException("locale must not be null");
+        }
+        this.languageTag = locale.toLanguageTag();
+    }
+
     @Override
     public String toString() {
         return name;
@@ -166,6 +216,8 @@ public class Recipe {
     public Recipe cloneRecipe() {
         Recipe r = new Recipe();
         r.setName(name);
+
+        r.setLanguageTag(this.languageTag);
 
         List<RecipeStep> rSteps = new ArrayList<>();
         for (RecipeStep step : steps) {
