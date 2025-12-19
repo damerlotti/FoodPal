@@ -1,5 +1,7 @@
 package client.scenes;
 
+import client.i18n.I18n;
+import client.i18n.I18nConfig;
 import com.google.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -37,16 +39,24 @@ public class MainLayoutCtrl implements Initializable {
         // Initialise combo box
         
 //        languageCombo.setItems(FXCollections.observableArrayList());
+        languageCombo.getItems().setAll(I18nConfig.SUPPORTED);
+        languageCombo.getSelectionModel().select(I18n.getLocale());
+        
+        languageCombo.valueProperty().addListener((obs, oldL, newL) -> {
+            if (newL != null) {
+                I18n.setLocale(newL);
+            }
+        });
         
         // show language name in its own language
         languageCombo.setConverter(new StringConverter<>() {
             @Override public String toString(Locale locale) {
-                if (locale == null) return "";
-                // name in its own language:
+                if (locale == null) {
+                    return "";
+                }
                 return capitalize(locale.getDisplayName(locale));
             }
             @Override public Locale fromString(String s) {
-                // not needed for a non-editable ComboBox
                 return null;
             }
         });
