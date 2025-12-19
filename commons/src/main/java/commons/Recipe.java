@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -246,5 +248,28 @@ public class Recipe {
         r.setIngredients(rIngredients);
 
         return r;
+    }
+
+    /**
+     * Estimates the amount of kcal per 100g of recipe
+     * @return the amount of kcal as BigDecimal
+     */
+    public BigDecimal estimatedRecipeKcal() {
+        BigDecimal totalKcal = BigDecimal.ZERO;
+        BigDecimal totalGrams = BigDecimal.ZERO;
+
+        for (RecipeIngredient ingredient : ingredients) {
+            BigDecimal kcal = ingredient.calculateKcal();
+            BigDecimal grams = ingredient.getAmount().toBaseUnit();
+            totalKcal = totalKcal.add(kcal);
+            totalGrams = totalGrams.add(grams);
+        }
+
+        if (totalGrams.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+
+        return totalKcal.multiply(BigDecimal.valueOf(100))
+                .divide(totalGrams, 0, RoundingMode.DOWN);
     }
 }

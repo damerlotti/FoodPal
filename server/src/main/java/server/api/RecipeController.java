@@ -6,8 +6,10 @@ import commons.RecipeStep;
 import server.database.RecipeRepository;
 import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.EntityManager;
+
 import java.util.List;
 import java.util.Locale;
+
 // this class has been partly made by AI
 @RestController
 @RequestMapping("/recipes")
@@ -118,4 +120,14 @@ public class RecipeController {
         }
         return repo.save(existing);
     }
+
+    /**
+     * Handles the delete recipe request
+     * @param id is the id of teh recipe to delete
+     */
+    @DeleteMapping("/{id}")
+    public void deleteRecipe(@PathVariable long id) {
+        repo.deleteById(id);
+    }
+
 }
