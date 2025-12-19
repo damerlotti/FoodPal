@@ -3,7 +3,6 @@ package commons;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,7 +11,11 @@ class RecipeTest {
     @Test
     void testEstimatedRecipeKcal() {
         // Ingredient 1
-        Nutrition n1 = new Nutrition(new BigDecimal("10"), new BigDecimal("5"), new BigDecimal("20"));
+        Nutrition n1 = new Nutrition(
+                new BigDecimal("10"),
+                new BigDecimal("5"),
+                new BigDecimal("20")
+        );
         Ingredient i1 = new Ingredient();
         i1.setNutrition(n1);
         RecipeIngredient ri1 = new RecipeIngredient();
@@ -20,7 +23,11 @@ class RecipeTest {
         ri1.setAmount(new Measurement(new BigDecimal("50"), Unit.G));
 
         // Ingredient 2
-        Nutrition n2 = new Nutrition(new BigDecimal("5"), new BigDecimal("5"), new BigDecimal("15"));
+        Nutrition n2 = new Nutrition(
+                new BigDecimal("5"),
+                new BigDecimal("5"),
+                new BigDecimal("15")
+        );
         Ingredient i2 = new Ingredient();
         i2.setNutrition(n2);
         RecipeIngredient ri2 = new RecipeIngredient();
