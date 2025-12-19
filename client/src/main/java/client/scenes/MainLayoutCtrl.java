@@ -45,4 +45,9 @@ public class MainLayoutCtrl {
     public void showIngredients() {
         primaryCtrl.showIngredients();
     }
+
+    @FXML
+    public void showShoppingList() {
+        primaryCtrl.showShoppingList();
+    }
 }
