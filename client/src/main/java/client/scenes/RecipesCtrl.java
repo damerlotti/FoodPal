@@ -109,6 +109,31 @@ public class RecipesCtrl implements Initializable {
 
 
     /**
+     * When the add button for an ingredient is pressed, the user can add a new ingredient
+     * in an identical fashion as when creating a recipe
+     */
+    @FXML
+    public void addIngredient() {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        if (currentRecipe == null) {
+            showAlert("No Selection", "Please select a recipe first.");
+            return;
+        }
+        var allIngredients = server.getIngredients();
+        Optional<RecipeIngredient> result = IngredientDialog.show(allIngredients, server);
+        result.ifPresent(recIng -> {
+            try {
+                recIng.setRecipe(currentRecipe);
+                currentRecipe.getIngredients().add(recIng);
+                server.updateRecipe(currentRecipe);
+            } catch (Exception e) {
+                showAlert("Error", "Could not add the ingredient.");
+            }
+            showRecipeDetails(currentRecipe);
+        });
+    }
+
+    /**
      * When the edit button for an ingredient is pressed, the user can edit the amount
      */
     @FXML
@@ -126,18 +151,10 @@ public class RecipesCtrl implements Initializable {
             selectedItem.setAmount(newMeasurement);
             try {
                 server.updateRecipe(currentRecipe);
-                refresh();
-                Recipe newInstance = recipeList.getItems().stream()
-                        .filter(r -> r.getId() == currentRecipe.getId())
-                        .findFirst()
-                        .orElse(null);
-                recipeList.scrollTo(newInstance);
-                recipeList.getSelectionModel().select(newInstance);
-                recipeList.requestFocus();
-                showRecipeDetails(newInstance);
             } catch (Exception e) {
                 showAlert("Server Error", "Could not edit the ingredient");
             }
+            showRecipeDetails(currentRecipe);
         });
     }
 
