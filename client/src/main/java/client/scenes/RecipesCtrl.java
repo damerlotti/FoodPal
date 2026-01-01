@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.MyWebSocketClient;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Measurement;
@@ -14,6 +15,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import org.springframework.messaging.simp.stomp.StompSession;
 
 import java.io.*;
 import java.net.URL;
@@ -44,6 +46,8 @@ public class RecipesCtrl implements Initializable {
     private ObservableList<Recipe> allRecipes;
     private FilteredList<Recipe> filteredRecipes;
 
+    private MyWebSocketClient webSocket = new MyWebSocketClient();
+
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
      *
@@ -69,6 +73,18 @@ public class RecipesCtrl implements Initializable {
         recipeList.setCellFactory(new RecipeListCellFactory());
         // the ui list contains our data, currently empty
         refresh();
+        webSocket.connect("ws://localhost:8080/websocket");
+        webSocket.subscribe("/topic/recipes", Recipe.class, updatedRecipe -> {
+            System.out.println("Something changed in the list!");
+            refresh(); // Reload the list
+        });
+        recipeList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                webSocket.subscribe("/topic/recipes/" + newVal.getId(), Recipe.class, r -> {
+                    showRecipeDetails(r);
+                });
+            }
+        });
     }
 
     private void showAlert(String title, String content) {
