@@ -85,9 +85,10 @@ public class RecipesCtrl implements Initializable {
                 currentRecipeSubscription = null;
             }
             if (newVal != null) {
-                currentRecipeSubscription = webSocket.subscribe("/topic/recipes/" + newVal.getId(), Recipe.class, r -> {
-                    showRecipeDetails(r);
-                });
+                currentRecipeSubscription = webSocket.subscribe
+                        ("/topic/recipes/" + newVal.getId(), Recipe.class, r -> {
+                            showRecipeDetails(r);
+                        });
             }
         });
     }

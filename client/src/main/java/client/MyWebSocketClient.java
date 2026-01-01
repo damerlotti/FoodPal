@@ -43,7 +43,7 @@ public class MyWebSocketClient {
      */
     public <T> StompSession.Subscription subscribe(String destination, Class<T> type,
                                                Consumer<T> consumer) {
-        session.subscribe(destination, new StompFrameHandler() {
+        return session.subscribe(destination, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) { return type; }
 
