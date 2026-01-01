@@ -47,6 +47,7 @@ public class RecipesCtrl implements Initializable {
     private FilteredList<Recipe> filteredRecipes;
 
     private MyWebSocketClient webSocket = new MyWebSocketClient();
+    private StompSession.Subscription currentRecipeSubscription;
 
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
@@ -79,8 +80,12 @@ public class RecipesCtrl implements Initializable {
             refresh(); // Reload the list
         });
         recipeList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (currentRecipeSubscription != null) {
+                currentRecipeSubscription.unsubscribe();
+                currentRecipeSubscription = null;
+            }
             if (newVal != null) {
-                webSocket.subscribe("/topic/recipes/" + newVal.getId(), Recipe.class, r -> {
+                currentRecipeSubscription = webSocket.subscribe("/topic/recipes/" + newVal.getId(), Recipe.class, r -> {
                     showRecipeDetails(r);
                 });
             }

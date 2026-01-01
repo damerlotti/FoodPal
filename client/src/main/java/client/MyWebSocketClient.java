@@ -35,12 +35,14 @@ public class MyWebSocketClient {
 
     /**
      * aa
-     * @param destination d
-     * @param type t
-     * @param consumer c
-     * @param <T> t
+     * @param destination a
+     * @param type a
+     * @param consumer a
+     * @return a
+     * @param <T> a
      */
-    public <T> void subscribe(String destination, Class<T> type, Consumer<T> consumer) {
+    public <T> StompSession.Subscription subscribe(String destination, Class<T> type,
+                                               Consumer<T> consumer) {
         session.subscribe(destination, new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) { return type; }
