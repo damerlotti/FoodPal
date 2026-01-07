@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 @Entity
 @Table(name = "RecipeIngredients")
 public class RecipeIngredient {
@@ -121,6 +124,30 @@ public class RecipeIngredient {
      */
     public void setOrderIndex(int orderIndex) {
         this.orderIndex = orderIndex;
+    }
+
+    /**
+     * Calculate the kcal for the specific amount of ingredient
+     * @return the kcal of ingredient
+     */
+    public BigDecimal calculateKcal() {
+        if (ingredient == null || ingredient.getNutrition() == null || amount == null) {
+            return BigDecimal.ZERO;
+        }
+
+        BigDecimal kcalPer100g = ingredient.getNutrition().getKcalPer100g();
+        if (kcalPer100g == null) {
+            return BigDecimal.ZERO;
+        }
+        if (!(amount.getUnit().isMass() || amount.getUnit().isVolume())) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal grams = amount.toBaseUnit();
+
+        return kcalPer100g.multiply(grams)
+                .divide(BigDecimal.valueOf(100),
+                        Measurement.MEASUREMENT_SCALE,
+                        RoundingMode.HALF_UP);
     }
 
     /**
