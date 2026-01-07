@@ -117,12 +117,12 @@ public class RecipeController {
 
     /**
      * Handles the delete recipe request
-     * @param id is the id of teh recipe to delete
+     * @param id is the id of the recipe to delete
      */
     @DeleteMapping("/{id}")
     public void deleteRecipe(@PathVariable long id) {
         repo.deleteById(id);
-        msg.convertAndSend("/topic/recipes/delete", id);  // special delete channel
+        msg.convertAndSend("/topic/recipes", id);
     }
 
 }

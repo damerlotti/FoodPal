@@ -192,4 +192,21 @@ public class RecipeIngredient {
         // (more human-friendly compared to 2.5 CUP All-purpose Flour)
         return valueString + " " + unitName + " of " + name;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RecipeIngredient that = (RecipeIngredient) o;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(id);
+    }
 }

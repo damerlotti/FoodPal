@@ -36,11 +36,11 @@ public class MyWebSocketClient {
 
     /**
      * aa
-     * @param destination a
-     * @param type a
-     * @param consumer a
-     * @return a
-     * @param <T> a
+     * @param destination to what endpoint it connects
+     * @param type expected type of the returned object
+     * @param consumer the action taken
+     * @return the subscription
+     * @param <T> template for different types
      */
     public <T> StompSession.Subscription subscribe(String destination, Class<T> type,
                                                Consumer<T> consumer) {

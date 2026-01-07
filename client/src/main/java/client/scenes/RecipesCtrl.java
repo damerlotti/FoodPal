@@ -77,9 +77,9 @@ public class RecipesCtrl implements Initializable {
         // the ui list contains our data, currently empty
         refresh();
         webSocket.connect("ws://localhost:8080/websocket");
-        webSocket.subscribe("/topic/recipes", Recipe.class, updatedRecipe -> {
+        webSocket.subscribe("/topic/recipes", Object.class, obj -> {
             System.out.println("Something changed in the list!");
-            refresh(); // Reload the list
+            refresh(); // reload the list
         });
         recipeList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (currentRecipeSubscription != null) {
@@ -91,6 +91,9 @@ public class RecipesCtrl implements Initializable {
                         ("/topic/recipes/" + newVal.getId(), Recipe.class, r -> {
                             showRecipeDetails(r);
                         });
+            }
+            else {
+                showRecipeDetails(null);
             }
         });
     }
@@ -194,6 +197,26 @@ public class RecipesCtrl implements Initializable {
     }
 
     /**
+     * Action for when the user presses on delete for a certain ingredient withing a recipe
+     */
+    @FXML
+    public void deleteIngredient() {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        RecipeIngredient selectedIngredient = ingredientsList.getSelectionModel().getSelectedItem();
+        if (currentRecipe == null || selectedIngredient == null) {
+            showAlert("Error", "Please select a recipe and an ingredient.");
+            return;
+        }
+        currentRecipe.getIngredients().remove(selectedIngredient);
+
+        try {
+            server.updateRecipe(currentRecipe);
+        } catch (Exception e) {
+            showAlert("Error", "Could not delete the ingredient.");
+        }
+    }
+
+    /**
      * When the edit button for an ingredient is pressed, the user can edit the amount
      */
     @FXML
@@ -208,7 +231,11 @@ public class RecipesCtrl implements Initializable {
 
         Optional<Measurement> result = IngredientDialog.showEditAmount(selectedItem.getAmount());
         result.ifPresent(newMeasurement -> {
-            selectedItem.setAmount(newMeasurement);
+            RecipeIngredient actualItem = currentRecipe.getIngredients().stream()
+                    .filter(i -> i.getId() == selectedItem.getId()) // Match IDs
+                    .findFirst()
+                    .orElse(null);
+            actualItem.setAmount(newMeasurement);
             try {
                 server.updateRecipe(currentRecipe);
             } catch (Exception e) {
@@ -313,9 +340,14 @@ public class RecipesCtrl implements Initializable {
             if (newText.isEmpty()) {
                 return;
             }
-
-            selectedStep.setText(newText);
-            stepsList.refresh();
+            // the problem was that the first time works, but we send 2 messages on 2 channels,
+            // and it happens that the right part shows old objects, and then refresh happens,
+            // and we get different objects on the left
+            RecipeStep actualStep = recipe.getSteps().stream()
+                    .filter(s -> s.getId() == selectedStep.getId())
+                    .findFirst()
+                    .orElse(null);
+            actualStep.setText(newText);
 
             try {
                 server.updateRecipe(recipe);
@@ -501,10 +533,6 @@ public class RecipesCtrl implements Initializable {
             alert.showAndWait();
             return;
         }
-
-        refresh();
-        recipeList.getSelectionModel().clearSelection();
-        showRecipeDetails(null);
     }
 
 }

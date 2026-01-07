@@ -112,4 +112,21 @@ public class RecipeStep {
         sb.append(orderIndex + 1).append(". ").append(text);
         return sb.toString();
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (other == null || getClass() != other.getClass()) {
+            return false;
+        }
+        RecipeStep that = (RecipeStep)other;
+        return id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(id);
+    }
 }
