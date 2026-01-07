@@ -104,10 +104,20 @@ public class RecipesCtrl implements Initializable {
      * The logic linked to the refresh button
      */
     public void refresh() {
-        //System.out.println("Refreshing list...");
+        Recipe selected = recipeList.getSelectionModel().getSelectedItem();
+        Long selectedId = (selected != null) ? selected.getId() : null;
         var recipes = server.getRecipes();
         allRecipes.clear();
         allRecipes.addAll(recipes);
+        if (selectedId != null) {
+            Recipe newRecipe = recipeList.getItems().stream()
+                    .filter(r -> r.getId() == selectedId)
+                    .findFirst()
+                    .orElse(null);
+            if (newRecipe != null) {
+                recipeList.getSelectionModel().select(newRecipe);
+            }
+        }
         // Same filter in toggleFavoritesFilter
         if (favoritesToggle.isSelected()) {
             filteredRecipes.setPredicate(recipe ->
@@ -175,7 +185,6 @@ public class RecipesCtrl implements Initializable {
             } catch (Exception e) {
                 showAlert("Error", "Could not add the ingredient.");
             }
-            showRecipeDetails(currentRecipe);
         });
     }
 
@@ -200,7 +209,6 @@ public class RecipesCtrl implements Initializable {
             } catch (Exception e) {
                 showAlert("Server Error", "Could not edit the ingredient");
             }
-            showRecipeDetails(currentRecipe);
         });
     }
 
@@ -240,8 +248,6 @@ public class RecipesCtrl implements Initializable {
                 showAlert("Server Error", "Could not save the new step to the database");
                 return;
             }
-
-            showRecipeDetails(recipe);
         }
     }
 
@@ -273,7 +279,6 @@ public class RecipesCtrl implements Initializable {
             showAlert("Server error", "Could not delete the step from the database.");
             return;
         }
-        showRecipeDetails(recipe);
     }
 
     /**
@@ -305,6 +310,7 @@ public class RecipesCtrl implements Initializable {
             }
 
             selectedStep.setText(newText);
+            stepsList.refresh();
 
             try {
                 server.updateRecipe(recipe);
@@ -312,7 +318,6 @@ public class RecipesCtrl implements Initializable {
                 showAlert("Server Error", "Could not update the step in the database");
                 return;
             }
-            showRecipeDetails(recipe);
         }
     }
 
@@ -344,9 +349,6 @@ public class RecipesCtrl implements Initializable {
                 showAlert("Server Error", "Could not update the recipe title in the database.");
                 return;
             }
-            showRecipeDetails(recipe);
-            refresh();
-            recipeList.getSelectionModel().select(recipe);
         }
 
     }

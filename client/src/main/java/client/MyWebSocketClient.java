@@ -13,6 +13,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import java.lang.reflect.Type;
 import java.util.function.Consumer;
 
+// this class was made with AI
 public class MyWebSocketClient {
     private StompSession session;
 
