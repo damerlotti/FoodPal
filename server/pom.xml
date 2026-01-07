@@ -63,7 +63,7 @@
 				<version>3.3.0</version>
 				<configuration>
 					<configLocation>../checkstyle.xml</configLocation>
-                    <suppressionsLocation>suppressions.xml</suppressionsLocation>
+                    <suppressionsLocation>../suppressions.xml</suppressionsLocation>
 					<sourceDirectories>${project.basedir}</sourceDirectories>
 					<includes>src/**/*.java,**/*.xml,**/*.yml</includes>
 					<excludes>**/target/**</excludes>
