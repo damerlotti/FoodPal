@@ -20,6 +20,8 @@ import static com.google.inject.Guice.createInjector;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
+import client.config.Config;
+import client.config.ConfigManager;
 import client.scenes.*;
 import com.google.inject.Injector;
 
@@ -40,6 +42,24 @@ public class Main extends Application {
      */
     public static void main(String[] args) throws URISyntaxException, IOException {
         launch();
+    }
+
+    /**
+     * Called by the JavaFX launcher before {@link #start}. We use this to load
+     * the global config once so controllers can access it during startup.
+     *
+     * Development mode can be enabled by passing -Dclient.development=true to the JVM.
+     */
+    @Override
+    public void init() throws Exception {
+        super.init();
+
+        // TODO(calco): change how development mode is determined if needed
+        ConfigManager confMngr = INJECTOR.getInstance(ConfigManager.class);
+        confMngr.init(true);
+        Config config = confMngr.getConfig();
+
+        // config initalisation stuff goes here
     }
 
     @Override
@@ -63,6 +83,18 @@ public class Main extends Application {
 
         // Initialize all scenes inside PrimaryCtrl
         primaryCtrl.init(primaryStage, mainLayout, recipes, addRecipe, ingredients, addIngredient);
+    }
 
+    /**
+     * Called when the application is shutting down. Save the global config here.
+     */
+    @Override
+    public void stop() throws Exception {
+        // Persist any changes in the global config
+        ConfigManager conf = INJECTOR.getInstance(ConfigManager.class);
+//        conf.getConfig().setPrefLocale(I18n.getLocaleString());
+        conf.save();
+
+        super.stop();
     }
 }
