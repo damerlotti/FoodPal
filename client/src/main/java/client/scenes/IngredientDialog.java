@@ -165,7 +165,7 @@ public class IngredientDialog {
         units.getItems().addAll(Unit.values());
 
         if (currentAmount != null) {
-            amtField.setText(currentAmount.getValue().toString());
+            amtField.setText(currentAmount.getValue().stripTrailingZeros().toPlainString());
             units.setValue(currentAmount.getUnit());
         }
 

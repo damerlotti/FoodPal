@@ -8,4 +8,5 @@
     <suppress checks="MissingJavadocMethod" files="[\\/]src[\\/]test[\\/]java[\\/]"/>
 
     <suppress checks="MagicNumber" files="[\\/]src[\\/]test[\\/]java[\\/]"/>
+    <suppress files=".mvn[\\/]wrapper[\\/]maven-wrapper.properties" checks=".*" />
 </suppressions>

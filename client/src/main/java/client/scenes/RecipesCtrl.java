@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.MyWebSocketClient;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Measurement;
@@ -14,6 +15,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
+import org.springframework.messaging.simp.stomp.StompSession;
 
 import java.io.*;
 import java.net.URL;
@@ -46,6 +48,9 @@ public class RecipesCtrl implements Initializable {
     private ObservableList<Recipe> allRecipes;
     private FilteredList<Recipe> filteredRecipes;
 
+    private MyWebSocketClient webSocket = new MyWebSocketClient();
+    private StompSession.Subscription currentRecipeSubscription;
+
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
      *
@@ -71,6 +76,26 @@ public class RecipesCtrl implements Initializable {
         recipeList.setCellFactory(new RecipeListCellFactory());
         // the ui list contains our data, currently empty
         refresh();
+        webSocket.connect("ws://localhost:8080/websocket");
+        webSocket.subscribe("/topic/recipes", Object.class, obj -> {
+            System.out.println("Something changed in the list!");
+            refresh(); // reload the list
+        });
+        recipeList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (currentRecipeSubscription != null) {
+                currentRecipeSubscription.unsubscribe();
+                currentRecipeSubscription = null;
+            }
+            if (newVal != null) {
+                currentRecipeSubscription = webSocket.subscribe
+                        ("/topic/recipes/" + newVal.getId(), Recipe.class, r -> {
+                            showRecipeDetails(r);
+                        });
+            }
+            else {
+                showRecipeDetails(null);
+            }
+        });
     }
 
     private void showAlert(String title, String content) {
@@ -84,10 +109,20 @@ public class RecipesCtrl implements Initializable {
      * The logic linked to the refresh button
      */
     public void refresh() {
-        //System.out.println("Refreshing list...");
+        Recipe selected = recipeList.getSelectionModel().getSelectedItem();
+        Long selectedId = (selected != null) ? selected.getId() : null;
         var recipes = server.getRecipes();
         allRecipes.clear();
         allRecipes.addAll(recipes);
+        if (selectedId != null) {
+            Recipe newRecipe = recipeList.getItems().stream()
+                    .filter(r -> r.getId() == selectedId)
+                    .findFirst()
+                    .orElse(null);
+            if (newRecipe != null) {
+                recipeList.getSelectionModel().select(newRecipe);
+            }
+        }
         // Same filter in toggleFavoritesFilter
         if (favoritesToggle.isSelected()) {
             filteredRecipes.setPredicate(recipe ->
@@ -158,8 +193,27 @@ public class RecipesCtrl implements Initializable {
             } catch (Exception e) {
                 showAlert("Error", "Could not add the ingredient.");
             }
-            showRecipeDetails(currentRecipe);
         });
+    }
+
+    /**
+     * Action for when the user presses on delete for a certain ingredient withing a recipe
+     */
+    @FXML
+    public void deleteIngredient() {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        RecipeIngredient selectedIngredient = ingredientsList.getSelectionModel().getSelectedItem();
+        if (currentRecipe == null || selectedIngredient == null) {
+            showAlert("Error", "Please select a recipe and an ingredient.");
+            return;
+        }
+        currentRecipe.getIngredients().remove(selectedIngredient);
+
+        try {
+            server.updateRecipe(currentRecipe);
+        } catch (Exception e) {
+            showAlert("Error", "Could not delete the ingredient.");
+        }
     }
 
     /**
@@ -177,13 +231,16 @@ public class RecipesCtrl implements Initializable {
 
         Optional<Measurement> result = IngredientDialog.showEditAmount(selectedItem.getAmount());
         result.ifPresent(newMeasurement -> {
-            selectedItem.setAmount(newMeasurement);
+            RecipeIngredient actualItem = currentRecipe.getIngredients().stream()
+                    .filter(i -> i.getId() == selectedItem.getId()) // Match IDs
+                    .findFirst()
+                    .orElse(null);
+            actualItem.setAmount(newMeasurement);
             try {
                 server.updateRecipe(currentRecipe);
             } catch (Exception e) {
                 showAlert("Server Error", "Could not edit the ingredient");
             }
-            showRecipeDetails(currentRecipe);
         });
     }
 
@@ -223,8 +280,6 @@ public class RecipesCtrl implements Initializable {
                 showAlert("Server Error", "Could not save the new step to the database");
                 return;
             }
-
-            showRecipeDetails(recipe);
         }
     }
 
@@ -256,7 +311,6 @@ public class RecipesCtrl implements Initializable {
             showAlert("Server error", "Could not delete the step from the database.");
             return;
         }
-        showRecipeDetails(recipe);
     }
 
     /**
@@ -286,8 +340,14 @@ public class RecipesCtrl implements Initializable {
             if (newText.isEmpty()) {
                 return;
             }
-
-            selectedStep.setText(newText);
+            // the problem was that the first time works, but we send 2 messages on 2 channels,
+            // and it happens that the right part shows old objects, and then refresh happens,
+            // and we get different objects on the left
+            RecipeStep actualStep = recipe.getSteps().stream()
+                    .filter(s -> s.getId() == selectedStep.getId())
+                    .findFirst()
+                    .orElse(null);
+            actualStep.setText(newText);
 
             try {
                 server.updateRecipe(recipe);
@@ -295,7 +355,6 @@ public class RecipesCtrl implements Initializable {
                 showAlert("Server Error", "Could not update the step in the database");
                 return;
             }
-            showRecipeDetails(recipe);
         }
     }
 
@@ -327,9 +386,6 @@ public class RecipesCtrl implements Initializable {
                 showAlert("Server Error", "Could not update the recipe title in the database.");
                 return;
             }
-            showRecipeDetails(recipe);
-            refresh();
-            recipeList.getSelectionModel().select(recipe);
         }
 
     }
@@ -477,10 +533,6 @@ public class RecipesCtrl implements Initializable {
             alert.showAndWait();
             return;
         }
-
-        refresh();
-        recipeList.getSelectionModel().clearSelection();
-        showRecipeDetails(null);
     }
 
 }
