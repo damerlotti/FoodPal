@@ -1,16 +1,22 @@
 package client.scenes;
 
+import client.i18n.I18n;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
 import commons.Nutrition;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.math.BigDecimal;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class AddIngredientCtrl {
+public class AddIngredientCtrl implements Initializable {
 
     private final ServerUtils server;
 
@@ -22,6 +28,16 @@ public class AddIngredientCtrl {
     private TextField proteinIngredient;
     @FXML
     private TextField carbsIngredient;
+    @FXML
+    private Label titleLabel;
+    @FXML
+    private Label fatLabel;
+    @FXML
+    private Label proteinLabel;
+    @FXML
+    private Label carbsLabel;
+    @FXML
+    private Button addButton;
 
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
@@ -31,6 +47,17 @@ public class AddIngredientCtrl {
     public AddIngredientCtrl(ServerUtils server) {
         this.server = server;
     }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        // Bind labels and buttons to i18n
+        titleLabel.textProperty().bind(I18n.createStringBinding("addIngredient.title"));
+        fatLabel.textProperty().bind(I18n.createStringBinding("addIngredient.fat"));
+        proteinLabel.textProperty().bind(I18n.createStringBinding("addIngredient.protein"));
+        carbsLabel.textProperty().bind(I18n.createStringBinding("addIngredient.carbs"));
+        addButton.textProperty().bind(I18n.createStringBinding("addIngredient.add"));
+    }
+
     /**
      * Adds an ingredient based on the name in the TextField
      * should probably do a separate window to add an ingredient
