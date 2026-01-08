@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.persistence.EntityManager;
 
 import java.util.List;
+import java.util.Locale;
 
 // this class has been partly made by AI
 @RestController
@@ -34,6 +35,7 @@ public class RecipeController {
 
     /**
      * Gets all recipes
+     *
      * @return a list of all recipes, returns an empty list if no recipes exist
      */
     @GetMapping("/")
@@ -43,6 +45,7 @@ public class RecipeController {
 
     /**
      * Finds a recipe by id
+     *
      * @param id the id of the recipe
      * @return the recipe (or null if it does not exist)
      */
@@ -53,6 +56,7 @@ public class RecipeController {
 
     /**
      * Handler for POST requests to /recipes
+     *
      * @param recipe the JSON body automatically converted to a Recipe object
      * @return The saved recipe
      */
@@ -62,6 +66,11 @@ public class RecipeController {
         if (recipe.getName() == null || recipe.getName().isEmpty()) {
             return null;
         }
+
+        if (recipe.getLanguageTag() == null || recipe.getLanguageTag().isBlank()) {
+            recipe.setLanguageTag(Locale.ENGLISH.toLanguageTag());
+        }
+
         // CascadeType.ALL actually means that all the RecipeSteps in it will be saved automatically
         Recipe saved = repo.save(recipe);
 
@@ -72,6 +81,7 @@ public class RecipeController {
 
     /**
      * Retrieves the total count of recipes in the database.
+     *
      * @return a String in the format "Total recipes: X" where X is the
      * number of recipes in the database
      */
@@ -84,6 +94,7 @@ public class RecipeController {
 
     /**
      * Updates an existing recipe in the database.
+     *
      * @param id            of recipe to update
      * @param updatedRecipe recipe containing updated data
      * @return updated recipe, or null if id doesn't exist
@@ -95,6 +106,12 @@ public class RecipeController {
             return null;
         }
         existing.setName(updatedRecipe.getName());
+
+        // Update language tag if provided (non-null/non-blank). Leave unchanged otherwise.
+        if (updatedRecipe.getLanguageTag() != null && !updatedRecipe.getLanguageTag().isBlank()) {
+            existing.setLanguageTag(updatedRecipe.getLanguageTag());
+        }
+
         existing.getIngredients().clear();
         if (updatedRecipe.getIngredients() != null) {
             for (RecipeIngredient ri : updatedRecipe.getIngredients()) {
