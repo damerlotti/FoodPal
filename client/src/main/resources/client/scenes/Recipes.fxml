@@ -63,7 +63,7 @@
                            <children>
                               <Button mnemonicParsing="false" onAction="#addIngredient" text="Add" />
                               <Button mnemonicParsing="false" onAction="#editIngredient" text="Edit" />
-                              <Button mnemonicParsing="false" text="Delete" />
+                              <Button mnemonicParsing="false" onAction="#deleteIngredient" text="Delete" />
                            </children>
                            <VBox.margin>
                               <Insets />
