@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.i18n.I18n;
 import client.utils.ServerUtils;
 import commons.*;
 import javafx.geometry.Insets;
@@ -47,8 +48,8 @@ public class IngredientDialog {
     public static Optional<RecipeIngredient> show(List<Ingredient> allIngredients,
                                                   ServerUtils server) {
         Dialog<RecipeIngredient> dialog = new Dialog<>();
-        dialog.setTitle("Add Ingredient");
-        dialog.setHeaderText("Select existing or create new:");
+        dialog.setTitle(I18n.get("dialog.addIngredient.title"));
+        dialog.setHeaderText(I18n.get("dialog.addIngredient.header"));
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         GridPane grid = new GridPane();
@@ -59,23 +60,26 @@ public class IngredientDialog {
         ComboBox<Ingredient> name = new ComboBox<>();
         name.setEditable(true);  // so we can also type sth
         name.getItems().addAll(allIngredients);
-        grid.add(new Label("Ingredient:"), 0, 0);  // first is column, second is line
+        grid.add(new Label(I18n.get("dialog.addIngredient.ingredient")), 0, 0);
         grid.add(name, 1, 0);
 
         TextField amount = new TextField();
         ComboBox<Unit> unit = new ComboBox<>();
         unit.getItems().addAll(Unit.values());
         unit.setValue(Unit.G);
-        grid.add(new Label("Amount:"), 0, 1);
+        grid.add(new Label(I18n.get("dialog.addIngredient.amount")), 0, 1);
         grid.add(amount, 1, 1);
         grid.add(unit, 2, 1);
 
         TextField fatField = new TextField();
         TextField proteinField = new TextField();
         TextField carbsField = new TextField();
-        grid.add(new Label("Fat: (per 100g)"), 0, 2); grid.add(fatField, 1, 2);
-        grid.add(new Label("Protein: (per 100g)"), 0, 3); grid.add(proteinField, 1, 3);
-        grid.add(new Label("Carbs: (per 100g)"), 0, 4); grid.add(carbsField, 1, 4);
+        grid.add(new Label(I18n.get("dialog.addIngredient.fat")), 0, 2);
+        grid.add(fatField, 1, 2);
+        grid.add(new Label(I18n.get("dialog.addIngredient.protein")), 0, 3);
+        grid.add(proteinField, 1, 3);
+        grid.add(new Label(I18n.get("dialog.addIngredient.carbs")), 0, 4);
+        grid.add(carbsField, 1, 4);
 
         // this happens when anything changes in the name field
         name.getEditor().textProperty().addListener((obs, oldText, newText) -> {
@@ -152,8 +156,8 @@ public class IngredientDialog {
      */
     public static Optional<Measurement> showEditAmount(Measurement currentAmount) {
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Edit Amount");
-        dialog.setHeaderText("Update quantity:");
+        dialog.setTitle(I18n.get("dialog.editAmount.title"));
+        dialog.setHeaderText(I18n.get("dialog.editAmount.header"));
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         GridPane grid = new GridPane();
@@ -169,7 +173,7 @@ public class IngredientDialog {
             units.setValue(currentAmount.getUnit());
         }
 
-        grid.add(new Label("Amount:"), 0, 0);
+        grid.add(new Label(I18n.get("dialog.addIngredient.amount")), 0, 0);
         grid.add(amtField, 1, 0);
         grid.add(units, 2, 0);
 
