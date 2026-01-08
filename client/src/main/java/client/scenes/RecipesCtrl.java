@@ -475,7 +475,8 @@ public class RecipesCtrl implements Initializable {
 
 
         // TODO(calco): This shouldn't be as hard coded
-        TextInputDialog dialog = new TextInputDialog(clonedRecipe.getName() + " " + I18n.get("dialog.clone.suffix"));
+        String cloneName = clonedRecipe.getName() + " " + I18n.get("dialog.clone.suffix");
+        TextInputDialog dialog = new TextInputDialog(cloneName);
         dialog.setHeaderText(I18n.get("dialog.clone.header"));
         dialog.setGraphic(null);
         dialog.getDialogPane().setPrefSize(400, 250);
@@ -572,8 +573,10 @@ public class RecipesCtrl implements Initializable {
         confirm.setContentText(I18n.get("dialog.deleteRecipe.content"));
         confirm.setGraphic(null);
         
-        ButtonType deleteButton = new ButtonType(I18n.get("dialog.deleteRecipe.delete"), ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType(I18n.get("dialog.deleteRecipe.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType deleteButton = new ButtonType(
+                I18n.get("dialog.deleteRecipe.delete"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType(
+                I18n.get("dialog.deleteRecipe.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
         confirm.getButtonTypes().setAll(deleteButton, cancelButton);
 
         Optional<ButtonType> result = confirm.showAndWait();

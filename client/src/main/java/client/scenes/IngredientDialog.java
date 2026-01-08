@@ -139,13 +139,10 @@ public class IngredientDialog {
                     ans.setIngredient(finalIng);
                     ans.setAmount(m);
                     return ans;
-                } catch (Exception e) {
-                    return null;
-                }
+                } catch (Exception e) { return null; }
             }
             return null;
         });
-
         return dialog.showAndWait();
     }
 
