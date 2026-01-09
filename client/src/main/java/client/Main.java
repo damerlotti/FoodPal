@@ -86,6 +86,7 @@ public class Main extends Application {
         // Initialize all scenes inside PrimaryCtrl
         primaryCtrl.init(primaryStage, mainLayout, recipes,
                 addRecipe, ingredients, addIngredient, shoppingList);
+    }
 
     /**
      * Called when the application is shutting down. Save the global config here.
