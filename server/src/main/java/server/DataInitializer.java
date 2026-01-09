@@ -140,6 +140,15 @@ public class DataInitializer implements CommandLineRunner {
                 createNutrition(BigDecimal.ZERO,
                         new BigDecimal("5"),
                         new BigDecimal("10")));
+        Ingredient cucumber = createIngredient("Cucumber",
+                createNutrition(new BigDecimal("0.1"),
+                        new BigDecimal("0.7"),
+                        new BigDecimal("3.6")));
+
+        Ingredient olives = createIngredient("Kalamata Olives",
+                createNutrition(new BigDecimal("15"),
+                        new BigDecimal("0.8"),
+                        new BigDecimal("3.8")));
 
         // Create recipes
         createSpaghettiCarbonara(spaghetti, eggs, pancetta, parmesan);
@@ -268,6 +277,50 @@ public class DataInitializer implements CommandLineRunner {
         addStepToRecipe(lasagna, "Layer lasagna sheets with vegetables and cheese.", 2);
         addStepToRecipe(lasagna, "Bake for 45 minutes until bubbly and golden.", 3);
         entityManager.persist(lasagna);
+    }
+
+    /**
+     * Creates and persists a Vegetable Omelette recipe with its ingredients and steps.
+     * Uses eggs, bell pepper, broccoli, tomato, onion, garlic, and cheese.
+     * @param eggs the eggs ingredient
+     * @param bellPepper the bell pepper ingredient
+     * @param tomato the tomato ingredient
+     * @param onion the onion ingredient
+     * @param garlic the garlic ingredient
+     * @param cheese the cheese ingredient
+     * @param butter the butter ingredient
+     */
+    private void createVegetableOmelette(Ingredient eggs, Ingredient bellPepper,
+                                         Ingredient butter, Ingredient tomato,
+                                         Ingredient onion, Ingredient garlic,
+                                         Ingredient cheese) {
+        Recipe omelette = createRecipe("Vegetable Omelette");
+
+        // Add ingredients with appropriate amounts
+        addIngredientToRecipe(omelette, eggs, new BigDecimal("3"), Unit.PIECE);
+        addIngredientToRecipe(omelette, bellPepper, new BigDecimal("0.5"), Unit.PIECE);
+        addIngredientToRecipe(omelette, tomato, new BigDecimal("1"), Unit.PIECE);
+        addIngredientToRecipe(omelette, onion, new BigDecimal("0.25"), Unit.PIECE);
+        addIngredientToRecipe(omelette, garlic, new BigDecimal("1"), Unit.PIECE);
+        addIngredientToRecipe(omelette, cheese, new BigDecimal("50"), Unit.G);
+        addIngredientToRecipe(omelette, butter, new BigDecimal("1"), Unit.TBSP);
+
+        // Add preparation steps
+        addStepToRecipe(omelette, "Chop all vegetables: dice bell pepper, "
+                + "tomato, onion, and mince garlic.", 0);
+        addStepToRecipe(omelette, "In a non-stick pan, melt butter over medium heat.", 1);
+        addStepToRecipe(omelette, "Sauté vegetables (bell pepper, onion, garlic) "
+                + "for 3-4 minutes until slightly tender.", 2);
+        addStepToRecipe(omelette, "Add diced tomato and cook for 1 more minute.", 3);
+        addStepToRecipe(omelette, "In a bowl, beat eggs with salt and pepper.", 4);
+        addStepToRecipe(omelette, "Pour beaten eggs over the sautéed vegetables in the pan.", 5);
+        addStepToRecipe(omelette, "Cook over medium-low heat until eggs begin to set.", 6);
+        addStepToRecipe(omelette, "Sprinkle grated cheese over half of the omelette.", 7);
+        addStepToRecipe(omelette, "Fold the omelette in half and cook for another 1-2 minutes "
+                + "until cheese melts.", 8);
+        addStepToRecipe(omelette, "Slide onto a plate and serve immediately.", 9);
+
+        entityManager.persist(omelette);
     }
 
     /**
