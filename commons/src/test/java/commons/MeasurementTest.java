@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MeasurementTest {
+    private Measurement m(String val, Unit unit) {
+        return new Measurement(new BigDecimal(val), unit);
+    }
     @Test
     void testMassConversionFromGramToAllMassUnits() {
         // 1000 g → various mass units
