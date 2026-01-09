@@ -13,6 +13,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -44,6 +45,14 @@ public class RecipesCtrl implements Initializable {
     private ListView<RecipeStep> stepsList;
     @FXML
     private ToggleButton favoritesToggle;
+    @FXML
+    private Button editServingsButton;
+    @FXML
+    private HBox infoBox;
+    @FXML
+    private ChoiceBox<Integer> servingsField;
+    @FXML
+    private Label servings;
 
     private ObservableList<Recipe> allRecipes;
     private FilteredList<Recipe> filteredRecipes;
@@ -112,8 +121,15 @@ public class RecipesCtrl implements Initializable {
         Recipe selected = recipeList.getSelectionModel().getSelectedItem();
         Long selectedId = (selected != null) ? selected.getId() : null;
         var recipes = server.getRecipes();
-        allRecipes.clear();
-        allRecipes.addAll(recipes);
+        allRecipes.setAll(recipes);
+        // Same filter in toggleFavoritesFilter
+        if (favoritesToggle.isSelected()) {
+            filteredRecipes.setPredicate(recipe ->
+                    RecipeListCellFactory.isFavorite(recipe.getId())
+            );
+        } else {
+            filteredRecipes.setPredicate(null); // show all if toggle off
+        }
         if (selectedId != null) {
             Recipe newRecipe = recipeList.getItems().stream()
                     .filter(r -> r.getId() == selectedId)
@@ -121,13 +137,8 @@ public class RecipesCtrl implements Initializable {
                     .orElse(null);
             if (newRecipe != null) {
                 recipeList.getSelectionModel().select(newRecipe);
+                showRecipeDetails(newRecipe);
             }
-        }
-        // Same filter in toggleFavoritesFilter
-        if (favoritesToggle.isSelected()) {
-            filteredRecipes.setPredicate(recipe ->
-                    RecipeListCellFactory.isFavorite(recipe.getId())
-            );
         }
     }
     /**
@@ -155,9 +166,30 @@ public class RecipesCtrl implements Initializable {
             recipeTitle.setText("Select a recipe");
             ingredientsList.getItems().clear();
             stepsList.getItems().clear();
+
+            servings.setVisible(false);
+            recipeKcal.setVisible(false);
+            editServingsButton.setVisible(false);
+
+            servings.setText("");
+            recipeKcal.setText("");
+
             return;
         }
+
         recipeTitle.setText(recipe.getName());
+        // Show servings label with current value
+        int currentServings = recipe.getServings() > 0 ? recipe.getServings() : 1;
+        servings.setText("Servings: " + currentServings);
+        servings.setVisible(true);
+        editServingsButton.setVisible(true);
+
+        // Show calories
+        recipeKcal.setText("Kcal/100g: " + recipe.estimatedRecipeKcal()
+                .stripTrailingZeros()
+                .toPlainString());
+        recipeKcal.setVisible(true);
+
         recipeKcal.setText("Kcal/100g: " + recipe.estimatedRecipeKcal()
                 .stripTrailingZeros()
                 .toPlainString());
@@ -534,5 +566,53 @@ public class RecipesCtrl implements Initializable {
             return;
         }
     }
+
+    @FXML
+    private void onEditServingsClicked() {
+        Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
+        if (recipe == null) {
+            showAlert("No Recipe Selected", "Please select a recipe first.");
+            return;
+        }
+
+        ChoiceDialog<Integer> dialog = new ChoiceDialog<>(
+                recipe.getServings() > 0 ? recipe.getServings() : 1,
+                FXCollections.observableArrayList(
+                        1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                        11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+                )
+        );
+        dialog.setHeaderText("Select the new number of servings:");
+        dialog.setGraphic(null);
+        dialog.getDialogPane().setPrefSize(300, 150);
+
+        java.util.Optional<Integer> result = dialog.showAndWait();
+        if (result.isPresent()) {
+            int newServings = result.get();
+            if (newServings == recipe.getServings()) {
+                return;
+            }
+
+            recipe.setServings(newServings); // update local object
+            servings.setText("Servings: " + newServings); // update label
+
+            try {
+                server.updateRecipe(recipe); // save to server
+
+                // Update the list to keep it in sync
+                int index = allRecipes.indexOf(recipe);
+                if (index >= 0) {
+                    allRecipes.set(index, recipe); // replaces with updated version
+                }
+
+            } catch (Exception e) {
+                showAlert("Server Error", "Could not update the servings.");
+            }
+        }
+    }
+
+
+
+
 
 }

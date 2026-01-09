@@ -111,6 +111,8 @@ public class RecipeController {
         if (updatedRecipe.getLanguageTag() != null && !updatedRecipe.getLanguageTag().isBlank()) {
             existing.setLanguageTag(updatedRecipe.getLanguageTag());
         }
+        // Update servings
+        existing.setServings(updatedRecipe.getServings());
 
         existing.getIngredients().clear();
         if (updatedRecipe.getIngredients() != null) {

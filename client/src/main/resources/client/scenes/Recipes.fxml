@@ -57,6 +57,21 @@
                               </Button>
                            </children>
                         </HBox>
+                        <HBox fx:id="infoBox" prefHeight="32.0" prefWidth="296.0" spacing="60.0">
+                           <children>
+                              <HBox prefHeight="27.0" prefWidth="174.0" spacing="30.0">
+                                 <children>
+                                    <Label fx:id="servings" text="Servings:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <Button fx:id="editServingsButton" mnemonicParsing="false" onAction="#onEditServingsClicked" text="Edit" />
+                                 </children>
+                              </HBox>
+                              <Label fx:id="recipeKcal" prefHeight="27.0" prefWidth="119.0" />
+                           </children>
+                        </HBox>
                         <Label prefHeight="18.0" prefWidth="72.0" text="Ingredients" />
                         <ListView fx:id="ingredientsList" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="144.0" prefWidth="296.0" VBox.vgrow="ALWAYS" />
                         <HBox prefHeight="27.0" prefWidth="296.0" spacing="35.0">
@@ -84,7 +99,6 @@
                               <Insets left="45.0" />
                            </padding>
                         </HBox>
-                        <Label fx:id="recipeKcal" prefHeight="29.0" prefWidth="142.0" />
                      </children>
                   </VBox>
                </children>
