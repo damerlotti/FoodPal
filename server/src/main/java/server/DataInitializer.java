@@ -60,26 +60,86 @@ public class DataInitializer implements CommandLineRunner {
      */
     private void initializeIngredientsAndRecipes() {
         // Create all ingredients
-        Ingredient zucchini = createIngredient("Zucchini");
-        Ingredient spaghetti = createIngredient("Spaghetti");
-        Ingredient eggs = createIngredient("Eggs");
-        Ingredient pancetta = createIngredient("Pancetta");
-        Ingredient parmesan = createIngredient("Parmesan Cheese");
-        Ingredient chicken = createIngredient("Chicken Breast");
-        Ingredient bellPepper = createIngredient("Bell Pepper");
-        Ingredient broccoli = createIngredient("Broccoli");
-        Ingredient soySauce = createIngredient("Soy Sauce");
-        Ingredient flour = createIngredient("All-purpose Flour");
-        Ingredient butter = createIngredient("Butter");
-        Ingredient chocolate = createIngredient("Chocolate Chips");
-        Ingredient groundBeef = createIngredient("Ground Beef");
-        Ingredient lettuce = createIngredient("Lettuce");
-        Ingredient tomato = createIngredient("Tomato");
-        Ingredient cheese = createIngredient("Cheese");
-        Ingredient onion = createIngredient("Onion");
-        Ingredient garlic = createIngredient("Garlic");
-        Ingredient sugar = createIngredient("Sugar");
-        Ingredient bakingSoda = createIngredient("Baking Soda");
+        Ingredient zucchini = createIngredient("Zucchini",
+                createNutrition(new BigDecimal("0.3"),
+                        new BigDecimal("1.2"),
+                        new BigDecimal("3.1")));
+        Ingredient bellPepper = createIngredient("Bell Pepper",
+                createNutrition(new BigDecimal("0.2"),
+                        new BigDecimal("1"),
+                        new BigDecimal("6")));
+        Ingredient broccoli = createIngredient("Broccoli",
+                createNutrition(new BigDecimal("0.4"),
+                        new BigDecimal("2.8"),
+                        new BigDecimal("7")));
+        Ingredient lettuce = createIngredient("Lettuce",
+                createNutrition(new BigDecimal("0.2"),
+                        new BigDecimal("1.4"),
+                        new BigDecimal("2.9")));
+        Ingredient tomato = createIngredient("Tomato",
+                createNutrition(new BigDecimal("0.2"),
+                        new BigDecimal("1"),
+                        new BigDecimal("3.9")));
+        Ingredient onion = createIngredient("Onion",
+                createNutrition(new BigDecimal("0.1"),
+                        new BigDecimal("1.1"),
+                        new BigDecimal("9")));
+        Ingredient garlic = createIngredient("Garlic",
+                createNutrition(new BigDecimal("0.5"),
+                        new BigDecimal("6.4"),
+                        new BigDecimal("33")));
+        Ingredient eggs = createIngredient("Eggs",
+                createNutrition(new BigDecimal("10"),
+                        new BigDecimal("12"),
+                        new BigDecimal("1")));
+        Ingredient chicken = createIngredient("Chicken Breast",
+                createNutrition(new BigDecimal("3.6"),
+                        new BigDecimal("31"),
+                        new BigDecimal("0")));
+        Ingredient pancetta = createIngredient("Pancetta",
+                createNutrition(new BigDecimal("45"),
+                        new BigDecimal("37"),
+                        new BigDecimal("1.5")));
+        Ingredient groundBeef = createIngredient("Ground Beef",
+                createNutrition(new BigDecimal("20"),
+                        new BigDecimal("26"),
+                        new BigDecimal("0")));
+        Ingredient parmesan = createIngredient("Parmesan Cheese",
+                createNutrition(new BigDecimal("29"),
+                        new BigDecimal("35"),
+                        new BigDecimal("3.2")));
+        Ingredient cheese = createIngredient("Cheese",
+                createNutrition(new BigDecimal("25"),
+                        new BigDecimal("27"),
+                        new BigDecimal("1.3")));
+        Ingredient butter = createIngredient("Butter",
+                createNutrition(new BigDecimal("81"),
+                        new BigDecimal("1"),
+                        new BigDecimal("0.1")));
+        Ingredient spaghetti = createIngredient("Spaghetti",
+                createNutrition(new BigDecimal("1.3"),
+                        new BigDecimal("12"),
+                        new BigDecimal("75")));
+        Ingredient flour = createIngredient("All-purpose Flour",
+                createNutrition(new BigDecimal("1"),
+                        new BigDecimal("10"),
+                        new BigDecimal("76")));
+        Ingredient sugar = createIngredient("Sugar",
+                createNutrition(BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        new BigDecimal("100")));
+        Ingredient bakingSoda = createIngredient("Baking Soda",
+                createNutrition(BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO));
+        Ingredient chocolate = createIngredient("Chocolate Chips",
+                createNutrition(new BigDecimal("30"),
+                        new BigDecimal("5"),
+                        new BigDecimal("60")));
+        Ingredient soySauce = createIngredient("Soy Sauce",
+                createNutrition(BigDecimal.ZERO,
+                        new BigDecimal("5"),
+                        new BigDecimal("10")));
 
         // Create recipes
         createSpaghettiCarbonara(spaghetti, eggs, pancetta, parmesan);
@@ -213,13 +273,33 @@ public class DataInitializer implements CommandLineRunner {
     /**
      * Creates and persists a new Ingredient with the specified name.
      * @param name the name of the ingredient to create
+     * @param nutrition the nutritional values of teh ingredient
      * @return the created and persisted Ingredient object
      */
-    private Ingredient createIngredient(String name) {
+    private Ingredient createIngredient(String name, Nutrition nutrition) {
         Ingredient ingredient = new Ingredient();
         ingredient.setName(name);
+        if (nutrition == null) {
+            nutrition = new Nutrition(
+                    BigDecimal.ZERO, // fat
+                    BigDecimal.ZERO, // protein
+                    BigDecimal.ZERO  // carbs
+            );
+        }
+        ingredient.setNutrition(nutrition);
         entityManager.persist(ingredient);
         return ingredient;
+    }
+
+    /**
+     * Creates a Nutrition object with the specified values.
+     * @param fat fat in grams per 100g
+     * @param protein protein in grams per 100g
+     * @param carbs carbohydrates in grams per 100g
+     * @return a Nutrition object
+     */
+    private Nutrition createNutrition(BigDecimal fat, BigDecimal protein, BigDecimal carbs) {
+        return new Nutrition(fat, protein, carbs);
     }
 
     /**

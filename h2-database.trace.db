@@ -364,3 +364,9 @@ org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database is already closed (
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1361)
 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1350)
 	at server.Main.main(Main.java:41)
+2026-01-09 18:50:07.518128+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "RECIPES" not found; SQL statement:
+select r1_0.id,r1_0.language_tag,r1_0.name from recipes r1_0 [42102-232]
+2026-01-09 18:50:07.947692+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "RECIPES" not found; SQL statement:
+select r1_0.id,r1_0.language_tag,r1_0.name from recipes r1_0 [42102-232]
