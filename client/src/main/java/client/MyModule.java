@@ -21,16 +21,15 @@ import client.scenes.PrimaryCtrl;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Scopes;
+import client.config.ConfigManager;
 
 public class MyModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-//        binder.bind(MainCtrl.class).in(Scopes.SINGLETON);
-//        binder.bind(AddQuoteCtrl.class).in(Scopes.SINGLETON);
-//        binder.bind(QuoteOverviewCtrl.class).in(Scopes.SINGLETON);
         binder.bind(RecipesCtrl.class).in(Scopes.SINGLETON);
         binder.bind(AddRecipeCtrl.class).in(Scopes.SINGLETON);
         binder.bind(PrimaryCtrl.class).in(Scopes.SINGLETON);
+        binder.bind(ConfigManager.class).in(Scopes.SINGLETON);
     }
 }
