@@ -63,7 +63,7 @@
                            <children>
                               <Button mnemonicParsing="false" onAction="#addIngredient" text="Add" />
                               <Button mnemonicParsing="false" onAction="#editIngredient" text="Edit" />
-                              <Button mnemonicParsing="false" text="Delete" />
+                              <Button mnemonicParsing="false" onAction="#deleteIngredient" text="Delete" />
                            </children>
                            <VBox.margin>
                               <Insets />
@@ -84,6 +84,7 @@
                               <Insets left="45.0" />
                            </padding>
                         </HBox>
+                        <Label fx:id="recipeKcal" prefHeight="29.0" prefWidth="142.0" />
                      </children>
                   </VBox>
                </children>

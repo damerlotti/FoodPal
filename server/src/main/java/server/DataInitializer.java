@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import jakarta.transaction.Transactional;
 import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
+import java.util.Locale;
 // NOTE: Some ingredients may serialize as IDs due to Jackson circular references
 // This is a known minor issue that doesn't affect functionality
 // this class has been made by AI
@@ -77,7 +78,6 @@ public class DataInitializer implements CommandLineRunner {
         Ingredient cheese = createIngredient("Cheese");
         Ingredient onion = createIngredient("Onion");
         Ingredient garlic = createIngredient("Garlic");
-        Ingredient milk = createIngredient("Milk");
         Ingredient sugar = createIngredient("Sugar");
         Ingredient bakingSoda = createIngredient("Baking Soda");
 
@@ -231,6 +231,7 @@ public class DataInitializer implements CommandLineRunner {
     private Recipe createRecipe(String name) {
         Recipe recipe = new Recipe();
         recipe.setName(name);
+        recipe.setLanguageTag(Locale.ENGLISH.toLanguageTag());
         return recipe;
     }
 
