@@ -108,14 +108,7 @@ public class MainLayoutCtrl implements Initializable {
         primaryCtrl.showShoppingList(); 
     }
 
-    /**
-<<<<<<< client/src/main/java/client/scenes/MainLayoutCtrl.java
-     * Targetting the View -> ShoppingList menu item, so we delegate responsibility to primaryCtrl
-     */
-    @FXML
-    public void showShoppingList() {
-        primaryCtrl.showShoppingList();
-=======
+    /** 
      * Returns a string capitalized.
      * @param s The language string
      * @return The properly capitalised string
@@ -167,6 +160,5 @@ public class MainLayoutCtrl implements Initializable {
                 setTooltip(new javafx.scene.control.Tooltip(locale.getDisplayName(locale)));
             }
         };
->>>>>>> client/src/main/java/client/scenes/MainLayoutCtrl.java
     }
 }
