@@ -26,6 +26,7 @@ public class RecipesCtrl implements Initializable {
 
     private final ServerUtils server;
     private final PrimaryCtrl primaryCtrl;
+    private final RecipeListCellFactory cellFactory;
 
     // fxml link, keep in mind that it must match with the id in scene builder
     // that's the left-hand side
@@ -58,11 +59,14 @@ public class RecipesCtrl implements Initializable {
      *
      * @param server      the server utils
      * @param primaryCtrl primaryCtrl
+     * @param cellFactory the cell factory to keep favourites local
      */
     @Inject
-    public RecipesCtrl(ServerUtils server, PrimaryCtrl primaryCtrl) {
+    public RecipesCtrl(ServerUtils server, PrimaryCtrl primaryCtrl,
+                       RecipeListCellFactory cellFactory) {
         this.server = server;
         this.primaryCtrl = primaryCtrl;
+        this.cellFactory = cellFactory;
     }
 
     // runs immediately when the screen opens
@@ -75,7 +79,7 @@ public class RecipesCtrl implements Initializable {
         recipeList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showRecipeDetails(newValue)
         );
-        recipeList.setCellFactory(new RecipeListCellFactory());
+        recipeList.setCellFactory(cellFactory);
         // the ui list contains our data, currently empty
         refresh();
 
@@ -149,7 +153,7 @@ public class RecipesCtrl implements Initializable {
         // Same filter in toggleFavoritesFilter
         if (favoritesToggle.isSelected()) {
             filteredRecipes.setPredicate(recipe ->
-                    RecipeListCellFactory.isFavorite(recipe.getId())
+                    cellFactory.isFavorite(recipe.getId())
             );
         }
     }
@@ -160,7 +164,7 @@ public class RecipesCtrl implements Initializable {
     public void toggleFavoritesFilter() {
         if (favoritesToggle.isSelected()) {
             filteredRecipes.setPredicate(recipe ->
-                    RecipeListCellFactory.isFavorite(recipe.getId())
+                    cellFactory.isFavorite(recipe.getId())
             );
             favoritesToggle.setText("Show All");
         } else {
