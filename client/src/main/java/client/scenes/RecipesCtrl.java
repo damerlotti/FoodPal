@@ -1,6 +1,8 @@
 package client.scenes;
 
 import client.MyWebSocketClient;
+import client.config.Config;
+import client.config.ConfigManager;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.*;
@@ -72,7 +74,15 @@ public class RecipesCtrl implements Initializable {
     // runs immediately when the screen opens
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // special javafx list that updates the UI automatically
+        initializeRecipeList();
+        initializeScaler();
+        initializeWebSocket();
+    }
+
+    /**
+     * initializes the recipe list
+     */
+    private void initializeRecipeList() {
         allRecipes = FXCollections.observableArrayList();
         filteredRecipes = new FilteredList<>(allRecipes);
         recipeList.setItems(filteredRecipes);
@@ -80,19 +90,17 @@ public class RecipesCtrl implements Initializable {
                 (observable, oldValue, newValue) -> showRecipeDetails(newValue)
         );
         recipeList.setCellFactory(cellFactory);
-        // the ui list contains our data, currently empty
         refresh();
+    }
 
+    /**
+     * initializes the scaler
+     */
+    private void initializeScaler() {
         scaler.setValueFactory(
                 new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 10.0, 1.0, 0.5)
         );
-        scaler.getEditor().setTextFormatter(new TextFormatter<>(change -> {
-            String newText = change.getControlNewText();
-            if (newText.matches("-?([0-9]*\\.[0-9]*)?")) {  // checks if it's a number
-                return change;
-            }
-            return null;
-        }));
+        scaler.getEditor().setTextFormatter(createNumberTextFormatter());
         scaler.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 Recipe current = recipeList.getSelectionModel().getSelectedItem();
@@ -102,12 +110,31 @@ public class RecipesCtrl implements Initializable {
                 updateVisuals(newVal);
             }
         });
+    }
 
+    /**
+     * Creates a text formatter that only allows optional decimal point
+     * and optional minus sign
+     * @return a TextFormatter for numeric validation
+     */
+    private TextFormatter<String> createNumberTextFormatter() {
+        return new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            return newText.matches("-?([0-9]*\\.[0-9]*)?") ? change : null;
+        });
+    }
+
+    /**
+     * initializes the websocket
+     */
+    private void initializeWebSocket() {
         webSocket.connect("ws://localhost:8080/websocket");
+
         webSocket.subscribe("/topic/recipes", Object.class, obj -> {
             System.out.println("Something changed in the list!");
-            refresh(); // reload the list
+            refresh();
         });
+
         recipeList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (currentRecipeSubscription != null) {
                 currentRecipeSubscription.unsubscribe();
@@ -125,6 +152,11 @@ public class RecipesCtrl implements Initializable {
         });
     }
 
+    /**
+     * shows an alert
+     * @param title the title of the alert
+     * @param content the content of the alert
+     */
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
