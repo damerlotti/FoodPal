@@ -3,10 +3,7 @@ package client.scenes;
 import client.MyWebSocketClient;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
-import commons.Measurement;
-import commons.Recipe;
-import commons.RecipeIngredient;
-import commons.RecipeStep;
+import commons.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -21,6 +18,8 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -28,6 +27,7 @@ public class RecipesCtrl implements Initializable {
 
     private final ServerUtils server;
     private final PrimaryCtrl primaryCtrl;
+    private final RecipeListCellFactory cellFactory;
 
     // fxml link, keep in mind that it must match with the id in scene builder
     // that's the left-hand side
@@ -37,6 +37,9 @@ public class RecipesCtrl implements Initializable {
     // and this is the right-hand side
     @FXML
     private Label recipeTitle;
+    @FXML
+    private Spinner<Double> scaler;
+    private Map<Long, Double> scalingMap = new HashMap<>();
     @FXML
     private Label recipeKcal;
     @FXML
@@ -65,11 +68,14 @@ public class RecipesCtrl implements Initializable {
      *
      * @param server      the server utils
      * @param primaryCtrl primaryCtrl
+     * @param cellFactory the cell factory to keep favourites local
      */
     @Inject
-    public RecipesCtrl(ServerUtils server, PrimaryCtrl primaryCtrl) {
+    public RecipesCtrl(ServerUtils server, PrimaryCtrl primaryCtrl,
+                       RecipeListCellFactory cellFactory) {
         this.server = server;
         this.primaryCtrl = primaryCtrl;
+        this.cellFactory = cellFactory;
     }
 
     // runs immediately when the screen opens
@@ -82,9 +88,30 @@ public class RecipesCtrl implements Initializable {
         recipeList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showRecipeDetails(newValue)
         );
-        recipeList.setCellFactory(new RecipeListCellFactory());
+        recipeList.setCellFactory(cellFactory);
         // the ui list contains our data, currently empty
         refresh();
+
+        scaler.setValueFactory(
+                new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 10.0, 1.0, 0.5)
+        );
+        scaler.getEditor().setTextFormatter(new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            if (newText.matches("-?([0-9]*\\.[0-9]*)?")) {  // checks if it's a number
+                return change;
+            }
+            return null;
+        }));
+        scaler.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                Recipe current = recipeList.getSelectionModel().getSelectedItem();
+                if (current != null) {
+                    scalingMap.put(current.getId(), newVal);
+                }
+                updateVisuals(newVal);
+            }
+        });
+
         webSocket.connect("ws://localhost:8080/websocket");
         webSocket.subscribe("/topic/recipes", Object.class, obj -> {
             System.out.println("Something changed in the list!");
@@ -140,6 +167,12 @@ public class RecipesCtrl implements Initializable {
                 showRecipeDetails(newRecipe);
             }
         }
+        // Same filter in toggleFavoritesFilter
+        if (favoritesToggle.isSelected()) {
+            filteredRecipes.setPredicate(recipe ->
+                    cellFactory.isFavorite(recipe.getId())
+            );
+        }
     }
     /**
      * Toggle between showing all recipes and favorites only
@@ -148,7 +181,7 @@ public class RecipesCtrl implements Initializable {
     public void toggleFavoritesFilter() {
         if (favoritesToggle.isSelected()) {
             filteredRecipes.setPredicate(recipe ->
-                    RecipeListCellFactory.isFavorite(recipe.getId())
+                    cellFactory.isFavorite(recipe.getId())
             );
             favoritesToggle.setText("Show All");
         } else {
@@ -176,6 +209,9 @@ public class RecipesCtrl implements Initializable {
 
             return;
         }
+        // we check to see the stored scale value (if not just put 1)
+        Double savedFactor = scalingMap.getOrDefault(recipe.getId(), 1.0);
+        scaler.getValueFactory().setValue(savedFactor);  // this will call updateVisuals
 
         recipeTitle.setText(recipe.getName());
         // Show servings label with current value
@@ -203,6 +239,31 @@ public class RecipesCtrl implements Initializable {
         }
     }
 
+    private void updateVisuals(double factor) {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        if (currentRecipe == null) {
+            return;
+        }
+        ingredientsList.setCellFactory(param -> new ListCell<RecipeIngredient>() {
+            @Override
+            protected void updateItem(RecipeIngredient item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                }
+                else {
+                    Measurement displayMeasurement = item.getAmount().scale(factor)
+                                                         .normalizeMeasurement();
+
+                    RecipeIngredient aux = new RecipeIngredient();
+                    aux.setIngredient(item.getIngredient());
+                    aux.setId(item.getId());
+                    aux.setAmount(displayMeasurement);
+                    setText(aux.toString());
+                }
+            }
+        });
+    }
 
     /**
      * When the add button for an ingredient is pressed, the user can add a new ingredient

@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -20,6 +22,7 @@ public class Config {
 
     private int configVersion = CURRENT_VERSION;
     private String prefLocale = "";
+    private Set<Long> favoriteRecipeIds = new HashSet<>();
 
     /**
      * Create a new Config with default values.
@@ -166,5 +169,48 @@ public class Config {
      */
     public void setPrefLocale(String languageFilter) {
         this.prefLocale = languageFilter;
+    }
+
+    /**
+     * Get the set of favorite recipe IDs.
+     * @return the favorite recipe IDs
+     */
+    public Set<Long> getFavoriteRecipeIds() {
+        return favoriteRecipeIds;
+    }
+
+    /**
+     * Set the set of favorite recipe IDs.
+     * @param favoriteRecipeIds the favorite recipe IDs to set
+     */
+    public void setFavoriteRecipeIds(Set<Long> favoriteRecipeIds) {
+        this.favoriteRecipeIds = favoriteRecipeIds;
+    }
+
+    /**
+     * Add a recipe ID to favorites.
+     * @param recipeId the recipe ID to add
+     * @return true if the set changed as a result of the call
+     */
+    public boolean addFavorite(Long recipeId) {
+        return favoriteRecipeIds.add(recipeId);
+    }
+
+    /**
+     * Remove a recipe ID from favorites.
+     * @param recipeId the recipe ID to remove
+     * @return true if the set contained the specified element
+     */
+    public boolean removeFavorite(Long recipeId) {
+        return favoriteRecipeIds.remove(recipeId);
+    }
+
+    /**
+     * Check if a recipe ID is in favorites.
+     * @param recipeId the recipe ID to check
+     * @return true if the recipe is favorited
+     */
+    public boolean isFavorite(Long recipeId) {
+        return favoriteRecipeIds.contains(recipeId);
     }
 }

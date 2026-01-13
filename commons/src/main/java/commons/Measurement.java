@@ -101,6 +101,61 @@ public class Measurement {
     }
 
     /**
+     * Scales a measurement by some factor
+     * @param factor the factor to scale
+     * @return the new measurement
+     */
+    public Measurement scale(double factor) {
+        if (this.value == null) {
+            return new Measurement(java.math.BigDecimal.ZERO, this.unit);
+        }
+
+        java.math.BigDecimal newVal = this.value.multiply(java.math.BigDecimal.valueOf(factor));
+        return new Measurement(newVal, this.unit);
+    }
+    /**
+     * Normalizes measurements (e.g 1000g becomes 1kg)
+     * @return the new measurement
+     */
+    public Measurement normalizeMeasurement() {
+        if (unit == null) {
+            return this;
+        }
+        if (unit == Unit.MG || unit == Unit.G || unit == Unit.KG) {
+            Measurement base = this.convert(Unit.G);
+            BigDecimal g = base.getValue();
+            if (g.compareTo(BigDecimal.valueOf(1000)) >= 0) {
+                return this.convert(Unit.KG);
+            }
+            else if (g.compareTo(BigDecimal.ONE) >= 0) {
+                return this.convert(Unit.G);
+            }
+            else {
+                return this.convert(Unit.MG);
+            }
+        }
+        if (unit == Unit.ML || unit == Unit.L) {
+            Measurement base = this.convert(Unit.ML);
+            BigDecimal ml = base.getValue();
+            if (ml.compareTo(BigDecimal.valueOf(1000)) >= 0) {
+                return this.convert(Unit.L);
+            }
+            else {
+                return this.convert(Unit.ML);
+            }
+        }
+        if (unit == Unit.TSP || unit == Unit.TBSP || unit == Unit.CUP) {
+            if (unit == Unit.TSP && value.compareTo(BigDecimal.valueOf(3)) >= 0) {
+                return this.convert(Unit.TBSP);
+            }
+            if (unit == Unit.TBSP && value.compareTo(BigDecimal.valueOf(4)) >= 0) {
+                return this.convert(Unit.CUP);
+            }
+        }
+        return this;
+    }
+
+    /**
      * Returns the value.
      * @return The value.
      */
