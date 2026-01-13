@@ -190,7 +190,13 @@ public class RecipesCtrl implements Initializable {
         boolean favRecipeExists;
         for (int i = 0; i < favRecipesIDArray.size(); i++) {
             Long recipeID = favRecipesIDArray.get(i);
-            favRecipeExists = allRecipes.contains(recipeID);
+            favRecipeExists = false;
+            for (Recipe recipe : allRecipes) {
+                if (recipe.getId() == recipeID) {
+                    favRecipeExists = true;
+                    break;
+                }
+            }
             if (!favRecipeExists) {
                 favConfig.removeFavorite(recipeID);
             }
