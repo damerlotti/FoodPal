@@ -2,7 +2,6 @@ package client.scenes;
 
 import client.MyWebSocketClient;
 import client.config.Config;
-import client.config.ConfigManager;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.*;
@@ -19,10 +18,7 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class RecipesCtrl implements Initializable {
 
@@ -188,6 +184,18 @@ public class RecipesCtrl implements Initializable {
                     cellFactory.isFavorite(recipe.getId())
             );
         }
+        Config favConfig = cellFactory.getConfigManager().getConfig();
+        Set<Long> favRecipesID = favConfig.getFavoriteRecipeIds();
+        ArrayList<Long> favRecipesIDArray = new ArrayList<>(favRecipesID);
+        boolean favRecipeExists;
+        for (int i = 0; i < favRecipesIDArray.size(); i++) {
+            Long recipeID = favRecipesIDArray.get(i);
+            favRecipeExists = allRecipes.contains(recipeID);
+            if (!favRecipeExists) {
+                favConfig.removeFavorite(recipeID);
+            }
+        }
+        cellFactory.getConfigManager().save();
     }
     /**
      * Toggle between showing all recipes and favorites only
