@@ -85,7 +85,7 @@
                            <children>
                               <Button mnemonicParsing="false" onAction="#addIngredient" text="Add" />
                               <Button mnemonicParsing="false" onAction="#editIngredient" text="Edit" />
-                              <Button mnemonicParsing="false" text="Delete" />
+                              <Button mnemonicParsing="false" onAction="#deleteIngredient" text="Delete" />
                            </children>
                            <VBox.margin>
                               <Insets />
@@ -96,7 +96,7 @@
                         </HBox>
                         <Label text="Preparation" />
                         <ListView fx:id="stepsList" prefHeight="117.0" prefWidth="296.0" VBox.vgrow="ALWAYS" />
-                        <Label fx:id="recipeKcal" minHeight="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="64.0" text="Label" />
+                        <Label fx:id="recipeKcal" minHeight="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="124.0" text=" " />
                         <HBox prefHeight="27.0" prefWidth="296.0" spacing="35.0">
                            <children>
                               <Button mnemonicParsing="false" onAction="#onAddStepClicked" text="Add" />
