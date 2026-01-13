@@ -49,13 +49,7 @@ public class RecipesCtrl implements Initializable {
     @FXML
     private ToggleButton favoritesToggle;
     @FXML
-    private Button editServingsButton;
-    @FXML
-    private HBox infoBox;
-    @FXML
-    private ChoiceBox<Integer> servingsField;
-    @FXML
-    private Label servings;
+    private Spinner<Integer> servings;
 
     private ObservableList<Recipe> allRecipes;
     private FilteredList<Recipe> filteredRecipes;
@@ -112,6 +106,18 @@ public class RecipesCtrl implements Initializable {
             }
         });
 
+        SpinnerValueFactory<Integer> servingsFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1);
+        servings.setValueFactory(servingsFactory);
+
+        servings.valueProperty().addListener((obs, oldVal, newVal) -> {
+            Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+            if (currentRecipe != null && newVal != null && !newVal.equals(oldVal)) {
+                currentRecipe.setServings(newVal);
+                server.updateRecipe(currentRecipe);
+            }
+        });
+
         webSocket.connect("ws://localhost:8080/websocket");
         webSocket.subscribe("/topic/recipes", Object.class, obj -> {
             System.out.println("Something changed in the list!");
@@ -152,7 +158,7 @@ public class RecipesCtrl implements Initializable {
         // Same filter in toggleFavoritesFilter
         if (favoritesToggle.isSelected()) {
             filteredRecipes.setPredicate(recipe ->
-                    RecipeListCellFactory.isFavorite(recipe.getId())
+                    cellFactory.isFavorite(recipe.getId())
             );
         } else {
             filteredRecipes.setPredicate(null); // show all if toggle off
@@ -200,11 +206,8 @@ public class RecipesCtrl implements Initializable {
             ingredientsList.getItems().clear();
             stepsList.getItems().clear();
 
-            servings.setVisible(false);
             recipeKcal.setVisible(false);
-            editServingsButton.setVisible(false);
 
-            servings.setText("");
             recipeKcal.setText("");
 
             return;
@@ -216,9 +219,8 @@ public class RecipesCtrl implements Initializable {
         recipeTitle.setText(recipe.getName());
         // Show servings label with current value
         int currentServings = recipe.getServings() > 0 ? recipe.getServings() : 1;
-        servings.setText("Servings: " + currentServings);
+        servings.getValueFactory().setValue(currentServings);
         servings.setVisible(true);
-        editServingsButton.setVisible(true);
 
         // Show calories
         recipeKcal.setText("Kcal/100g: " + recipe.estimatedRecipeKcal()
@@ -655,7 +657,6 @@ public class RecipesCtrl implements Initializable {
             }
 
             recipe.setServings(newServings); // update local object
-            servings.setText("Servings: " + newServings); // update label
 
             try {
                 server.updateRecipe(recipe); // save to server
