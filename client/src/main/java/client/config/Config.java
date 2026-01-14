@@ -11,8 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -22,8 +22,7 @@ public class Config {
 
     private int configVersion = CURRENT_VERSION;
     private String prefLocale = "";
-    private Set<Long> favoriteRecipeIds = new HashSet<>();
-
+    private Map<Long, String> favoriteRecipes = new HashMap<>();
     /**
      * Create a new Config with default values.
      */
@@ -171,38 +170,40 @@ public class Config {
         this.prefLocale = languageFilter;
     }
 
+
     /**
-     * Get the set of favorite recipe IDs.
-     * @return the favorite recipe IDs
+     * Get the map of favorite recipes (ID -> Name).
+     * @return the favorite recipes map
      */
-    public Set<Long> getFavoriteRecipeIds() {
-        return favoriteRecipeIds;
+    public Map<Long, String> getFavoriteRecipes() {
+        return favoriteRecipes;
     }
 
     /**
-     * Set the set of favorite recipe IDs.
-     * @param favoriteRecipeIds the favorite recipe IDs to set
+     * Set the map of favorite recipes (ID -> Name).
+     * @param favoriteRecipes the favorite recipes map to set
      */
-    public void setFavoriteRecipeIds(Set<Long> favoriteRecipeIds) {
-        this.favoriteRecipeIds = favoriteRecipeIds;
+    public void setFavoriteRecipes(Map<Long, String> favoriteRecipes) {
+        this.favoriteRecipes = favoriteRecipes;
     }
 
     /**
-     * Add a recipe ID to favorites.
+     * Add a recipe ID and name to favorites.
      * @param recipeId the recipe ID to add
-     * @return true if the set changed as a result of the call
+     * @param recipeName the recipe name to add
+     * @return true if the map changed as a result of the call
      */
-    public boolean addFavorite(Long recipeId) {
-        return favoriteRecipeIds.add(recipeId);
+    public boolean addFavorite(Long recipeId, String recipeName) {
+        return favoriteRecipes.put(recipeId, recipeName) == null;
     }
 
     /**
      * Remove a recipe ID from favorites.
      * @param recipeId the recipe ID to remove
-     * @return true if the set contained the specified element
+     * @return true if the map contained the specified element
      */
     public boolean removeFavorite(Long recipeId) {
-        return favoriteRecipeIds.remove(recipeId);
+        return favoriteRecipes.remove(recipeId) != null;
     }
 
     /**
@@ -211,6 +212,15 @@ public class Config {
      * @return true if the recipe is favorited
      */
     public boolean isFavorite(Long recipeId) {
-        return favoriteRecipeIds.contains(recipeId);
+        return favoriteRecipes.containsKey(recipeId);
+    }
+
+    /**
+     * Get the name of a favorite recipe by ID.
+     * @param recipeId the recipe ID
+     * @return the recipe name, or null if not found
+     */
+    public String getFavoriteRecipeName(Long recipeId) {
+        return favoriteRecipes.get(recipeId);
     }
 }

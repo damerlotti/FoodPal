@@ -246,20 +246,32 @@ public class RecipesCtrl implements Initializable {
             );
         }
         Config favConfig = cellFactory.getConfigManager().getConfig();
-        Set<Long> favRecipesID = favConfig.getFavoriteRecipeIds();
-        ArrayList<Long> favRecipesIDArray = new ArrayList<>(favRecipesID);
+        Map<Long, String> favRecipes = favConfig.getFavoriteRecipes();
+        List<Long> favRecipeIds = new ArrayList<>(favRecipes.keySet());
         boolean favRecipeExists;
-        for (int i = 0; i < favRecipesIDArray.size(); i++) {
-            Long recipeID = favRecipesIDArray.get(i);
+        for (Long recipeID : favRecipeIds) {
             favRecipeExists = false;
             for (Recipe recipe : allRecipes) {
                 if (recipe.getId() == recipeID) {
                     favRecipeExists = true;
+                    String currentName = recipe.getName();
+                    String storedName = favRecipes.get(recipeID);
+                    if (!currentName.equals(storedName)) {
+                        favConfig.addFavorite(recipeID, currentName);
+                    }
                     break;
                 }
             }
             if (!favRecipeExists) {
+                String recipeName = favRecipes.get(recipeID);
+                if (recipeName == null) {
+                    recipeName = "Standard Recipe";
+                }
                 favConfig.removeFavorite(recipeID);
+                showAlert(I18n.get("alert.favouriteDeleted"),
+                        I18n.get("alert.mournOverDeletedFavRecipePart1") +
+                                " " + recipeName + " " +
+                                I18n.get("alert.mournOverDeletedFavRecipePart2"));
             }
         }
         cellFactory.getConfigManager().save();
@@ -678,7 +690,7 @@ public class RecipesCtrl implements Initializable {
         confirm.setHeaderText(I18n.get("dialog.deleteRecipe.header"));
         confirm.setContentText(I18n.get("dialog.deleteRecipe.content"));
         confirm.setGraphic(null);
-        
+
         ButtonType deleteButton = new ButtonType(
                 I18n.get("dialog.deleteRecipe.delete"), ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButton = new ButtonType(
@@ -700,6 +712,20 @@ public class RecipesCtrl implements Initializable {
             alert.showAndWait();
             return;
         }
+    }
+
+    /**
+     * given a recipe id, it returns the name of the recipe
+     * @param recipeId the id of the recipe
+     * @return the name of the recipe if it exists, else null
+     */
+    public String findRecipeNameById(long recipeId) {
+        for (Recipe recipe : allRecipes) {
+            if (recipe.getId() == recipeId) {
+                return recipe.getName();
+            }
+        }
+        return null; // or throw exception if not found
     }
 
 }
