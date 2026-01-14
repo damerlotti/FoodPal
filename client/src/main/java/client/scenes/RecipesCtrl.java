@@ -267,6 +267,7 @@ public class RecipesCtrl implements Initializable {
                 if (recipeName == null) {
                     recipeName = "Standard Recipe";
                 }
+
                 favConfig.removeFavorite(recipeID);
                 showAlert(I18n.get("alert.favouriteDeleted"),
                         I18n.get("alert.mournOverDeletedFavRecipePart1") +
