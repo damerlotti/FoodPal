@@ -27,7 +27,7 @@ class RecipeListCellFactoryTest {
     @Test
     void testIsFavoriteWhenTrue() {
         long recipeId = 1L;
-        configManager.getConfig().addFavorite(recipeId);
+        configManager.getConfig().addFavorite(recipeId, "Test recipe 1");
 
         boolean result = factory.isFavorite(recipeId);
 
@@ -46,9 +46,9 @@ class RecipeListCellFactoryTest {
     @Test
     void testGetFavoriteIds() {
         Config config = configManager.getConfig();
-        config.addFavorite(1L);
-        config.addFavorite(2L);
-        config.addFavorite(3L);
+        config.addFavorite(1L, "Test recipe 1");
+        config.addFavorite(2L, "Test recipe 2");
+        config.addFavorite(3L, "Test recipe 3");
 
         Set<Long> result = factory.getFavoriteIds();
 
@@ -74,7 +74,7 @@ class RecipeListCellFactoryTest {
 
         assertFalse(factory.isFavorite(recipeId));
 
-        config.addFavorite(recipeId);
+        config.addFavorite(recipeId, "Test recipe 1");
         assertTrue(factory.isFavorite(recipeId));
 
         config.removeFavorite(recipeId);
@@ -84,7 +84,7 @@ class RecipeListCellFactoryTest {
     @Test
     void testGetFavoriteIdsReturnsCopy() {
         Config config = configManager.getConfig();
-        config.addFavorite(1L);
+        config.addFavorite(1L, "Test recipe 1");
 
         Set<Long> result1 = factory.getFavoriteIds();
         Set<Long> result2 = factory.getFavoriteIds();
@@ -97,9 +97,9 @@ class RecipeListCellFactoryTest {
     void testMultipleFavoriteOperations() {
         Config config = configManager.getConfig();
 
-        config.addFavorite(10L);
-        config.addFavorite(20L);
-        config.addFavorite(30L);
+        config.addFavorite(10L, "Test recipe 1");
+        config.addFavorite(20L, "Test recipe 2");
+        config.addFavorite(30L, "Test recipe 3");
 
         assertTrue(factory.isFavorite(10L));
         assertTrue(factory.isFavorite(20L));
