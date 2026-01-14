@@ -2,6 +2,7 @@ package client.scenes;
 
 import client.MyWebSocketClient;
 import client.i18n.I18n;
+import client.config.Config;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.*;
@@ -18,10 +19,7 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class RecipesCtrl implements Initializable {
 
@@ -105,6 +103,13 @@ public class RecipesCtrl implements Initializable {
     // runs immediately when the screen opens
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        initializeRecipeList();
+        initializeScaler();
+        initializeWebSocket();
+        initializeLanguage();
+    }
+
+    private void initializeLanguage() {
         // Bind labels and buttons to i18n
         allRecipesLabel.textProperty().bind(I18n.createStringBinding("recipes.title"));
         refreshButton.textProperty().bind(I18n.createStringBinding("recipes.refresh"));
@@ -124,12 +129,16 @@ public class RecipesCtrl implements Initializable {
 
         // Bind favorites toggle to i18n
         favoritesToggle.textProperty().bind(
-            javafx.beans.binding.Bindings.when(favoritesToggle.selectedProperty())
-                .then(I18n.createStringBinding("recipes.showAll"))
-                .otherwise(I18n.createStringBinding("recipes.showFavorite"))
+                javafx.beans.binding.Bindings.when(favoritesToggle.selectedProperty())
+                        .then(I18n.createStringBinding("recipes.showAll"))
+                        .otherwise(I18n.createStringBinding("recipes.showFavorite"))
         );
+    }
 
-        // special javafx list that updates the UI automatically
+    /**
+     * initializes the recipe list
+     */
+    private void initializeRecipeList() {
         allRecipes = FXCollections.observableArrayList();
         filteredRecipes = new FilteredList<>(allRecipes);
         recipeList.setItems(filteredRecipes);
@@ -139,17 +148,16 @@ public class RecipesCtrl implements Initializable {
         recipeList.setCellFactory(cellFactory);
         // the ui list contains our data, currently empty
         refresh();
+    }
 
+    /**
+     * initializes the scaler
+     */
+    private void initializeScaler() {
         scaler.setValueFactory(
                 new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 10.0, 1.0, 0.5)
         );
-        scaler.getEditor().setTextFormatter(new TextFormatter<>(change -> {
-            String newText = change.getControlNewText();
-            if (newText.matches("-?([0-9]*\\.[0-9]*)?")) {  // checks if it's a number
-                return change;
-            }
-            return null;
-        }));
+        scaler.getEditor().setTextFormatter(createNumberTextFormatter());
         scaler.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 Recipe current = recipeList.getSelectionModel().getSelectedItem();
@@ -159,12 +167,31 @@ public class RecipesCtrl implements Initializable {
                 updateVisuals(newVal);
             }
         });
+    }
 
+    /**
+     * Creates a text formatter that only allows optional decimal point
+     * and optional minus sign
+     * @return a TextFormatter for numeric validation
+     */
+    private TextFormatter<String> createNumberTextFormatter() {
+        return new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            return newText.matches("-?([0-9]*\\.[0-9]*)?") ? change : null;
+        });
+    }
+
+    /**
+     * initializes the websocket
+     */
+    private void initializeWebSocket() {
         webSocket.connect("ws://localhost:8080/websocket");
+
         webSocket.subscribe("/topic/recipes", Object.class, obj -> {
             System.out.println("Something changed in the list!");
-            refresh(); // reload the list
+            refresh();
         });
+
         recipeList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (currentRecipeSubscription != null) {
                 currentRecipeSubscription.unsubscribe();
@@ -182,6 +209,11 @@ public class RecipesCtrl implements Initializable {
         });
     }
 
+    /**
+     * shows an alert
+     * @param title the title of the alert
+     * @param content the content of the alert
+     */
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -213,6 +245,24 @@ public class RecipesCtrl implements Initializable {
                     cellFactory.isFavorite(recipe.getId())
             );
         }
+        Config favConfig = cellFactory.getConfigManager().getConfig();
+        Set<Long> favRecipesID = favConfig.getFavoriteRecipeIds();
+        ArrayList<Long> favRecipesIDArray = new ArrayList<>(favRecipesID);
+        boolean favRecipeExists;
+        for (int i = 0; i < favRecipesIDArray.size(); i++) {
+            Long recipeID = favRecipesIDArray.get(i);
+            favRecipeExists = false;
+            for (Recipe recipe : allRecipes) {
+                if (recipe.getId() == recipeID) {
+                    favRecipeExists = true;
+                    break;
+                }
+            }
+            if (!favRecipeExists) {
+                favConfig.removeFavorite(recipeID);
+            }
+        }
+        cellFactory.getConfigManager().save();
     }
     /**
      * Toggle between showing all recipes and favorites only

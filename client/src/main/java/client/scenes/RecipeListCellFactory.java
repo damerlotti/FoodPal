@@ -159,4 +159,12 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
     public Set<Long> getFavoriteIds() {  // Remove 'static'
         return new HashSet<>(configManager.getConfig().getFavoriteRecipeIds());
     }
+
+    /**
+     * getter for the config manager
+     * @return the config manager
+     */
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
 }
