@@ -9,6 +9,7 @@
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -18,25 +19,31 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <VBox layoutX="29.0" layoutY="14.0" prefHeight="242.0" prefWidth="200.0">
+                  <VBox layoutX="29.0" layoutY="14.0" prefHeight="333.0" prefWidth="237.0">
                      <children>
-                        <Label prefHeight="30.0" prefWidth="110.0" text="All Recipes">
+                        <Label fx:id="allRecipesLabel" prefHeight="30.0" prefWidth="110.0" text="All Recipes">
                            <font>
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Label>
-                        <ListView fx:id="recipeList" prefHeight="210.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                        <ListView fx:id="recipeList" prefHeight="191.0" prefWidth="212.0" VBox.vgrow="ALWAYS" />
+                        <HBox prefHeight="14.0" prefWidth="237.0">
+                           <children>
+                              <ToggleButton fx:id="favoritesToggle" mnemonicParsing="false" onAction="#toggleFavoritesFilter" prefHeight="25.0" prefWidth="211.0" text="Show Favourite" />
+                              <Pane prefHeight="25.0" prefWidth="143.0" />
+                              <Button fx:id="refreshButton" mnemonicParsing="false" onAction="#refresh" prefHeight="25.0" prefWidth="142.0" text="Refresh" />
+                           </children>
+                        </HBox>
                      </children>
                   </VBox>
                    <HBox alignment="CENTER" layoutX="29.0" layoutY="359.0" prefHeight="25.0" prefWidth="237.0" spacing="15.0">
                        <children>
-                           <Button mnemonicParsing="false" onAction="#switchToAddRecipe" text="Add" />
-                        <Button mnemonicParsing="false" onAction="#onDeleteRecipePressed" text="Delete" />
-                           <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#onClonePressed" text="Clone" />
-                           <Button layoutX="87.0" layoutY="10.0" mnemonicParsing="false" onAction="#onPrintPressed" text="Print" />
+                           <Button fx:id="addRecipeButton" mnemonicParsing="false" onAction="#switchToAddRecipe" text="Add" />
+                        <Button fx:id="deleteRecipeButton" mnemonicParsing="false" onAction="#onDeleteRecipePressed" text="Delete" />
+                           <Button fx:id="cloneButton" layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#onClonePressed" text="Clone" />
+                           <Button fx:id="printButton" layoutX="87.0" layoutY="10.0" mnemonicParsing="false" onAction="#onPrintPressed" text="Print" />
                        </children>
                    </HBox>
-                  <ToggleButton fx:id="favoritesToggle" layoutX="29.0" layoutY="268.0" mnemonicParsing="false" onAction="#toggleFavoritesFilter" prefHeight="18.0" prefWidth="102.0" text="Show Favourite" />
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="455.0" prefWidth="80.0">
@@ -50,42 +57,21 @@
                                     <Font name="System Bold" size="20.0" />
                                  </font>
                               </Label>
-                              <Button mnemonicParsing="false" onAction="#onEditTitleClicked" text="Edit">
+                              <Button fx:id="editTitleButton" mnemonicParsing="false" onAction="#onEditTitleClicked" text="Edit">
                                  <HBox.margin>
                                     <Insets top="5.0" />
                                  </HBox.margin>
                               </Button>
                            </children>
                         </HBox>
-                        <HBox prefHeight="33.0" prefWidth="296.0" spacing="50.0">
-                           <children>
-                              <HBox prefHeight="28.0" prefWidth="118.0" spacing="10.0">
-                                 <children>
-                                    <Label text="Scale:" />
-                                    <Spinner fx:id="scaler" prefHeight="18.0" prefWidth="62.0" />
-                                 </children>
-                              </HBox>
-                              <HBox prefHeight="28.0" prefWidth="127.0" spacing="10.0">
-                                 <children>
-                                    <Label text="Servings:" />
-                                    <Spinner fx:id="servings" prefHeight="18.0" prefWidth="62.0" />
-                                 </children>
-                              </HBox>
-                           </children>
-                           <VBox.margin>
-                              <Insets />
-                           </VBox.margin>
-                           <padding>
-                              <Insets top="3.0" />
-                           </padding>
-                        </HBox>
-                        <Label prefHeight="18.0" prefWidth="72.0" text="Ingredients" />
+                        <Spinner fx:id="scaler" prefHeight="18.0" prefWidth="62.0" />
+                        <Label fx:id="ingredientsLabel" prefHeight="18.0" prefWidth="72.0" text="Ingredients" />
                         <ListView fx:id="ingredientsList" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="144.0" prefWidth="296.0" VBox.vgrow="ALWAYS" />
                         <HBox prefHeight="27.0" prefWidth="296.0" spacing="35.0">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#addIngredient" text="Add" />
-                              <Button mnemonicParsing="false" onAction="#editIngredient" text="Edit" />
-                              <Button mnemonicParsing="false" onAction="#deleteIngredient" text="Delete" />
+                              <Button fx:id="addIngredientButton" mnemonicParsing="false" onAction="#addIngredient" text="Add" />
+                              <Button fx:id="editIngredientButton" mnemonicParsing="false" onAction="#editIngredient" text="Edit" />
+                              <Button fx:id="deleteIngredientButton" mnemonicParsing="false" onAction="#deleteIngredient" text="Delete" />
                            </children>
                            <VBox.margin>
                               <Insets />
@@ -94,14 +80,14 @@
                               <Insets left="45.0" right="30.0" />
                            </padding>
                         </HBox>
-                        <Label text="Preparation" />
+                        <Label fx:id="preparationLabel" text="Preparation" />
                         <ListView fx:id="stepsList" prefHeight="117.0" prefWidth="296.0" VBox.vgrow="ALWAYS" />
                         <Label fx:id="recipeKcal" minHeight="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="124.0" text=" " />
                         <HBox prefHeight="27.0" prefWidth="296.0" spacing="35.0">
                            <children>
-                              <Button mnemonicParsing="false" onAction="#onAddStepClicked" text="Add" />
-                              <Button mnemonicParsing="false" onAction="#onEditStepClicked" text="Edit" />
-                              <Button mnemonicParsing="false" onAction="#onDeleteStepClicked" text="Delete" />
+                              <Button fx:id="addStepButton" mnemonicParsing="false" onAction="#onAddStepClicked" text="Add" />
+                              <Button fx:id="editStepButton" mnemonicParsing="false" onAction="#onEditStepClicked" text="Edit" />
+                              <Button fx:id="deleteStepButton" mnemonicParsing="false" onAction="#onDeleteStepClicked" text="Delete" />
                            </children>
                            <padding>
                               <Insets left="45.0" />

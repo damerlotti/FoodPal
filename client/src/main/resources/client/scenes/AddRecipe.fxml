@@ -9,19 +9,17 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddRecipeCtrl">
    <children>
-      <Label layoutX="254.0" layoutY="35.0" text="Enter the title of the recipe" />
-      <TextField fx:id="titleField" layoutX="249.0" layoutY="59.0" />
-      <Button layoutX="345.0" layoutY="351.0" mnemonicParsing="false" onAction="#createRecipe" text="Add Recipe" />
-      <Button layoutX="203.0" layoutY="351.0" mnemonicParsing="false" onAction="#cancel" text="Cancel" />
+      <Label fx:id="titleLabel" layoutX="229.0" layoutY="35.0" text="Enter the title of the recipe" />
+      <TextField fx:id="titleField" layoutX="225.0" layoutY="59.0" />
+      <Button fx:id="addRecipeButton" layoutX="345.0" layoutY="351.0" mnemonicParsing="false" onAction="#createRecipe" text="Add Recipe" />
+      <Button fx:id="cancelButton" layoutX="203.0" layoutY="351.0" mnemonicParsing="false" onAction="#cancel" text="Cancel" />
       <ListView fx:id="ingredientsList" layoutX="200.0" layoutY="122.0" prefHeight="78.0" prefWidth="200.0" />
       <ListView fx:id="stepsList" layoutX="67.0" layoutY="245.0" prefHeight="95.0" prefWidth="347.0" />
-      <Label layoutX="246.0" layoutY="97.0" text="Add the recipe ingredients" />
+      <Label fx:id="ingredientsLabel" layoutX="246.0" layoutY="97.0" text="Add the recipe ingredients" />
       <Button fx:id="addStepButton" layoutX="429.0" layoutY="259.0" mnemonicParsing="false" onAction="#onAddStepClicked" text="Add" />
-      <Button layoutX="429.0" layoutY="293.0" mnemonicParsing="false" onAction="#onDeleteStepClicked" text="Delete" />
-      <Label layoutX="270.0" layoutY="229.0" text="Add the recipe steps" />
-      <Button layoutX="429.0" layoutY="122.0" mnemonicParsing="false" onAction="#onAddIngredient" text="Add" />
-      <Button layoutX="429.0" layoutY="155.0" mnemonicParsing="false" text="Delete" />
-      <ChoiceBox fx:id="servingsField" layoutX="427.0" layoutY="59.0" minHeight="-Infinity" minWidth="-Infinity" prefHeight="25.0" prefWidth="48.0" style="-fx-background-color: white; -fx-border-color: grey; -fx-border-radius: 3;" />
-      <Label layoutX="427.0" layoutY="35.0" text="Servings:" />
+      <Button fx:id="deleteStepButton" layoutX="429.0" layoutY="293.0" mnemonicParsing="false" onAction="#onDeleteStepClicked" text="Delete" />
+      <Label fx:id="stepsLabel" layoutX="270.0" layoutY="229.0" text="Add the recipe steps" />
+      <Button fx:id="addIngredientButton" layoutX="429.0" layoutY="122.0" mnemonicParsing="false" onAction="#onAddIngredient" text="Add" />
+      <Button fx:id="deleteIngredientButton" layoutX="429.0" layoutY="155.0" mnemonicParsing="false" text="Delete" />
    </children>
 </AnchorPane>
