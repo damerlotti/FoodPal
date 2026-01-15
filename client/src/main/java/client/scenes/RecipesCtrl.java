@@ -46,6 +46,8 @@ public class RecipesCtrl implements Initializable {
     private ListView<RecipeStep> stepsList;
     @FXML
     private ToggleButton favoritesToggle;
+    @FXML
+    private Spinner<Integer> servings;
 
     // i18n buttons and labels
     @FXML
@@ -103,8 +105,9 @@ public class RecipesCtrl implements Initializable {
     // runs immediately when the screen opens
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        initializeRecipeList();
         initializeScaler();
+        initializeServings();
+        initializeRecipeList();
         initializeWebSocket();
         initializeLanguage();
     }
@@ -170,6 +173,23 @@ public class RecipesCtrl implements Initializable {
     }
 
     /**
+     * Initializes the servings spinner
+     */
+    private void initializeServings() {
+        SpinnerValueFactory<Integer> servingsFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1);
+        servings.setValueFactory(servingsFactory);
+
+        servings.valueProperty().addListener((obs, oldVal, newVal) -> {
+            Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+            if (currentRecipe != null && newVal != null && !newVal.equals(oldVal)) {
+                currentRecipe.setServings(newVal);
+                server.updateRecipe(currentRecipe);
+            }
+        });
+    }
+
+    /**
      * Creates a text formatter that only allows optional decimal point
      * and optional minus sign
      * @return a TextFormatter for numeric validation
@@ -228,8 +248,15 @@ public class RecipesCtrl implements Initializable {
         Recipe selected = recipeList.getSelectionModel().getSelectedItem();
         Long selectedId = (selected != null) ? selected.getId() : null;
         var recipes = server.getRecipes();
-        allRecipes.clear();
-        allRecipes.addAll(recipes);
+        allRecipes.setAll(recipes);
+        // Same filter in toggleFavoritesFilter
+        if (favoritesToggle.isSelected()) {
+            filteredRecipes.setPredicate(recipe ->
+                    cellFactory.isFavorite(recipe.getId())
+            );
+        } else {
+            filteredRecipes.setPredicate(null); // show all if toggle off
+        }
         if (selectedId != null) {
             Recipe newRecipe = recipeList.getItems().stream()
                     .filter(r -> r.getId() == selectedId)
@@ -237,6 +264,7 @@ public class RecipesCtrl implements Initializable {
                     .orElse(null);
             if (newRecipe != null) {
                 recipeList.getSelectionModel().select(newRecipe);
+                showRecipeDetails(newRecipe);
             }
         }
         // Same filter in toggleFavoritesFilter
@@ -290,6 +318,11 @@ public class RecipesCtrl implements Initializable {
             recipeKcal.setText("");
             ingredientsList.getItems().clear();
             stepsList.getItems().clear();
+
+            recipeKcal.setVisible(false);
+
+            recipeKcal.setText("");
+
             return;
         }
         // we check to see the stored scale value (if not just put 1)
@@ -297,9 +330,20 @@ public class RecipesCtrl implements Initializable {
         scaler.getValueFactory().setValue(savedFactor);  // this will call updateVisuals
 
         recipeTitle.setText(recipe.getName());
-        recipeKcal.setText(I18n.get("recipes.kcal").replace("{0}", recipe.estimatedRecipeKcal()
-                .stripTrailingZeros()
-                .toPlainString()));
+
+        int currentServings = recipe.getServings() > 0 ? recipe.getServings() : 1;
+        servings.getValueFactory().setValue(currentServings);
+        servings.setVisible(true);
+
+        recipeKcal.setText(
+                I18n.get("recipes.kcal").replace(
+                        "{0}",
+                        recipe.estimatedRecipeKcal()
+                                .stripTrailingZeros()
+                                .toPlainString()
+                )
+        );
+        recipeKcal.setVisible(true);
         ingredientsList.getItems().clear();
         for (var ing : recipe.getIngredients()) {
             ingredientsList.getItems().add(ing);  // add RecipeIngredient objects, not strings

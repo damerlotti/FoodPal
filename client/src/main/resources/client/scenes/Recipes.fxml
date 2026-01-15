@@ -64,7 +64,39 @@
                               </Button>
                            </children>
                         </HBox>
-                        <Spinner fx:id="scaler" prefHeight="18.0" prefWidth="62.0" />
+                        <HBox prefHeight="40.0" prefWidth="296.0" spacing="40.0">
+                           <children>
+                              <HBox prefHeight="25.0" prefWidth="126.0" spacing="5.0">
+                                 <children>
+                                    <Label text="Scale: ">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets top="2.0" />
+                                       </padding>
+                                    </Label>
+                                    <Spinner fx:id="scaler" prefHeight="18.0" prefWidth="62.0" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="25.0" prefWidth="126.0" spacing="5.0">
+                                 <children>
+                                    <Label text="Servings:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets top="2.0" />
+                                       </padding>
+                                    </Label>
+                                    <Spinner fx:id="servings" prefHeight="18.0" prefWidth="62.0" />
+                                 </children>
+                              </HBox>
+                           </children>
+                           <padding>
+                              <Insets top="3.0" />
+                           </padding>
+                        </HBox>
                         <Label fx:id="ingredientsLabel" prefHeight="18.0" prefWidth="72.0" text="Ingredients" />
                         <ListView fx:id="ingredientsList" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="144.0" prefWidth="296.0" VBox.vgrow="ALWAYS" />
                         <HBox prefHeight="27.0" prefWidth="296.0" spacing="35.0">
@@ -82,6 +114,7 @@
                         </HBox>
                         <Label fx:id="preparationLabel" text="Preparation" />
                         <ListView fx:id="stepsList" prefHeight="117.0" prefWidth="296.0" VBox.vgrow="ALWAYS" />
+                        <Label fx:id="recipeKcal" minHeight="-Infinity" minWidth="-Infinity" prefHeight="17.0" prefWidth="124.0" text=" " />
                         <HBox prefHeight="27.0" prefWidth="296.0" spacing="35.0">
                            <children>
                               <Button fx:id="addStepButton" mnemonicParsing="false" onAction="#onAddStepClicked" text="Add" />
@@ -92,12 +125,12 @@
                               <Insets left="45.0" />
                            </padding>
                         </HBox>
-                        <Label fx:id="recipeKcal" prefHeight="29.0" prefWidth="142.0" />
                      </children>
                   </VBox>
                </children>
             </AnchorPane>
         </items>
       </SplitPane>
+      <Label minWidth="-Infinity" prefWidth="80.0" text="Label" />
    </children>
 </AnchorPane>
