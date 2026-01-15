@@ -44,6 +44,12 @@ public class IngredientsCtrl implements Initializable {
     @FXML
     private Label nameLabel;
 
+    @FXML
+    private Button addButton;
+
+    @FXML
+    private Button deleteSelectedButton;
+
 
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
