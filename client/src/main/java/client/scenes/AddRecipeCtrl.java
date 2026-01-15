@@ -1,6 +1,7 @@
 package client.scenes;
 
 import client.i18n.I18n;
+import client.utils.IngredientDialog;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.*;

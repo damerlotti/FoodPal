@@ -3,6 +3,8 @@ package client.scenes;
 import client.MyWebSocketClient;
 import client.i18n.I18n;
 import client.config.Config;
+import client.utils.IngredientDialog;
+import client.utils.RecipeListCellFactory;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.*;

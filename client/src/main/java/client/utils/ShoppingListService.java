@@ -55,18 +55,4 @@ public class ShoppingListService {
         this.items.clear();
     }
 
-    /**
-     * Helper method to convert a RecipeIngredient into a ShoppingItem
-     * (but I haven't done that part yet)
-     * @param recipeIngredient the ingredient from a recipe.
-     * @return a new ShoppingItem to be added to the list.
-     */
-    public ShoppingItem createItemFromIngredient(RecipeIngredient recipeIngredient) {
-        return new ShoppingItem(
-                recipeIngredient.getIngredient().getName(),
-                recipeIngredient.getAmount().getValue(),
-                recipeIngredient.getAmount().getUnit(),
-                recipeIngredient.getRecipe().getName() //the source!!!!!
-        );
-    }
 }

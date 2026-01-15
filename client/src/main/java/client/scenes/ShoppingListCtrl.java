@@ -1,15 +1,14 @@
 package client.scenes;
 
 import client.utils.ShoppingItem;
+import client.utils.ShoppingListCellFactory;
 import client.utils.ShoppingListService;
 import com.google.inject.Inject;
-import commons.Unit;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextInputDialog;
 
-import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -63,11 +62,6 @@ public class ShoppingListCtrl implements Initializable {
         Optional<String> result = dialog.showAndWait();
 
         result.ifPresent(name -> {
-            if (!name.trim().isEmpty()) {
-                // for now, the program assumes 1 piece for manual items.
-                ShoppingItem newItem = new ShoppingItem(name, BigDecimal.ONE, Unit.PIECE, "Manual");
-                shoppingListService.getItems().add(newItem);
-            }
         });
     }
 

@@ -131,6 +131,5 @@
             </AnchorPane>
         </items>
       </SplitPane>
-      <Label minWidth="-Infinity" prefWidth="80.0" text="Label" />
    </children>
 </AnchorPane>

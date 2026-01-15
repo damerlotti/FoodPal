@@ -1,6 +1,7 @@
-package client.scenes;
+package client.utils;
 
-import client.utils.ShoppingItem;
+import commons.Ingredient;
+import commons.Measurement;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
@@ -81,13 +82,19 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                 setText(null);
                 setGraphic(null);
             } else {
-                checkBox.setSelected(item.isChecked());
+                checkBox.setSelected(item.getChecked());
 
-                String amountStr = item.getAmount() != null ? item.getAmount().toPlainString() : "";
-                String unitStr = item.getUnit() != null ?
-                        item.getUnit().getHumanReadableName() : "";
-                nameText.setText(amountStr + " " + unitStr + " " + item.getName());
+                Measurement measurement = item.getMeasurement();
+                Ingredient ingredient = item.getIngredient();
 
+                String amountStr = measurement.getValue() != null ?
+                        measurement.getValue().stripTrailingZeros().toPlainString() : "";
+                String unitStr = measurement.getUnit() != null ?
+                        measurement.getUnit().getHumanReadableName() : "";
+                String nameStr = ingredient.getName();
+
+                nameText.setText(String.format("%s %s %s", amountStr, unitStr, nameStr).trim());
+                
                 if (item.getSource() != null
                         && !item.getSource().isEmpty()
                         && !item.getSource().equals("Manual")) {

@@ -2,6 +2,7 @@ package client.scenes; //Ai generated class
 
 import client.config.Config;
 import client.config.ConfigManager;
+import client.utils.RecipeListCellFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import java.util.Set;
