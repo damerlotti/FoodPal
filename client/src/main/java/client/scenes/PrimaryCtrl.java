@@ -6,6 +6,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.util.List;
+
 public class PrimaryCtrl {
 
     private Stage primaryStage;
@@ -112,5 +114,15 @@ public class PrimaryCtrl {
         p.setTitle("Add Ingredient");
         p.showAndWait();
         ingredientsCtrl.refresh();
+    }
+
+    /**
+     * Called when recipe language filter changes.
+     * @param selectedLanguageTags the list of selected language tags
+     */
+    public void onRecipeLanguagesChanged(List<String> selectedLanguageTags) {
+        if (recipesCtrl != null) {
+            recipesCtrl.setFilteredLanguages(selectedLanguageTags);
+        }
     }
 }
