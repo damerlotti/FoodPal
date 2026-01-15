@@ -64,7 +64,39 @@
                               </Button>
                            </children>
                         </HBox>
-                        <Spinner fx:id="scaler" prefHeight="18.0" prefWidth="62.0" />
+                        <HBox prefHeight="40.0" prefWidth="296.0" spacing="40.0">
+                           <children>
+                              <HBox prefHeight="25.0" prefWidth="126.0" spacing="5.0">
+                                 <children>
+                                    <Label text="Scale: ">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets top="2.0" />
+                                       </padding>
+                                    </Label>
+                                    <Spinner fx:id="scaler" prefHeight="18.0" prefWidth="62.0" />
+                                 </children>
+                              </HBox>
+                              <HBox prefHeight="25.0" prefWidth="126.0" spacing="5.0">
+                                 <children>
+                                    <Label text="Servings:">
+                                       <font>
+                                          <Font size="14.0" />
+                                       </font>
+                                       <padding>
+                                          <Insets top="2.0" />
+                                       </padding>
+                                    </Label>
+                                    <Spinner fx:id="servings" prefHeight="18.0" prefWidth="62.0" />
+                                 </children>
+                              </HBox>
+                           </children>
+                           <padding>
+                              <Insets top="3.0" />
+                           </padding>
+                        </HBox>
                         <Label fx:id="ingredientsLabel" prefHeight="18.0" prefWidth="72.0" text="Ingredients" />
                         <ListView fx:id="ingredientsList" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="144.0" prefWidth="296.0" VBox.vgrow="ALWAYS" />
                         <HBox prefHeight="27.0" prefWidth="296.0" spacing="35.0">

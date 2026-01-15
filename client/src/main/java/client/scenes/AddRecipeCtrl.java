@@ -76,13 +76,6 @@ public class AddRecipeCtrl implements Initializable {
         deleteStepButton.textProperty().bind(I18n.createStringBinding("addRecipe.delete"));
         addIngredientButton.textProperty().bind(I18n.createStringBinding("addRecipe.add"));
         deleteIngredientButton.textProperty().bind(I18n.createStringBinding("addRecipe.delete"));
-    }
-
-    /**
-     * Displays the choice box
-     */
-    @FXML
-    public void initialize() {
         displayServingChoices();
     }
 

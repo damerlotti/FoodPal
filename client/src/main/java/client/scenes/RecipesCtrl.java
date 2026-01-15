@@ -105,8 +105,9 @@ public class RecipesCtrl implements Initializable {
     // runs immediately when the screen opens
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        initializeRecipeList();
         initializeScaler();
+        initializeServings();
+        initializeRecipeList();
         initializeWebSocket();
         initializeLanguage();
     }
@@ -171,19 +172,22 @@ public class RecipesCtrl implements Initializable {
         });
     }
 
-private void initializeServings() {
-    SpinnerValueFactory<Integer> servingsFactory =
-            new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1);
-    servings.setValueFactory(servingsFactory);
+    /**
+     * Initializes the servings spinner
+     */
+    private void initializeServings() {
+        SpinnerValueFactory<Integer> servingsFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1);
+        servings.setValueFactory(servingsFactory);
 
-    servings.valueProperty().addListener((obs, oldVal, newVal) -> {
-        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
-        if (currentRecipe != null && newVal != null && !newVal.equals(oldVal)) {
-            currentRecipe.setServings(newVal);
-            server.updateRecipe(currentRecipe);
-        }
-    });
-}
+        servings.valueProperty().addListener((obs, oldVal, newVal) -> {
+            Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+            if (currentRecipe != null && newVal != null && !newVal.equals(oldVal)) {
+                currentRecipe.setServings(newVal);
+                server.updateRecipe(currentRecipe);
+            }
+        });
+    }
 
     /**
      * Creates a text formatter that only allows optional decimal point
