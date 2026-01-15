@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.i18n.I18n;
 import client.utils.ServerUtils;
 import commons.*;
 import javafx.geometry.Insets;
@@ -39,7 +40,7 @@ public class IngredientDialog {
         return number.stripTrailingZeros().toPlainString();
     }
     /**
-     * Shows a customized dialogue in which the user can configure the ingredient
+     * Shows a customized dialog in which the user can configure the ingredient
      * @param allIngredients all our existing ingredients from which the user can choose
      * @param server injection of the server, to be able to save the newly created ingredient
      * @return a potential RecipeIngredient, if the user inputs correct values
@@ -47,8 +48,8 @@ public class IngredientDialog {
     public static Optional<RecipeIngredient> show(List<Ingredient> allIngredients,
                                                   ServerUtils server) {
         Dialog<RecipeIngredient> dialog = new Dialog<>();
-        dialog.setTitle("Add Ingredient");
-        dialog.setHeaderText("Select existing or create new:");
+        dialog.setTitle(I18n.get("dialog.addIngredient.title"));
+        dialog.setHeaderText(I18n.get("dialog.addIngredient.header"));
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         GridPane grid = new GridPane();
@@ -59,23 +60,26 @@ public class IngredientDialog {
         ComboBox<Ingredient> name = new ComboBox<>();
         name.setEditable(true);  // so we can also type sth
         name.getItems().addAll(allIngredients);
-        grid.add(new Label("Ingredient:"), 0, 0);  // first is column, second is line
+        grid.add(new Label(I18n.get("dialog.addIngredient.ingredient")), 0, 0);
         grid.add(name, 1, 0);
 
         TextField amount = new TextField();
         ComboBox<Unit> unit = new ComboBox<>();
         unit.getItems().addAll(Unit.values());
         unit.setValue(Unit.G);
-        grid.add(new Label("Amount:"), 0, 1);
+        grid.add(new Label(I18n.get("dialog.addIngredient.amount")), 0, 1);
         grid.add(amount, 1, 1);
         grid.add(unit, 2, 1);
 
         TextField fatField = new TextField();
         TextField proteinField = new TextField();
         TextField carbsField = new TextField();
-        grid.add(new Label("Fat: (per 100g)"), 0, 2); grid.add(fatField, 1, 2);
-        grid.add(new Label("Protein: (per 100g)"), 0, 3); grid.add(proteinField, 1, 3);
-        grid.add(new Label("Carbs: (per 100g)"), 0, 4); grid.add(carbsField, 1, 4);
+        grid.add(new Label(I18n.get("dialog.addIngredient.fat")), 0, 2);
+        grid.add(fatField, 1, 2);
+        grid.add(new Label(I18n.get("dialog.addIngredient.protein")), 0, 3);
+        grid.add(proteinField, 1, 3);
+        grid.add(new Label(I18n.get("dialog.addIngredient.carbs")), 0, 4);
+        grid.add(carbsField, 1, 4);
 
         // this happens when anything changes in the name field
         name.getEditor().textProperty().addListener((obs, oldText, newText) -> {
@@ -135,13 +139,55 @@ public class IngredientDialog {
                     ans.setIngredient(finalIng);
                     ans.setAmount(m);
                     return ans;
-                } catch (Exception e) {
-                    return null;
-                }
+                } catch (Exception e) { return null; }
             }
             return null;
         });
-
         return dialog.showAndWait();
+    }
+
+    /**
+     * Shows a simple dialog in which the user can edit the amount of an ingredient inside a recipe
+     * @param currentAmount the current amount of that ingredient, for the user to know
+     * @return the new measurement (value and unit)
+     */
+    public static Optional<Measurement> showEditAmount(Measurement currentAmount) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(I18n.get("dialog.editAmount.title"));
+        dialog.setHeaderText(I18n.get("dialog.editAmount.header"));
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10); grid.setVgap(10);
+        grid.setPadding(new Insets(20, 20, 10, 10));
+
+        TextField amtField = new TextField();
+        ComboBox<Unit> units = new ComboBox<>();
+        units.getItems().addAll(Unit.values());
+
+        if (currentAmount != null) {
+            amtField.setText(currentAmount.getValue().stripTrailingZeros().toPlainString());
+            units.setValue(currentAmount.getUnit());
+        }
+
+        grid.add(new Label(I18n.get("dialog.addIngredient.amount")), 0, 0);
+        grid.add(amtField, 1, 0);
+        grid.add(units, 2, 0);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Optional<ButtonType> buttonClicked = dialog.showAndWait();
+
+        if (buttonClicked.isPresent() && buttonClicked.get() == ButtonType.OK) {
+            try {
+                BigDecimal val = check(amtField.getText());
+                Unit unit = units.getValue();
+                return Optional.of(new Measurement(val, unit));
+            } catch (Exception e) {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.empty();
     }
 }

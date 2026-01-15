@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.i18n.I18n;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.Ingredient;
@@ -57,6 +58,11 @@ public class IngredientsCtrl implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Bind buttons to i18n
+        addButton.textProperty().bind(I18n.createStringBinding("ingredients.add"));
+        deleteSelectedButton.textProperty().bind(
+                I18n.createStringBinding("ingredients.deleteSelected"));
+
         // special javafx list that updates the UI automatically
         data = FXCollections.observableArrayList();
         ingredientsList.setItems(data);
@@ -150,7 +156,7 @@ public class IngredientsCtrl implements Initializable {
         Ingredient selected = ingredientsList.getSelectionModel().getSelectedItem();
         if (selected == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setContentText("Select an item to delete!");
+            alert.setContentText(I18n.get("alert.selectItemToDelete"));
             alert.showAndWait();
             return;
         }

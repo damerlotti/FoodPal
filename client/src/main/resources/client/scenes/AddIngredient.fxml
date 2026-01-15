@@ -7,14 +7,14 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.AddIngredientCtrl">
     <children>
-        <Label layoutX="249.0" layoutY="33.0" prefHeight="30.0" prefWidth="90.0" text="New Ingredient" />
-        <Button layoutX="246.0" layoutY="333.0" mnemonicParsing="false" onAction="#addIngredient" prefHeight="25.0" prefWidth="97.0" text="Add" />
+        <Label fx:id="titleLabel" layoutX="249.0" layoutY="33.0" prefHeight="30.0" prefWidth="90.0" text="New Ingredient" />
+        <Button fx:id="addButton" layoutX="246.0" layoutY="333.0" mnemonicParsing="false" onAction="#addIngredient" prefHeight="25.0" prefWidth="97.0" text="Add" />
         <TextField fx:id="nameIngredient" layoutX="225.0" layoutY="63.0" />
         <TextField fx:id="carbsIngredient" layoutX="225.0" layoutY="166.0" />
         <TextField fx:id="proteinIngredient" layoutX="225.0" layoutY="205.0" />
         <TextField fx:id="fatIngredient" layoutX="225.0" layoutY="120.0" />
-        <Label layoutX="150.0" layoutY="121.0" prefHeight="30.0" prefWidth="59.0" text="Fat g/100g" />
-        <Label layoutX="140.0" layoutY="201.0" prefHeight="30.0" prefWidth="83.0" text="Protein g/100g" />
-        <Label layoutX="141.0" layoutY="164.0" prefHeight="30.0" prefWidth="76.0" text="Carbs g/100g" />
+        <Label fx:id="fatLabel" layoutX="150.0" layoutY="121.0" prefHeight="30.0" prefWidth="59.0" text="Fat g/100g" />
+        <Label fx:id="proteinLabel" layoutX="140.0" layoutY="201.0" prefHeight="30.0" prefWidth="83.0" text="Protein g/100g" />
+        <Label fx:id="carbsLabel" layoutX="141.0" layoutY="164.0" prefHeight="30.0" prefWidth="76.0" text="Carbs g/100g" />
     </children>
 </AnchorPane>
