@@ -1,12 +1,11 @@
 package client.scenes;
 
 import client.MyWebSocketClient;
+import client.i18n.I18n;
+import client.config.Config;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
-import commons.Measurement;
-import commons.Recipe;
-import commons.RecipeIngredient;
-import commons.RecipeStep;
+import commons.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -20,13 +19,13 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class RecipesCtrl implements Initializable {
 
     private final ServerUtils server;
     private final PrimaryCtrl primaryCtrl;
+    private final RecipeListCellFactory cellFactory;
 
     // fxml link, keep in mind that it must match with the id in scene builder
     // that's the left-hand side
@@ -37,6 +36,9 @@ public class RecipesCtrl implements Initializable {
     @FXML
     private Label recipeTitle;
     @FXML
+    private Spinner<Double> scaler;
+    private Map<Long, Double> scalingMap = new HashMap<>();
+    @FXML
     private Label recipeKcal;
     @FXML
     private ListView<RecipeIngredient> ingredientsList;
@@ -44,6 +46,38 @@ public class RecipesCtrl implements Initializable {
     private ListView<RecipeStep> stepsList;
     @FXML
     private ToggleButton favoritesToggle;
+
+    // i18n buttons and labels
+    @FXML
+    private Label allRecipesLabel;
+    @FXML
+    private Button refreshButton;
+    @FXML
+    private Button addRecipeButton;
+    @FXML
+    private Button deleteRecipeButton;
+    @FXML
+    private Button cloneButton;
+    @FXML
+    private Button printButton;
+    @FXML
+    private Button editTitleButton;
+    @FXML
+    private Label ingredientsLabel;
+    @FXML
+    private Button addIngredientButton;
+    @FXML
+    private Button editIngredientButton;
+    @FXML
+    private Button deleteIngredientButton;
+    @FXML
+    private Label preparationLabel;
+    @FXML
+    private Button addStepButton;
+    @FXML
+    private Button editStepButton;
+    @FXML
+    private Button deleteStepButton;
 
     private ObservableList<Recipe> allRecipes;
     private FilteredList<Recipe> filteredRecipes;
@@ -56,31 +90,108 @@ public class RecipesCtrl implements Initializable {
      *
      * @param server      the server utils
      * @param primaryCtrl primaryCtrl
+     * @param cellFactory the cell factory to keep favourites local
      */
     @Inject
-    public RecipesCtrl(ServerUtils server, PrimaryCtrl primaryCtrl) {
+    public RecipesCtrl(ServerUtils server, PrimaryCtrl primaryCtrl,
+                       RecipeListCellFactory cellFactory) {
         this.server = server;
         this.primaryCtrl = primaryCtrl;
+        this.cellFactory = cellFactory;
     }
 
     // runs immediately when the screen opens
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // special javafx list that updates the UI automatically
+        initializeRecipeList();
+        initializeScaler();
+        initializeWebSocket();
+        initializeLanguage();
+    }
+
+    private void initializeLanguage() {
+        // Bind labels and buttons to i18n
+        allRecipesLabel.textProperty().bind(I18n.createStringBinding("recipes.title"));
+        refreshButton.textProperty().bind(I18n.createStringBinding("recipes.refresh"));
+        addRecipeButton.textProperty().bind(I18n.createStringBinding("recipes.add"));
+        deleteRecipeButton.textProperty().bind(I18n.createStringBinding("recipes.delete"));
+        cloneButton.textProperty().bind(I18n.createStringBinding("recipes.clone"));
+        printButton.textProperty().bind(I18n.createStringBinding("recipes.print"));
+        editTitleButton.textProperty().bind(I18n.createStringBinding("recipes.edit"));
+        ingredientsLabel.textProperty().bind(I18n.createStringBinding("recipes.ingredients"));
+        addIngredientButton.textProperty().bind(I18n.createStringBinding("recipes.add"));
+        editIngredientButton.textProperty().bind(I18n.createStringBinding("recipes.edit"));
+        deleteIngredientButton.textProperty().bind(I18n.createStringBinding("recipes.delete"));
+        preparationLabel.textProperty().bind(I18n.createStringBinding("recipes.preparation"));
+        addStepButton.textProperty().bind(I18n.createStringBinding("recipes.add"));
+        editStepButton.textProperty().bind(I18n.createStringBinding("recipes.edit"));
+        deleteStepButton.textProperty().bind(I18n.createStringBinding("recipes.delete"));
+
+        // Bind favorites toggle to i18n
+        favoritesToggle.textProperty().bind(
+                javafx.beans.binding.Bindings.when(favoritesToggle.selectedProperty())
+                        .then(I18n.createStringBinding("recipes.showAll"))
+                        .otherwise(I18n.createStringBinding("recipes.showFavorite"))
+        );
+    }
+
+    /**
+     * initializes the recipe list
+     */
+    private void initializeRecipeList() {
         allRecipes = FXCollections.observableArrayList();
         filteredRecipes = new FilteredList<>(allRecipes);
         recipeList.setItems(filteredRecipes);
         recipeList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showRecipeDetails(newValue)
         );
-        recipeList.setCellFactory(new RecipeListCellFactory());
+        recipeList.setCellFactory(cellFactory);
         // the ui list contains our data, currently empty
         refresh();
+    }
+
+    /**
+     * initializes the scaler
+     */
+    private void initializeScaler() {
+        scaler.setValueFactory(
+                new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 10.0, 1.0, 0.5)
+        );
+        scaler.getEditor().setTextFormatter(createNumberTextFormatter());
+        scaler.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null) {
+                Recipe current = recipeList.getSelectionModel().getSelectedItem();
+                if (current != null) {
+                    scalingMap.put(current.getId(), newVal);
+                }
+                updateVisuals(newVal);
+            }
+        });
+    }
+
+    /**
+     * Creates a text formatter that only allows optional decimal point
+     * and optional minus sign
+     * @return a TextFormatter for numeric validation
+     */
+    private TextFormatter<String> createNumberTextFormatter() {
+        return new TextFormatter<>(change -> {
+            String newText = change.getControlNewText();
+            return newText.matches("-?([0-9]*\\.[0-9]*)?") ? change : null;
+        });
+    }
+
+    /**
+     * initializes the websocket
+     */
+    private void initializeWebSocket() {
         webSocket.connect("ws://localhost:8080/websocket");
+
         webSocket.subscribe("/topic/recipes", Object.class, obj -> {
             System.out.println("Something changed in the list!");
-            refresh(); // reload the list
+            refresh();
         });
+
         recipeList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
             if (currentRecipeSubscription != null) {
                 currentRecipeSubscription.unsubscribe();
@@ -98,6 +209,11 @@ public class RecipesCtrl implements Initializable {
         });
     }
 
+    /**
+     * shows an alert
+     * @param title the title of the alert
+     * @param content the content of the alert
+     */
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
@@ -126,9 +242,27 @@ public class RecipesCtrl implements Initializable {
         // Same filter in toggleFavoritesFilter
         if (favoritesToggle.isSelected()) {
             filteredRecipes.setPredicate(recipe ->
-                    RecipeListCellFactory.isFavorite(recipe.getId())
+                    cellFactory.isFavorite(recipe.getId())
             );
         }
+        Config favConfig = cellFactory.getConfigManager().getConfig();
+        Set<Long> favRecipesID = favConfig.getFavoriteRecipeIds();
+        ArrayList<Long> favRecipesIDArray = new ArrayList<>(favRecipesID);
+        boolean favRecipeExists;
+        for (int i = 0; i < favRecipesIDArray.size(); i++) {
+            Long recipeID = favRecipesIDArray.get(i);
+            favRecipeExists = false;
+            for (Recipe recipe : allRecipes) {
+                if (recipe.getId() == recipeID) {
+                    favRecipeExists = true;
+                    break;
+                }
+            }
+            if (!favRecipeExists) {
+                favConfig.removeFavorite(recipeID);
+            }
+        }
+        cellFactory.getConfigManager().save();
     }
     /**
      * Toggle between showing all recipes and favorites only
@@ -137,12 +271,12 @@ public class RecipesCtrl implements Initializable {
     public void toggleFavoritesFilter() {
         if (favoritesToggle.isSelected()) {
             filteredRecipes.setPredicate(recipe ->
-                    RecipeListCellFactory.isFavorite(recipe.getId())
+                    cellFactory.isFavorite(recipe.getId())
             );
-            favoritesToggle.setText("Show All");
+            // Text is bound via i18n, no manual setting needed
         } else {
             filteredRecipes.setPredicate(null);
-            favoritesToggle.setText("Show Favourite");
+            // Text is bound via i18n, no manual setting needed
         }
     }
     /**
@@ -152,15 +286,20 @@ public class RecipesCtrl implements Initializable {
      */
     private void showRecipeDetails(Recipe recipe) {
         if (recipe == null) {
-            recipeTitle.setText("Select a recipe");
+            recipeTitle.setText(I18n.get("recipes.selectRecipe"));
+            recipeKcal.setText("");
             ingredientsList.getItems().clear();
             stepsList.getItems().clear();
             return;
         }
+        // we check to see the stored scale value (if not just put 1)
+        Double savedFactor = scalingMap.getOrDefault(recipe.getId(), 1.0);
+        scaler.getValueFactory().setValue(savedFactor);  // this will call updateVisuals
+
         recipeTitle.setText(recipe.getName());
-        recipeKcal.setText("Kcal/100g: " + recipe.estimatedRecipeKcal()
+        recipeKcal.setText(I18n.get("recipes.kcal").replace("{0}", recipe.estimatedRecipeKcal()
                 .stripTrailingZeros()
-                .toPlainString());
+                .toPlainString()));
         ingredientsList.getItems().clear();
         for (var ing : recipe.getIngredients()) {
             ingredientsList.getItems().add(ing);  // add RecipeIngredient objects, not strings
@@ -171,6 +310,31 @@ public class RecipesCtrl implements Initializable {
         }
     }
 
+    private void updateVisuals(double factor) {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        if (currentRecipe == null) {
+            return;
+        }
+        ingredientsList.setCellFactory(param -> new ListCell<RecipeIngredient>() {
+            @Override
+            protected void updateItem(RecipeIngredient item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                }
+                else {
+                    Measurement displayMeasurement = item.getAmount().scale(factor)
+                                                         .normalizeMeasurement();
+
+                    RecipeIngredient aux = new RecipeIngredient();
+                    aux.setIngredient(item.getIngredient());
+                    aux.setId(item.getId());
+                    aux.setAmount(displayMeasurement);
+                    setText(aux.toString());
+                }
+            }
+        });
+    }
 
     /**
      * When the add button for an ingredient is pressed, the user can add a new ingredient
@@ -180,7 +344,7 @@ public class RecipesCtrl implements Initializable {
     public void addIngredient() {
         Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
         if (currentRecipe == null) {
-            showAlert("No Selection", "Please select a recipe first.");
+            showAlert(I18n.get("alert.noSelection"), I18n.get("alert.selectRecipeFirst"));
             return;
         }
         var allIngredients = server.getIngredients();
@@ -191,7 +355,7 @@ public class RecipesCtrl implements Initializable {
                 currentRecipe.getIngredients().add(recIng);
                 server.updateRecipe(currentRecipe);
             } catch (Exception e) {
-                showAlert("Error", "Could not add the ingredient.");
+                showAlert(I18n.get("alert.error"), I18n.get("alert.couldNotAddIngredient"));
             }
         });
     }
@@ -204,7 +368,7 @@ public class RecipesCtrl implements Initializable {
         Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
         RecipeIngredient selectedIngredient = ingredientsList.getSelectionModel().getSelectedItem();
         if (currentRecipe == null || selectedIngredient == null) {
-            showAlert("Error", "Please select a recipe and an ingredient.");
+            showAlert(I18n.get("alert.error"), I18n.get("alert.selectRecipeAndIngredient"));
             return;
         }
         currentRecipe.getIngredients().remove(selectedIngredient);
@@ -212,7 +376,7 @@ public class RecipesCtrl implements Initializable {
         try {
             server.updateRecipe(currentRecipe);
         } catch (Exception e) {
-            showAlert("Error", "Could not delete the ingredient.");
+            showAlert(I18n.get("alert.error"), I18n.get("alert.couldNotDeleteIngredient"));
         }
     }
 
@@ -225,7 +389,7 @@ public class RecipesCtrl implements Initializable {
         RecipeIngredient selectedItem = ingredientsList.getSelectionModel().getSelectedItem();
 
         if (currentRecipe == null || selectedItem == null) {
-            showAlert("Error", "Please select a recipe and an ingredient");
+            showAlert(I18n.get("alert.error"), I18n.get("alert.selectRecipeAndIngredient"));
             return;
         }
 
@@ -239,7 +403,7 @@ public class RecipesCtrl implements Initializable {
             try {
                 server.updateRecipe(currentRecipe);
             } catch (Exception e) {
-                showAlert("Server Error", "Could not edit the ingredient");
+                showAlert(I18n.get("alert.serverError"), I18n.get("alert.couldNotEditIngredient"));
             }
         });
     }
@@ -251,12 +415,12 @@ public class RecipesCtrl implements Initializable {
     public void onAddStepClicked() {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
-            showAlert("No Recipe selected", "Please select a recipe to add a step");
+            showAlert(I18n.get("alert.noRecipeSelected"), I18n.get("alert.selectRecipeToAddStep"));
             return;
         }
 
         TextInputDialog dialog = new TextInputDialog();
-        dialog.setHeaderText("Enter the step description:");
+        dialog.setHeaderText(I18n.get("dialog.addStep.header"));
         dialog.setGraphic(null);
         dialog.getDialogPane().setPrefSize(400, 250);
 
@@ -265,7 +429,7 @@ public class RecipesCtrl implements Initializable {
         if (result.isPresent()) {
             String stepText = result.get();
             if (stepText.isEmpty()) {
-                showAlert("Error", "Step description cannot be empty");
+                showAlert(I18n.get("alert.error"), I18n.get("alert.stepDescriptionEmpty"));
                 return;
             }
             RecipeStep step = new RecipeStep();
@@ -277,7 +441,7 @@ public class RecipesCtrl implements Initializable {
             try {
                 server.updateRecipe(recipe);
             } catch (Exception e) {
-                showAlert("Server Error", "Could not save the new step to the database");
+                showAlert(I18n.get("alert.serverError"), I18n.get("alert.couldNotSaveStep"));
                 return;
             }
         }
@@ -290,13 +454,13 @@ public class RecipesCtrl implements Initializable {
     public void onDeleteStepClicked() {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
-            showAlert("No Recipe selected", "Please select a recipe to edit");
+            showAlert(I18n.get("alert.noRecipeSelected"), I18n.get("alert.selectRecipeToEdit"));
             return;
         }
 
         RecipeStep selectedStep = stepsList.getSelectionModel().getSelectedItem();
         if (selectedStep == null) {
-            showAlert("No step selected", "Please select a step to delete");
+            showAlert(I18n.get("alert.noStepSelected"), I18n.get("alert.selectStepToDelete"));
             return;
         }
 
@@ -308,7 +472,7 @@ public class RecipesCtrl implements Initializable {
         try {
             server.updateRecipe(recipe);
         } catch (Exception e) {
-            showAlert("Server error", "Could not delete the step from the database.");
+            showAlert(I18n.get("alert.serverError"), I18n.get("alert.couldNotDeleteStep"));
             return;
         }
     }
@@ -320,17 +484,17 @@ public class RecipesCtrl implements Initializable {
     public void onEditStepClicked() {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
-            showAlert("No Recipe selected", "Please select a recipe to edit.");
+            showAlert(I18n.get("alert.noRecipeSelected"), I18n.get("alert.selectRecipeToEdit"));
             return;
         }
         RecipeStep selectedStep = stepsList.getSelectionModel().getSelectedItem();
         if (selectedStep == null) {
-            showAlert("No step selected", "Please select a step to modify.");
+            showAlert(I18n.get("alert.noStepSelected"), I18n.get("alert.selectStepToEdit"));
             return;
         }
 
         TextInputDialog dialog = new TextInputDialog(selectedStep.getText());
-        dialog.setHeaderText("Edit the step description:");
+        dialog.setHeaderText(I18n.get("dialog.editStep.header"));
         dialog.setGraphic(null);
         dialog.getDialogPane().setPrefSize(400, 250);
 
@@ -352,7 +516,7 @@ public class RecipesCtrl implements Initializable {
             try {
                 server.updateRecipe(recipe);
             } catch (Exception e) {
-                showAlert("Server Error", "Could not update the step in the database");
+                showAlert(I18n.get("alert.serverError"), I18n.get("alert.couldNotEditStep"));
                 return;
             }
         }
@@ -365,10 +529,11 @@ public class RecipesCtrl implements Initializable {
     public void onEditTitleClicked() {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
-            showAlert("No recipe selected", "Please select a recipe to edit its title");
+            showAlert(I18n.get("alert.noRecipeSelected"), I18n.get("alert.selectRecipeToEdit"));
+            return;
         }
         TextInputDialog dialog = new TextInputDialog(recipe.getName());
-        dialog.setHeaderText("Edit the recipe title:");
+        dialog.setHeaderText(I18n.get("dialog.editTitle.header"));
         dialog.setGraphic(null);
         dialog.getDialogPane().setPrefSize(400, 150);
 
@@ -376,14 +541,14 @@ public class RecipesCtrl implements Initializable {
         if (result.isPresent()) {
             String newTitle = result.get().trim();
             if (newTitle.isEmpty()) {
-                showAlert("Invalid title", "Title cannot be empty");
+                showAlert(I18n.get("alert.validationError"), I18n.get("alert.titleEmpty"));
                 return;
             }
             recipe.setName(newTitle);
             try {
                 server.updateRecipe(recipe);
             } catch (Exception e) {
-                showAlert("Server Error", "Could not update the recipe title in the database.");
+                showAlert(I18n.get("alert.serverError"), I18n.get("alert.couldNotSaveRecipe"));
                 return;
             }
         }
@@ -405,7 +570,7 @@ public class RecipesCtrl implements Initializable {
     public void onClonePressed() {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
-            showAlert("No Recipe Selected", "Please select a recipe to clone.");
+            showAlert(I18n.get("alert.noRecipeSelected"), I18n.get("alert.selectRecipeToClone"));
             return;
         }
 
@@ -416,8 +581,9 @@ public class RecipesCtrl implements Initializable {
 
 
         // TODO(calco): This shouldn't be as hard coded
-        TextInputDialog dialog = new TextInputDialog(clonedRecipe.getName() + " Clone");
-        dialog.setHeaderText("Enter the cloned recipe name:");
+        String cloneName = clonedRecipe.getName() + " " + I18n.get("dialog.clone.suffix");
+        TextInputDialog dialog = new TextInputDialog(cloneName);
+        dialog.setHeaderText(I18n.get("dialog.clone.header"));
         dialog.setGraphic(null);
         dialog.getDialogPane().setPrefSize(400, 250);
 
@@ -425,7 +591,7 @@ public class RecipesCtrl implements Initializable {
         if (result.isPresent()) {
             String newName = result.get();
             if (newName.isEmpty()) {
-                showAlert("Error Cloning Recipe", "No new name was provided.");
+                showAlert(I18n.get("alert.error"), I18n.get("alert.noNameProvided"));
                 return;
             }
 
@@ -449,7 +615,7 @@ public class RecipesCtrl implements Initializable {
                 recipeList.requestFocus();
                 showRecipeDetails(toSelect);
             } catch (Exception e) {
-                showAlert("Server Error", "Could not save the cloned recipe to the database.");
+                showAlert(I18n.get("alert.serverError"), I18n.get("alert.couldNotClone"));
             }
         }
     }
@@ -463,7 +629,7 @@ public class RecipesCtrl implements Initializable {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Recipe to File");
+        fileChooser.setTitle(I18n.get("fileChooser.saveRecipe"));
         fileChooser.setInitialFileName(recipe.getName());
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Text Files (*.txt)", "*.txt"),
@@ -484,9 +650,8 @@ public class RecipesCtrl implements Initializable {
                 }
             } catch (IOException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Save Failed");
-                alert.setHeaderText("Could not save the recipe to the file."
-                        + "\nUnable to write to the file.");
+                alert.setTitle(I18n.get("alert.saveFailed"));
+                alert.setHeaderText(I18n.get("alert.couldNotSaveFile"));
                 // TODO(calco): Should probably show a more human readable message
                 alert.setContentText("Error: " + e.getMessage());
                 alert.showAndWait();
@@ -502,20 +667,22 @@ public class RecipesCtrl implements Initializable {
         Recipe recipe = recipeList.getSelectionModel().getSelectedItem();
         if (recipe == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Recipe Selected");
-            alert.setContentText("Please select a recipe to delete.");
+            alert.setTitle(I18n.get("alert.noRecipeSelected"));
+            alert.setContentText(I18n.get("alert.selectRecipeToDelete"));
             alert.showAndWait();
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Delete Recipe");
-        confirm.setHeaderText("Are you sure you want to delete this recipe?");
-        confirm.setContentText("This action cannot be undone.");
+        confirm.setTitle(I18n.get("dialog.deleteRecipe.title"));
+        confirm.setHeaderText(I18n.get("dialog.deleteRecipe.header"));
+        confirm.setContentText(I18n.get("dialog.deleteRecipe.content"));
         confirm.setGraphic(null);
         
-        ButtonType deleteButton = new ButtonType("Delete Recipe", ButtonBar.ButtonData.OK_DONE);
-        ButtonType cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
+        ButtonType deleteButton = new ButtonType(
+                I18n.get("dialog.deleteRecipe.delete"), ButtonBar.ButtonData.OK_DONE);
+        ButtonType cancelButton = new ButtonType(
+                I18n.get("dialog.deleteRecipe.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
         confirm.getButtonTypes().setAll(deleteButton, cancelButton);
 
         Optional<ButtonType> result = confirm.showAndWait();
@@ -527,8 +694,8 @@ public class RecipesCtrl implements Initializable {
             server.deleteRecipe(recipe);
         } catch (Exception e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Server Error");
-            alert.setHeaderText("Could not delete the recipe from the database.");
+            alert.setTitle(I18n.get("alert.serverError"));
+            alert.setHeaderText(I18n.get("alert.couldNotDeleteRecipe"));
             alert.setContentText(e.getMessage());
             alert.showAndWait();
             return;

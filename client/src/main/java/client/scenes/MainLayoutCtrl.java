@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.image.Image;
@@ -28,6 +29,12 @@ public class MainLayoutCtrl implements Initializable {
     @FXML
     private ComboBox<Locale> languageCombo;
 
+    @FXML
+    private Button recipesButton;
+
+    @FXML
+    private Button ingredientsButton;
+
     /**
      * Constructor which injects the PrimaryCtrl, to which we'll tell what to display
      * @param primaryCtrl
@@ -39,19 +46,22 @@ public class MainLayoutCtrl implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Initialise combo box
+        // Bind button text to i18n
+        recipesButton.textProperty().bind(I18n.createStringBinding("nav.recipes"));
+        ingredientsButton.textProperty().bind(I18n.createStringBinding("nav.ingredients"));
 
+        // Initialise combo box
         languageCombo.getItems().setAll(I18nConfig.SUPPORTED);
         languageCombo.setCellFactory(_lv -> createFlagCell());
         
         languageCombo.getSelectionModel().select(I18n.getLocale());
-//        
-//        languageCombo.valueProperty().addListener((obs, oldL, newL) -> {
-//            if (newL != null) {
-//                I18n.setLocale(newL);
-//            }
-//        });
-//        
+
+        languageCombo.valueProperty().addListener((obs, oldL, newL) -> {
+            if (newL != null) {
+                I18n.setLocale(newL);
+            }
+        });
+
         // show language name in its own language
         languageCombo.setConverter(new StringConverter<>() {
             @Override public String toString(Locale locale) {

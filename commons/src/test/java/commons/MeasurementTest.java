@@ -8,6 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MeasurementTest {
+    private Measurement m(String val, Unit unit) {
+        return new Measurement(new BigDecimal(val), unit);
+    }
     @Test
     void testMassConversionFromGramToAllMassUnits() {
         // 1000 g → various mass units
@@ -65,6 +68,38 @@ public class MeasurementTest {
         Measurement grams = new Measurement(new BigDecimal("1000.0"), Unit.G);
 
         assertThrows(IllegalArgumentException.class, () -> grams.convert(Unit.ML));
+    }
+
+    @Test
+    void testScale() {
+        Measurement start = m("100", Unit.G);
+        Measurement result = start.scale(2.5);
+        assertEquals(0, result.getValue().compareTo(new BigDecimal("250.0")));
+        assertEquals(Unit.G, result.getUnit());
+    }
+
+    @Test
+    void testNormalizeGramsToKg() {
+        Measurement start = m("1500", Unit.G);
+        Measurement result = start.normalizeMeasurement();
+        assertEquals(0, result.getValue().compareTo(new BigDecimal("1.5")));
+        assertEquals(Unit.KG, result.getUnit());
+    }
+
+    @Test
+    void testNormalizeKeepsSmallUnits() {
+        Measurement start = m("500", Unit.G);
+        Measurement result = start.normalizeMeasurement();
+        assertEquals(0, result.getValue().compareTo(new BigDecimal("500")));
+        assertEquals(Unit.G, result.getUnit());
+    }
+
+    @Test
+    void testFullWorkflow() {
+        Measurement original = m("600", Unit.G);
+        Measurement display = original.scale(2.0).normalizeMeasurement();
+        assertEquals(0, display.getValue().compareTo(new BigDecimal("1.2")));
+        assertEquals(Unit.KG, display.getUnit());
     }
 
     // TODO(calco): Should probably be testing `toString` functionality and display, but meh

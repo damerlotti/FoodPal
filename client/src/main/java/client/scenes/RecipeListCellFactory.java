@@ -1,6 +1,8 @@
 package client.scenes;
 
+import client.config.ConfigManager;
 import commons.Recipe;
+import jakarta.inject.Inject;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -14,15 +16,23 @@ import java.util.Set;
 //this class has been generated with AI
 public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCell<Recipe>> {
 
-    // Store favorite recipe IDs locally (for now)
-    private static final Set<Long> favoriteIds = new HashSet<>();
+    private final ConfigManager configManager;
+    /**
+     * Constructor
+     * @param configManager the config manager to use for storing favorites
+     */
+    @Inject
+    public RecipeListCellFactory(ConfigManager configManager) {
+        this.configManager = configManager;
+    }
+
 
     @Override
     public ListCell<Recipe> call(ListView<Recipe> listView) {
         return new RecipeListCell();
     }
 
-    private static class RecipeListCell extends ListCell<Recipe> {
+    private class RecipeListCell extends ListCell<Recipe> {
         private final HBox hbox = new HBox(8);
         private final Text text = new Text();
         private final Button starButton = new Button();
@@ -55,17 +65,23 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
                 if (recipe != null) {
                     long recipeId = recipe.getId();
 
-                    // Toggle favorite status
-                    if (favoriteIds.contains(recipeId)) {
-                        favoriteIds.remove(recipeId);
+                    // Get config from manager
+                    var config = configManager.getConfig();
+
+                    // Toggle favorite status in config
+                    if (config.isFavorite(recipeId)) {
+                        config.removeFavorite(recipeId);
                         starShape.setStyle("-fx-fill: gray; -fx-opacity: 0.6;");
                     } else {
-                        favoriteIds.add(recipeId);
+                        config.addFavorite(recipeId);
                         starShape.setStyle("-fx-fill: gold;");
                     }
 
+                    // IMPORTANT: Save config to disk after changes
+                    configManager.save();
+
                     System.out.println("Star toggled for: " + recipe.getName() +
-                            " (Favorite: " + favoriteIds.contains(recipeId) + ")");
+                            " (Favorite: " + config.isFavorite(recipeId) + ")");
                     updateItem(recipe, false);
                 }
             });
@@ -74,7 +90,7 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
             starButton.setOnMouseEntered(e -> {
                 Recipe recipe = getItem();
                 if (recipe != null) {
-                    if (favoriteIds.contains(recipe.getId())) {
+                    if (configManager.getConfig().isFavorite(recipe.getId())) {
                         // Already favorited - make gold brighter
                         starShape.setStyle("-fx-fill: gold; -fx-opacity: 1.0;");
                     } else {
@@ -87,7 +103,7 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
             starButton.setOnMouseExited(e -> {
                 Recipe recipe = getItem();
                 if (recipe != null) {
-                    if (favoriteIds.contains(recipe.getId())) {
+                    if (configManager.getConfig().isFavorite(recipe.getId())) {
                         // Already favorited - solid gold
                         starShape.setStyle("-fx-fill: gold;");
                     } else {
@@ -110,7 +126,7 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
                 text.setText(recipe.getName());
 
                 // Update star appearance based on favorite status
-                if (favoriteIds.contains(recipe.getId())) {
+                if (configManager.getConfig().isFavorite(recipe.getId())) {
                     starShape.setStyle("-fx-fill: gold;");
                     setStyle("-fx-background-color: #fff8e1; " +  // Light gold background
                             "-fx-border-color: #ffd54f; " +       // Gold border
@@ -132,15 +148,23 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
      * @param recipeId the id of the recipe
      * @return true if the recipe is favourite, else false
      */
-    public static boolean isFavorite(long recipeId){
-        return favoriteIds.contains(recipeId);
+    public boolean isFavorite(long recipeId) {  // Remove 'static'
+        return configManager.getConfig().isFavorite(recipeId);
     }
 
     /**
      * Helper method to get all favorite IDs
      * @return returns a set of all recipe's ID of those that are favourite
      */
-    public static Set<Long> getFavoriteIds(){
-        return new HashSet<>(favoriteIds);
+    public Set<Long> getFavoriteIds() {  // Remove 'static'
+        return new HashSet<>(configManager.getConfig().getFavoriteRecipeIds());
+    }
+
+    /**
+     * getter for the config manager
+     * @return the config manager
+     */
+    public ConfigManager getConfigManager() {
+        return configManager;
     }
 }
