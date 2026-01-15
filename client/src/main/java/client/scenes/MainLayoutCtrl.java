@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.config.ConfigManager;
 import client.i18n.I18n;
 import client.i18n.I18nConfig;
 import com.google.inject.Inject;
@@ -26,6 +27,7 @@ import java.util.ResourceBundle;
 public class MainLayoutCtrl implements Initializable {
 
     private final PrimaryCtrl primaryCtrl;
+    private final ConfigManager configManager;
 
     @FXML
     private StackPane contentArea;
@@ -45,12 +47,14 @@ public class MainLayoutCtrl implements Initializable {
     private final List<Locale> selectedRecipeLanguages = new ArrayList<>();
 
     /**
-     * Constructor which injects the PrimaryCtrl, to which we'll tell what to display
-     * @param primaryCtrl
+     * Constructor which injects the PrimaryCtrl and ConfigManager.
+     * @param primaryCtrl the primary controller
+     * @param configManager the config manager for persisting settings
      */
     @Inject
-    public MainLayoutCtrl(PrimaryCtrl primaryCtrl) {
+    public MainLayoutCtrl(PrimaryCtrl primaryCtrl, ConfigManager configManager) {
         this.primaryCtrl = primaryCtrl;
+        this.configManager = configManager;
     }
 
     @Override
@@ -110,13 +114,29 @@ public class MainLayoutCtrl implements Initializable {
      * Initializes the recipe language multi-select menu.
      */
     private void initializeRecipeLanguageMenu() {
-        // Start with all languages selected
-        selectedRecipeLanguages.addAll(I18nConfig.SUPPORTED);
+        // Load saved languages from config, or default to all
+        List<String> savedLanguages = configManager.getConfig().getSelectedRecipeLanguages();
+        boolean useDefaults = savedLanguages == null || savedLanguages.isEmpty();
+
+        if (useDefaults) {
+            selectedRecipeLanguages.addAll(I18nConfig.SUPPORTED);
+        } else {
+            for (String tag : savedLanguages) {
+                Locale locale = Locale.forLanguageTag(tag);
+                if (I18nConfig.SUPPORTED.contains(locale)) {
+                    selectedRecipeLanguages.add(locale);
+                }
+            }
+            // If no valid languages found, default to all
+            if (selectedRecipeLanguages.isEmpty()) {
+                selectedRecipeLanguages.addAll(I18nConfig.SUPPORTED);
+            }
+        }
 
         for (Locale locale : I18nConfig.SUPPORTED) {
             CheckMenuItem item = new CheckMenuItem();
             item.setText(getLanguageDisplayName(locale));
-            item.setSelected(true);
+            item.setSelected(selectedRecipeLanguages.contains(locale));
             item.setUserData(locale);
 
             item.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
@@ -128,6 +148,7 @@ public class MainLayoutCtrl implements Initializable {
                     selectedRecipeLanguages.remove(locale);
                 }
                 updateRecipeLanguageMenuText();
+                saveSelectedLanguages();
                 primaryCtrl.onRecipeLanguagesChanged(getSelectedLanguageTags());
             });
 
@@ -135,6 +156,14 @@ public class MainLayoutCtrl implements Initializable {
         }
 
         updateRecipeLanguageMenuText();
+    }
+
+    /**
+     * Saves the selected languages to the config.
+     */
+    private void saveSelectedLanguages() {
+        configManager.getConfig().setSelectedRecipeLanguages(getSelectedLanguageTags());
+        configManager.save();
     }
 
     /**

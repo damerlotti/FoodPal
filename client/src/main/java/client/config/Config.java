@@ -11,7 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,6 +25,7 @@ public class Config {
     private int configVersion = CURRENT_VERSION;
     private String prefLocale = "";
     private Set<Long> favoriteRecipeIds = new HashSet<>();
+    private List<String> selectedRecipeLanguages = new ArrayList<>();
 
     /**
      * Create a new Config with default values.
@@ -212,5 +215,23 @@ public class Config {
      */
     public boolean isFavorite(Long recipeId) {
         return favoriteRecipeIds.contains(recipeId);
+    }
+
+    /**
+     * Get the list of selected recipe language tags.
+     * @return the selected recipe language tags
+     */
+    public List<String> getSelectedRecipeLanguages() {
+        return selectedRecipeLanguages;
+    }
+
+    /**
+     * Set the list of selected recipe language tags.
+     * @param selectedRecipeLanguages the language tags to set
+     */
+    public void setSelectedRecipeLanguages(List<String> selectedRecipeLanguages) {
+        this.selectedRecipeLanguages = selectedRecipeLanguages != null
+                ? new ArrayList<>(selectedRecipeLanguages)
+                : new ArrayList<>();
     }
 }
