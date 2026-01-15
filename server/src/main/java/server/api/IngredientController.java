@@ -1,7 +1,8 @@
 package server.api;
 
 import commons.Ingredient;
-import org.springframework.http.ResponseEntity;
+import commons.Recipe;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import server.database.IngredientRepository;
 import org.springframework.web.bind.annotation.*;
 import server.database.RecipeRepository;
@@ -14,15 +15,20 @@ public class IngredientController {
 
     private final IngredientRepository ingredientRepo;
     private final RecipeRepository recipeRepo;
+    private final SimpMessagingTemplate msg;
 
     /**
      * Constructor which injects the IngredientRepository
      * @param ingredientRepo the ingredient repository
      * @param recipeRepo the recipe repository
+     * @param msg websocket message to update users
      */
-    public IngredientController(IngredientRepository ingredientRepo, RecipeRepository recipeRepo) {
+    public IngredientController(IngredientRepository ingredientRepo,
+                                RecipeRepository recipeRepo,
+                                SimpMessagingTemplate msg) {
         this.ingredientRepo = ingredientRepo;
         this.recipeRepo = recipeRepo;
+        this.msg = msg;
     }
 
     /**
@@ -51,24 +57,29 @@ public class IngredientController {
     /**
      * Handler for DELETE requests to /ingredients/id
      * @param id the id of the Ingredient to delete
-     * @return a ResponseEntity confirming if the ingredient was successfully deleted or not.
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable("id") long id) {
-        if(!ingredientRepo.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
+    public void delete(@PathVariable("id") long id) {
+        // We first delete the ingredient from all recipes first
+        List<Recipe> allRecipes = recipeRepo.findAll();
 
-        List<commons.Recipe> allRecipes = recipeRepo.findAll();
-
-        for (commons.Recipe recipe : allRecipes) {
-            boolean removed = recipe.getIngredients().removeIf(ri ->
-                    ri.getIngredient().getId() == id);
-            if (removed) {
-                recipeRepo.save(recipe);
+        for(Recipe recipe : allRecipes) {
+            boolean removed = recipe.getIngredients()
+                    .removeIf(ri -> ri.getIngredient().getId() == id);
+            if(removed) {
+                // Save the recipe
+                Recipe savedRecipe = recipeRepo.save(recipe);
+                // Update the list for all users
+                msg.convertAndSend("/topic/recipes", savedRecipe);
+                // Update the list for users that are specifically
+                // looking at a recipe with the ingredient in it
+                msg.convertAndSend("/topic/recipes" + savedRecipe.getId(), savedRecipe);
             }
         }
+        // Then we delete the ingredient itself by its id
         ingredientRepo.deleteById(id);
-        return ResponseEntity.ok().build();
+
+        // WebSocket message for deleting the ingredient
+        msg.convertAndSend("/topic/ingredients", id);
     }
 }
