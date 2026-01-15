@@ -15,8 +15,9 @@
    <top>
       <HBox alignment="CENTER_LEFT" prefHeight="40.0" prefWidth="800.0" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
-            <Button fx:id="recipesButton" mnemonicParsing="false" onAction="#showRecipes" prefHeight="25.0" prefWidth="68.0" text="Recipes" />
-            <Button fx:id="ingredientsButton" layoutX="10.0" layoutY="18.0" mnemonicParsing="false" onAction="#showIngredients" prefHeight="25.0" prefWidth="91.0" text="Ingredients" />
+            <Button mnemonicParsing="false" onAction="#showRecipes" prefHeight="25.0" prefWidth="68.0" text="Recipes" />
+            <Button layoutX="10.0" layoutY="18.0" mnemonicParsing="false" onAction="#showIngredients" prefHeight="25.0" prefWidth="91.0" text="Ingredients" />
+            <Button mnemonicParsing="false" onAction="#showShoppingList" prefHeight="25.0" prefWidth="100.0" text="Shopping List" />
             <AnchorPane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
             <ComboBox fx:id="languageCombo" prefHeight="25.0" prefWidth="40.0" promptText="App Language" />
          </children>
