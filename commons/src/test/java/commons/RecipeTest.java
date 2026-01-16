@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -139,5 +140,26 @@ class RecipeTest {
 
         // Total kcal = 100 + 100 = 200
         assertEquals(new BigDecimal("146"), recipe.estimatedRecipeKcal());
+    }
+
+    @Test
+    void setLanguageTag_setsValidTag() {
+        Recipe recipe = new Recipe();
+        recipe.setLanguageTag("ro-RO");
+        assertEquals("ro-RO", recipe.getLanguageTag());
+    }
+
+    @Test
+    void setLanguageTag_nullFallsBackToEnglish() {
+        Recipe recipe = new Recipe();
+        recipe.setLanguageTag(null);
+        assertEquals(Locale.ENGLISH.toLanguageTag(), recipe.getLanguageTag());
+    }
+
+    @Test
+    void setLanguageTag_blankFallsBackToEnglish() {
+        Recipe recipe = new Recipe();
+        recipe.setLanguageTag("   ");
+        assertEquals(Locale.ENGLISH.toLanguageTag(), recipe.getLanguageTag());
     }
 }
