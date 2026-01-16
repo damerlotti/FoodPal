@@ -1,23 +1,24 @@
 package client.scenes;
 
 import client.i18n.I18n;
+import client.i18n.I18nConfig;
 import client.utils.IngredientDialog;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.util.StringConverter;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class AddRecipeCtrl implements Initializable {
 
@@ -52,6 +53,13 @@ public class AddRecipeCtrl implements Initializable {
     private Button addIngredientButton;
     @FXML
     private Button deleteIngredientButton;
+    @FXML
+    private Label servingsLabel;
+    @FXML
+    private ComboBox<Locale> languageCombo;
+    private String selectedLanguageTag = Locale.ENGLISH.toLanguageTag();
+
+
 
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
@@ -68,6 +76,7 @@ public class AddRecipeCtrl implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Bind labels and buttons to i18n
         titleLabel.textProperty().bind(I18n.createStringBinding("addRecipe.title"));
+        servingsLabel.textProperty().bind(I18n.createStringBinding("addRecipe.servings"));
         ingredientsLabel.textProperty().bind(
                 I18n.createStringBinding("addRecipe.ingredientsLabel"));
         stepsLabel.textProperty().bind(I18n.createStringBinding("addRecipe.stepsLabel"));
@@ -78,6 +87,82 @@ public class AddRecipeCtrl implements Initializable {
         addIngredientButton.textProperty().bind(I18n.createStringBinding("addRecipe.add"));
         deleteIngredientButton.textProperty().bind(I18n.createStringBinding("addRecipe.delete"));
         displayServingChoices();
+
+        languageCombo.getItems().setAll(I18nConfig.SUPPORTED);
+        languageCombo.setCellFactory(_lv -> createFlagCell());
+        languageCombo.setButtonCell(languageCombo.getCellFactory().call(null));
+        languageCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Locale locale) {
+                return locale == null ? "" : capitalize(locale.getDisplayName(locale));
+            }
+            @Override
+            public Locale fromString(String s) { return null; }
+        });
+
+        languageCombo.getSelectionModel().select(I18n.getLocale());
+
+        languageCombo.valueProperty().addListener((obs, oldL, newL) -> {
+            if (newL != null) {
+                selectedLanguageTag = newL.toLanguageTag();
+                I18n.setLocale(newL); // triggers UI update
+            }
+        });
+    }
+
+    /**
+     * Returns a string capitalized.
+     * @param s The language string
+     * @return The properly capitalised string
+     */
+    private static String capitalize(String s) {
+        if (s == null || s.isBlank()) {
+            return s;
+        }
+        return s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+
+    /**
+     * returns a flag
+     * @return the flag
+     */
+    private ListCell<Locale> createFlagCell() {
+        return new ListCell<>() {
+            private final ImageView iv = new ImageView();
+
+            {
+                iv.setFitWidth(20);
+                iv.setFitHeight(14);
+                iv.setPreserveRatio(true);
+            }
+
+            @Override
+            protected void updateItem(Locale locale, boolean empty) {
+                super.updateItem(locale, empty);
+
+                if (empty || locale == null) {
+                    setText(null);
+                    setGraphic(null);
+                    setTooltip(null);
+                    return;
+                }
+
+                String path = client.i18n.Flags.flagPathFor(locale);
+                if (path != null) {
+                    Image img = new Image(Objects.requireNonNull(
+                            getClass().getClassLoader().getResourceAsStream(path),
+                            "Missing flag resource: " + path
+                    ));
+                    iv.setImage(img);
+                    setGraphic(iv);
+                } else {
+                    setGraphic(null); // fallback if missing image
+                }
+
+                setText(null); // flags only
+                setTooltip(new javafx.scene.control.Tooltip(locale.getDisplayName(locale)));
+            }
+        };
     }
 
     /**
@@ -91,6 +176,8 @@ public class AddRecipeCtrl implements Initializable {
         servingsField.setValue(choices.get(0));
         servingsField.setItems(choices);
     }
+
+
     /**
      * The user adds an ingredient while creating the recipe
      */
@@ -149,6 +236,7 @@ public class AddRecipeCtrl implements Initializable {
 
         Recipe r = new Recipe();
         r.setName(title);
+        r.setLanguageTag(selectedLanguageTag);
         r.setServings(servingsField.getValue());
         List<RecipeStep> steps = new ArrayList<>();
         int index = 0;
