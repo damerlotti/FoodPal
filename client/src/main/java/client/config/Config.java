@@ -3,6 +3,8 @@ package client.config;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import commons.Ingredient;
+import commons.Measurement;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -11,7 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,6 +27,7 @@ public class Config {
     private int configVersion = CURRENT_VERSION;
     private String prefLocale = "";
     private Set<Long> favoriteRecipeIds = new HashSet<>();
+    private List<ShoppingItemBasic> shoppingList = new ArrayList<>();
 
     /**
      * Create a new Config with default values.
@@ -212,5 +217,48 @@ public class Config {
      */
     public boolean isFavorite(Long recipeId) {
         return favoriteRecipeIds.contains(recipeId);
+    }
+
+    /**
+     * Getter for the shopping list
+     * @return the shopping list (with ShoppingItemBasic objects)
+     */
+    public List<ShoppingItemBasic> getShoppingList() {
+        return shoppingList;
+    }
+
+    /**
+     * Setter for the shopping list
+     * @param shoppingList the shopping list to set
+     */
+    public void setShoppingList(List<ShoppingItemBasic> shoppingList) {
+        this.shoppingList = shoppingList;
+    }
+
+    public static class ShoppingItemBasic {
+        public boolean checked;
+        public Ingredient ingredient;
+        public Measurement measurement;
+        public String source;
+
+        /**
+         * No args constructor
+         */
+        public ShoppingItemBasic() {}
+
+        /**
+         * Constructor for a shopping item
+         * @param checked whether we bought it or not
+         * @param ingredient the ingredient
+         * @param measurement how much of the ingredient
+         * @param source provenience source
+         */
+        public ShoppingItemBasic(boolean checked, Ingredient ingredient,
+                                 Measurement measurement, String source) {
+            this.checked = checked;
+            this.ingredient = ingredient;
+            this.measurement = measurement;
+            this.source = source;
+        }
     }
 }

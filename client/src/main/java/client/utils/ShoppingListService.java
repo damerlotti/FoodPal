@@ -1,10 +1,15 @@
 package client.utils;
 
+import client.config.Config;
+import client.config.ConfigManager;
+import com.google.inject.Inject;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import com.google.inject.Singleton;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import javafx.collections.ListChangeListener;
 
 /**
  * Service class responsible for managing the shopping list data.
@@ -15,12 +20,54 @@ import java.util.List;
 public class ShoppingListService {
 
     private final ObservableList<ShoppingItem> items;
-
+    private final ConfigManager configManager;
     /**
      * Initializes the empty observable list.
+     * @param configManager inject the config boss
      */
-    public ShoppingListService() {
+    @Inject
+    public ShoppingListService(ConfigManager configManager) {
+        this.configManager = configManager;
         items = FXCollections.observableArrayList();
+        loadFromConfig();
+        items.addListener((ListChangeListener<ShoppingItem>) c -> saveToConfig());
+    }
+
+    /**
+     * Reads the basic shopping objects and turns them into smart javafx ones
+     */
+    private void loadFromConfig() {
+        Config config = configManager.getConfig();
+        if (config.getShoppingList() != null) {
+            List<ShoppingItem> loadedItems = config.getShoppingList().stream().map(basic -> {
+                ShoppingItem item = new ShoppingItem(basic.ingredient,
+                        basic.measurement, basic.source);
+                item.setChecked(basic.checked);
+                item.checkedProperty().addListener((obs, old, newVal) -> saveToConfig());
+                item.measurementProperty().addListener((obs, oldVal, newVal) -> saveToConfig());
+                return item;
+            }).collect(Collectors.toList());
+
+            items.setAll(loadedItems);
+        }
+    }
+
+    /**
+     * Convert the smart objects into basic objects
+     * and write them in the JSON
+     */
+    private void saveToConfig() {
+        Config config = configManager.getConfig();
+
+        List<Config.ShoppingItemBasic> basics = items.stream()
+                .map(item -> new Config.ShoppingItemBasic(
+                        item.getChecked(),
+                        item.getIngredient(),
+                        item.getMeasurement(),
+                        item.getSource()))
+                .collect(Collectors.toList());
+        config.setShoppingList(basics);
+        configManager.save();
     }
 
     /**
@@ -36,6 +83,10 @@ public class ShoppingListService {
      * @param newItems the list of shoppingitems to be added.
      */
     public void addItems(List<ShoppingItem> newItems) {
+        for (ShoppingItem item : newItems) {
+            item.checkedProperty().addListener((obs, old, newVal) -> saveToConfig());
+            item.measurementProperty().addListener((obs, oldVal, newVal) -> saveToConfig());
+        }
         this.items.addAll(newItems);
     }
 

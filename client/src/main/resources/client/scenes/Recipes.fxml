@@ -57,7 +57,7 @@
                                     <Font name="System Bold" size="20.0" />
                                  </font>
                               </Label>
-                              <Button fx:id="addToShoppingList" mnemonicParsing="false" prefHeight="26.0" prefWidth="46.0" text="Shop" />
+                              <Button mnemonicParsing="false" onAction="#addToShoppingList" prefHeight="26.0" prefWidth="46.0" text="Shop" />
                               <Button fx:id="editTitleButton" mnemonicParsing="false" onAction="#onEditTitleClicked" text="Edit">
                                  <HBox.margin>
                                     <Insets top="5.0" />

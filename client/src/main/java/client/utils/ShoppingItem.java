@@ -37,6 +37,14 @@ public class ShoppingItem {
     }
 
     /**
+     * Get the whole boolean property for shoppingListService to work
+     * @return the checked object
+     */
+    public BooleanProperty checkedProperty() {
+        return checked;
+    }
+
+    /**
      * Sets the checked status of the item.
      * @param checked true to mark as bought.
      */
@@ -66,6 +74,14 @@ public class ShoppingItem {
      */
     public Measurement getMeasurement() {
         return measurement.get();
+    }
+
+    /**
+     * Getter for the whole object property of the measurement
+     * @return the measurement
+     */
+    public ObjectProperty<Measurement> measurementProperty() {
+        return measurement;
     }
 
     /**

@@ -1,13 +1,11 @@
 package client.scenes;
 
-import client.utils.ShoppingItem;
-import client.utils.ShoppingListCellFactory;
-import client.utils.ShoppingListService;
+import client.utils.*;
 import com.google.inject.Inject;
+import commons.RecipeIngredient;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextInputDialog;
 
 import java.net.URL;
 import java.util.Optional;
@@ -21,6 +19,7 @@ public class ShoppingListCtrl implements Initializable {
 
     private final ShoppingListService shoppingListService;
     private final PrimaryCtrl primaryCtrl;
+    private final ServerUtils server;
 
     @FXML
     private ListView<ShoppingItem> shoppingListView;
@@ -29,11 +28,14 @@ public class ShoppingListCtrl implements Initializable {
      * Constructs the controller via dependency injection.
      * @param shoppingListService the service holding the shared list data
      * @param primaryCtrl the main controller for navigation
+     * @param server the server utils injected
      */
     @Inject
-    public ShoppingListCtrl(ShoppingListService shoppingListService, PrimaryCtrl primaryCtrl) {
+    public ShoppingListCtrl(ShoppingListService shoppingListService, PrimaryCtrl primaryCtrl,
+                            ServerUtils server) {
         this.shoppingListService = shoppingListService;
         this.primaryCtrl = primaryCtrl;
+        this.server = server;
     }
 
     /**
@@ -54,14 +56,15 @@ public class ShoppingListCtrl implements Initializable {
      */
     @FXML
     public void addManualItem() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Add Item");
-        dialog.setHeaderText("Add to Shopping List");
-        dialog.setContentText("Item Name:");
-
-        Optional<String> result = dialog.showAndWait();
-
-        result.ifPresent(name -> {
+        var allIngredients = server.getIngredients();
+        Optional<RecipeIngredient> result = IngredientDialog.show(allIngredients, server);
+        result.ifPresent(recipeIngredient -> {
+            ShoppingItem newItem = new ShoppingItem(
+                    recipeIngredient.getIngredient(),
+                    recipeIngredient.getAmount(),
+                    "Manual"
+            );
+            shoppingListService.addItems(java.util.List.of(newItem));
         });
     }
 

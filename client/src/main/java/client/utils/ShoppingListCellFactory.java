@@ -4,8 +4,6 @@ import commons.Ingredient;
 import commons.Measurement;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
 
@@ -39,7 +37,6 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
         private final Label sourceLabel;
         private final Button editButton;
         private final Button deleteButton;
-        private final Region spacer;
 
         /**
          * Constructor: Initializes the UI components (checkbox, text, button etc)
@@ -57,9 +54,6 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                     "-fx-font-size: 0.9em;"); //very cutely shows where the ingredient
             // comes from in the shopping list
 
-            spacer = new Region();
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-
             editButton = new Button("Edit");
             editButton.setOnAction(e -> handleEdit());
 
@@ -72,7 +66,8 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                 }
             });
 
-            layout.getChildren().addAll(checkBox, nameText, sourceLabel, deleteButton);
+            layout.getChildren().addAll(checkBox, nameText, sourceLabel,
+                    editButton, deleteButton);
 
             checkBox.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
                 if (getItem() != null) {
