@@ -143,21 +143,21 @@ class RecipeTest {
     }
 
     @Test
-    void setLanguageTag_setsValidTag() {
+    void setLanguageTagSetsValidTag() {
         Recipe recipe = new Recipe();
         recipe.setLanguageTag("ro-RO");
         assertEquals("ro-RO", recipe.getLanguageTag());
     }
 
     @Test
-    void setLanguageTag_nullFallsBackToEnglish() {
+    void nullFallsBackToEnglish() {
         Recipe recipe = new Recipe();
         recipe.setLanguageTag(null);
         assertEquals(Locale.ENGLISH.toLanguageTag(), recipe.getLanguageTag());
     }
 
     @Test
-    void setLanguageTag_blankFallsBackToEnglish() {
+    void blankFallsBackToEnglish() {
         Recipe recipe = new Recipe();
         recipe.setLanguageTag("   ");
         assertEquals(Locale.ENGLISH.toLanguageTag(), recipe.getLanguageTag());
