@@ -1,10 +1,13 @@
-package client.scenes;
+package client.utils;
 
-import client.utils.ShoppingItem;
+import commons.Ingredient;
+import commons.Measurement;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
+
+import java.util.Optional;
 
 /**
  * Custom CellFactory for the Shopping List ListView.
@@ -32,6 +35,7 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
         private final CheckBox checkBox;
         private final Text nameText;
         private final Label sourceLabel;
+        private final Button editButton;
         private final Button deleteButton;
 
         /**
@@ -50,9 +54,20 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                     "-fx-font-size: 0.9em;"); //very cutely shows where the ingredient
             // comes from in the shopping list
 
-            deleteButton = new Button("Delete");
+            editButton = new Button("Edit");
+            editButton.setOnAction(e -> handleEdit());
 
-            layout.getChildren().addAll(checkBox, nameText, sourceLabel, deleteButton);
+            deleteButton = new Button("Delete");
+            deleteButton.setStyle("-fx-background-color: #ffcccc; -fx-text-fill: red;");
+            deleteButton.setOnAction(e -> {
+                ShoppingItem item = getItem();
+                if (item != null) {
+                    getListView().getItems().remove(item);
+                }
+            });
+
+            layout.getChildren().addAll(checkBox, nameText, sourceLabel,
+                    editButton, deleteButton);
 
             checkBox.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
                 if (getItem() != null) {
@@ -65,6 +80,19 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                 if (item != null) {
                     getListView().getItems().remove(item);
                 }
+            });
+        }
+
+        private void handleEdit() {
+            ShoppingItem item = getItem();
+            if (item == null) {
+                return;
+            }
+
+            Optional<Measurement> result = IngredientDialog.showEditAmount(item.getMeasurement());
+            result.ifPresent(newMeasurement -> {
+                item.setMeasurement(newMeasurement);
+                updateItem(item, false);
             });
         }
 
@@ -81,18 +109,28 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                 setText(null);
                 setGraphic(null);
             } else {
-                checkBox.setSelected(item.isChecked());
+                checkBox.setSelected(item.getChecked());
 
-                String amountStr = item.getAmount() != null ? item.getAmount().toPlainString() : "";
-                String unitStr = item.getUnit() != null ?
-                        item.getUnit().getHumanReadableName() : "";
-                nameText.setText(amountStr + " " + unitStr + " " + item.getName());
+                Measurement measurement = item.getMeasurement();
+                Ingredient ingredient = item.getIngredient();
 
-                if (item.getSource() != null
-                        && !item.getSource().isEmpty()
-                        && !item.getSource().equals("Manual")) {
-                    sourceLabel.setText("(" + item.getSource() + ")");
-                } else {
+                String amountStr = measurement.getValue() != null ?
+                        measurement.getValue().stripTrailingZeros().toPlainString() : "";
+                String unitStr = measurement.getUnit() != null ?
+                        measurement.getUnit().getHumanReadableName() : "";
+                String nameStr = ingredient.getName();
+
+                nameText.setText(amountStr + " " + unitStr + " " + nameStr);
+
+                long duplicateCount = getListView().getItems().stream()
+                        .filter(i -> i.getIngredient().getName().equalsIgnoreCase(nameStr))
+                        .count();
+
+                if (duplicateCount > 1) {
+                    String source = item.getSource() == null ? "" : item.getSource();
+                    sourceLabel.setText("(" + source + ")");
+                }
+                else {
                     sourceLabel.setText("");
                 }
 

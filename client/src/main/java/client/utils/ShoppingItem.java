@@ -1,8 +1,8 @@
 package client.utils;
 
-import commons.Unit;
+import commons.Ingredient;
+import commons.Measurement;
 import javafx.beans.property.*;
-import java.math.BigDecimal;
 
 /**
  * Represents a single item in the shopping list.
@@ -11,33 +11,37 @@ import java.math.BigDecimal;
 public class ShoppingItem {
 
     private final BooleanProperty checked;
-    private final StringProperty name;
-    private final ObjectProperty<BigDecimal> amount;
-    private final ObjectProperty<Unit> unit;
-    private final String source; // Instead of plain String, we use StringProperty
-    // because changing the name of e.g. "Apple" to "Green Apple" instantly updates the screen.
+    private final ObjectProperty<Ingredient> ingredient;
+    private final ObjectProperty<Measurement> measurement;
+    private final String source;
 
     /**
      * Creates a new shopping item.
-     * @param name the name of the item
-     * @param amount the quantity needed
-     * @param unit the unit of measurement
+     * @param ingredient the ingredient for this item
+     * @param measurement the amount needed
      * @param source the name of the recipe this item came from
      */
-    public ShoppingItem(String name, BigDecimal amount, Unit unit, String source) {
+    public ShoppingItem(Ingredient ingredient, Measurement measurement, String source) {
         this.checked = new SimpleBooleanProperty(false);
-        this.name = new SimpleStringProperty(name);
-        this.amount = new SimpleObjectProperty<>(amount);
-        this.unit = new SimpleObjectProperty<>(unit);
-        this.source = new String(source);
+        this.ingredient = new SimpleObjectProperty<>(ingredient);
+        this.measurement = new SimpleObjectProperty<>(measurement);
+        this.source = source;
     }
 
     /**
-     * Checks if the ite is marked as "bought".
+     * Checks if the item is marked as "bought".
      * @return true if the checkbox is checked, false otherwise.
      */
-    public boolean isChecked() {
+    public boolean getChecked() {
         return checked.get();
+    }
+
+    /**
+     * Get the whole boolean property for shoppingListService to work
+     * @return the checked object
+     */
+    public BooleanProperty checkedProperty() {
+        return checked;
     }
 
     /**
@@ -49,51 +53,43 @@ public class ShoppingItem {
     }
 
     /**
-     * Gets the name of the item.
-     * @return the name string.
+     * Getter for the ingredient within the shopping item
+     * @return the ingredient
      */
-    public String getName() {
-        return name.get();
+    public Ingredient getIngredient() {
+        return ingredient.get();
     }
 
     /**
-     * sets the name of the item.
-     * @param name new name
+     * Setter for the ingredient within the shopping item
+     * @param ingredient the ingredient being set
      */
-    public void setName(String name) {
-        this.name.set(name);
+    public void setIngredient(Ingredient ingredient) {
+        this.ingredient.set(ingredient);
     }
 
     /**
-     * gets the amount of the item.
-     * @return the amount as a BigDecimal
+     * Getter for the measurement
+     * @return the measurement object of the shopping item
      */
-    public BigDecimal getAmount() {
-        return amount.get();
+    public Measurement getMeasurement() {
+        return measurement.get();
     }
 
     /**
-     * sets the amount of the item.
-     * @param amount the new amount.
+     * Getter for the whole object property of the measurement
+     * @return the measurement
      */
-    public void setAmount(BigDecimal amount) {
-        this.amount.set(amount);
+    public ObjectProperty<Measurement> measurementProperty() {
+        return measurement;
     }
 
     /**
-     * gets the unit of measurement.
-     * @return the unit enum.
+     * Setter for the measurement
+     * @param measurement the measurement being set
      */
-    public Unit getUnit() {
-        return unit.get();
-    }
-
-    /**
-     * sets the unit of measurement.
-     * @param unit the new unit
-     */
-    public void setUnit(Unit unit) {
-        this.unit.set(unit);
+    public void setMeasurement(Measurement measurement) {
+        this.measurement.set(measurement);
     }
 
     /**
@@ -107,12 +103,14 @@ public class ShoppingItem {
 
     /**
      * Returns a string representation of the item.
-     * Useful for debugging or simple text output or whatever.
-     * I never used it, I just added it out of habit.
-     * @return a string like "500 GRAM Flour".
+     * Useful for debugging or simple text output.
+     * @return a string like representing the object
      */
     @Override
     public String toString() {
-        return amount.get() + " " + unit.get() + " " + name.get();
+        if (getIngredient() == null || getMeasurement() == null) {
+            return "Invalid shopping item";
+        }
+        return getMeasurement().toString() + " " + getIngredient().getName();
     }
 }

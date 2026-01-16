@@ -1,18 +1,22 @@
 package client.scenes;
 
-import client.utils.ShoppingItem;
-import client.utils.ShoppingListService;
+import client.utils.*;
 import com.google.inject.Inject;
-import commons.Unit;
+import commons.RecipeIngredient;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextInputDialog;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
-import java.math.BigDecimal;
+import java.io.File;
+import java.io.PrintWriter;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.io.IOException;
 
 /**
  * Controller for the Shopping List screen.
@@ -22,6 +26,7 @@ public class ShoppingListCtrl implements Initializable {
 
     private final ShoppingListService shoppingListService;
     private final PrimaryCtrl primaryCtrl;
+    private final ServerUtils server;
 
     @FXML
     private ListView<ShoppingItem> shoppingListView;
@@ -30,11 +35,14 @@ public class ShoppingListCtrl implements Initializable {
      * Constructs the controller via dependency injection.
      * @param shoppingListService the service holding the shared list data
      * @param primaryCtrl the main controller for navigation
+     * @param server the server utils injected
      */
     @Inject
-    public ShoppingListCtrl(ShoppingListService shoppingListService, PrimaryCtrl primaryCtrl) {
+    public ShoppingListCtrl(ShoppingListService shoppingListService, PrimaryCtrl primaryCtrl,
+                            ServerUtils server) {
         this.shoppingListService = shoppingListService;
         this.primaryCtrl = primaryCtrl;
+        this.server = server;
     }
 
     /**
@@ -55,19 +63,15 @@ public class ShoppingListCtrl implements Initializable {
      */
     @FXML
     public void addManualItem() {
-        TextInputDialog dialog = new TextInputDialog();
-        dialog.setTitle("Add Item");
-        dialog.setHeaderText("Add to Shopping List");
-        dialog.setContentText("Item Name:");
-
-        Optional<String> result = dialog.showAndWait();
-
-        result.ifPresent(name -> {
-            if (!name.trim().isEmpty()) {
-                // for now, the program assumes 1 piece for manual items.
-                ShoppingItem newItem = new ShoppingItem(name, BigDecimal.ONE, Unit.PIECE, "Manual");
-                shoppingListService.getItems().add(newItem);
-            }
+        var allIngredients = server.getIngredients();
+        Optional<RecipeIngredient> result = IngredientDialog.show(allIngredients, server);
+        result.ifPresent(recipeIngredient -> {
+            ShoppingItem newItem = new ShoppingItem(
+                    recipeIngredient.getIngredient(),
+                    recipeIngredient.getAmount(),
+                    "Manual"
+            );
+            shoppingListService.addItems(java.util.List.of(newItem));
         });
     }
 
@@ -85,6 +89,53 @@ public class ShoppingListCtrl implements Initializable {
      */
     @FXML
     public void downloadList(){
-        //TODO: Will be added later
+        if (shoppingListService.getItems().isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Empty List");
+            alert.setHeaderText(null);
+            alert.setContentText("Your shopping list is empty.");
+            alert.showAndWait();
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Shopping List");
+        fileChooser.setInitialFileName("shopping_list.txt");
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Text Files (*.txt)", "*.txt"),
+                new FileChooser.ExtensionFilter("Markdown (*.md)", "*.md")
+        );
+        Window owner = shoppingListView.getScene().getWindow();
+        File file = fileChooser.showSaveDialog(owner);
+        if (file != null) {
+            saveToFile(file);
+        }
+    }
+
+    private void saveToFile(File file) {
+        try (PrintWriter writer = new PrintWriter(file, StandardCharsets.UTF_8)) {
+            writer.println("SHOPPING LIST");
+            writer.println("=============");
+            writer.println();
+            for (ShoppingItem item : shoppingListService.getItems()) {
+                String checkMark = item.getChecked() ? "[x]" : "[ ]";
+                String amount = item.getMeasurement().getValue().stripTrailingZeros()
+                        .toPlainString();
+                String unit = item.getMeasurement().getUnit() != null
+                        ? item.getMeasurement().getUnit().toString().toLowerCase() : "";
+                String name = item.getIngredient().getName();
+
+                String source = "";
+                if (item.getSource() != null) {
+                    source = "  (" + item.getSource() + ")";
+                }
+                writer.printf("%s %s %s %s%s%n", checkMark, amount, unit, name, source);
+            }
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText("Could not save file");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
     }
 }
