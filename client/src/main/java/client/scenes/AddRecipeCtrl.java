@@ -1,14 +1,18 @@
 package client.scenes;
 
 import client.i18n.I18n;
+import client.utils.IngredientDialog;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
 import commons.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.TextField;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,12 +23,13 @@ public class AddRecipeCtrl implements Initializable {
 
     private final PrimaryCtrl primaryCtrl;
     private final ServerUtils server;
+    private ObservableList<Integer> choices = FXCollections.observableArrayList();
     @FXML
     private TextField titleField;
-
+    @FXML
+    private ChoiceBox<Integer> servingsField;
     @FXML
     private ListView<RecipeIngredient> ingredientsList;
-
     //list of steps
     @FXML
     private ListView<String> stepsList;
@@ -72,8 +77,20 @@ public class AddRecipeCtrl implements Initializable {
         deleteStepButton.textProperty().bind(I18n.createStringBinding("addRecipe.delete"));
         addIngredientButton.textProperty().bind(I18n.createStringBinding("addRecipe.add"));
         deleteIngredientButton.textProperty().bind(I18n.createStringBinding("addRecipe.delete"));
+        displayServingChoices();
     }
 
+    /**
+     * Populates the choice box with choices
+     */
+    @FXML
+    public void displayServingChoices() {
+        for (int i = 1; i<21; i++) {
+            choices.add(i);
+        }
+        servingsField.setValue(choices.get(0));
+        servingsField.setItems(choices);
+    }
     /**
      * The user adds an ingredient while creating the recipe
      */
@@ -132,7 +149,7 @@ public class AddRecipeCtrl implements Initializable {
 
         Recipe r = new Recipe();
         r.setName(title);
-
+        r.setServings(servingsField.getValue());
         List<RecipeStep> steps = new ArrayList<>();
         int index = 0;
         for (String text: stepsList.getItems()) {
@@ -152,6 +169,10 @@ public class AddRecipeCtrl implements Initializable {
             ingredients.add(x);
         }
         r.setIngredients(ingredients);
+
+        // Calculate kcal per 100g here
+        BigDecimal estimatedKcal = r.estimatedRecipeKcal();
+        System.out.println("Estimated kcal per 100g: " + estimatedKcal);
 
         try {
             server.addRecipe(r);

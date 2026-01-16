@@ -167,7 +167,7 @@ public class DataInitializer implements CommandLineRunner {
      */
     private void createSpaghettiCarbonara(Ingredient spaghetti, Ingredient eggs,
                                           Ingredient pancetta, Ingredient parmesan) {
-        Recipe carbonara = createRecipe("Spaghetti Carbonara");
+        Recipe carbonara = createRecipe("Spaghetti Carbonara", 1);
         addIngredientToRecipe(carbonara, spaghetti, new BigDecimal("400"), Unit.G);
         addIngredientToRecipe(carbonara, eggs, new BigDecimal("3"), Unit.PIECE);
         addIngredientToRecipe(carbonara, pancetta, new BigDecimal("150"), Unit.G);
@@ -189,7 +189,7 @@ public class DataInitializer implements CommandLineRunner {
      */
     private void createChickenStirFry(Ingredient chicken, Ingredient bellPepper,
                                       Ingredient broccoli, Ingredient soySauce) {
-        Recipe stirFry = createRecipe("Chicken Stir Fry");
+        Recipe stirFry = createRecipe("Chicken Stir Fry", 2);
         addIngredientToRecipe(stirFry, chicken, new BigDecimal("500"), Unit.G);
         addIngredientToRecipe(stirFry, bellPepper, new BigDecimal("2"), Unit.PIECE);
         addIngredientToRecipe(stirFry, broccoli, new BigDecimal("1"), Unit.PIECE);
@@ -213,7 +213,7 @@ public class DataInitializer implements CommandLineRunner {
     private void createChocolateChipCookies(Ingredient flour, Ingredient butter,
                                             Ingredient sugar, Ingredient eggs,
                                             Ingredient chocolate, Ingredient bakingSoda) {
-        Recipe cookies = createRecipe("Chocolate Chip Cookies");
+        Recipe cookies = createRecipe("Chocolate Chip Cookies", 2);
         addIngredientToRecipe(cookies, flour, new BigDecimal("2.5"), Unit.CUP);
         addIngredientToRecipe(cookies, butter, new BigDecimal("1"), Unit.CUP);
         addIngredientToRecipe(cookies, sugar, new BigDecimal("0.75"), Unit.CUP);
@@ -241,7 +241,7 @@ public class DataInitializer implements CommandLineRunner {
     private void createBeefTacos(Ingredient groundBeef, Ingredient onion,
                                  Ingredient garlic, Ingredient cheese,
                                  Ingredient lettuce, Ingredient tomato) {
-        Recipe tacos = createRecipe("Beef Tacos");
+        Recipe tacos = createRecipe("Beef Tacos", 2);
         addIngredientToRecipe(tacos, groundBeef, new BigDecimal("500"), Unit.G);
         addIngredientToRecipe(tacos, onion, new BigDecimal("1"), Unit.PIECE);
         addIngredientToRecipe(tacos, garlic, new BigDecimal("2"), Unit.PIECE);
@@ -266,7 +266,7 @@ public class DataInitializer implements CommandLineRunner {
     private void createVegetableLasagna(Ingredient flour, Ingredient bellPepper,
                                         Ingredient zucchini, Ingredient cheese,
                                         Ingredient tomato) {
-        Recipe lasagna = createRecipe("Vegetable Lasagna");
+        Recipe lasagna = createRecipe("Vegetable Lasagna", 1);
         addIngredientToRecipe(lasagna, flour, new BigDecimal("12"), Unit.PIECE);
         addIngredientToRecipe(lasagna, bellPepper, new BigDecimal("2"), Unit.PIECE);
         addIngredientToRecipe(lasagna, zucchini, new BigDecimal("2"), Unit.PIECE);
@@ -294,7 +294,7 @@ public class DataInitializer implements CommandLineRunner {
                                          Ingredient butter, Ingredient tomato,
                                          Ingredient onion, Ingredient garlic,
                                          Ingredient cheese) {
-        Recipe omelette = createRecipe("Vegetable Omelette");
+        Recipe omelette = createRecipe("Vegetable Omelette", 3);
 
         // Add ingredients with appropriate amounts
         addIngredientToRecipe(omelette, eggs, new BigDecimal("3"), Unit.PIECE);
@@ -359,11 +359,13 @@ public class DataInitializer implements CommandLineRunner {
      * Creates a new Recipe object with the specified name.
      * Note: This method only creates the object but does not persist it.
      * @param name the name of the recipe to create
+     * @param servings of the recipe
      * @return the created Recipe object
      */
-    private Recipe createRecipe(String name) {
+    private Recipe createRecipe(String name, int servings) {
         Recipe recipe = new Recipe();
         recipe.setName(name);
+        recipe.setServings(servings);
         recipe.setLanguageTag(Locale.ENGLISH.toLanguageTag());
         return recipe;
     }

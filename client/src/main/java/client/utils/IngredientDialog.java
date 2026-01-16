@@ -1,7 +1,6 @@
-package client.scenes;
+package client.utils;
 
 import client.i18n.I18n;
-import client.utils.ServerUtils;
 import commons.*;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;

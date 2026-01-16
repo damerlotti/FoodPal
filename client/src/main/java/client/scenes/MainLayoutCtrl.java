@@ -231,6 +231,14 @@ public class MainLayoutCtrl implements Initializable {
     }
 
     /**
+     * Targetting the View -> ShoppingList menu item, so we delegate responsibility to primaryCtrl
+     */
+    @FXML
+    public void showShoppingList() { 
+        primaryCtrl.showShoppingList(); 
+    }
+
+    /** 
      * Returns a string capitalized.
      * @param s The language string
      * @return The properly capitalised string

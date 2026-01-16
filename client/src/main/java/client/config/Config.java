@@ -3,6 +3,8 @@ package client.config;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import commons.Ingredient;
+import commons.Measurement;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -26,6 +28,7 @@ public class Config {
     private String prefLocale = "";
     private Set<Long> favoriteRecipeIds = new HashSet<>();
     private List<String> selectedRecipeLanguages = new ArrayList<>();
+    private List<ShoppingItemBasic> shoppingList = new ArrayList<>();
 
     /**
      * Create a new Config with default values.
@@ -234,4 +237,47 @@ public class Config {
                 ? new ArrayList<>(selectedRecipeLanguages)
                 : new ArrayList<>();
     }
+
+     * Getter for the shopping list
+     * @return the shopping list (with ShoppingItemBasic objects)
+     */
+    public List<ShoppingItemBasic> getShoppingList() {
+        return shoppingList;
+    }
+
+    /**
+     * Setter for the shopping list
+     * @param shoppingList the shopping list to set
+     */
+    public void setShoppingList(List<ShoppingItemBasic> shoppingList) {
+        this.shoppingList = shoppingList;
+    }
+
+    public static class ShoppingItemBasic {
+        public boolean checked;
+        public Ingredient ingredient;
+        public Measurement measurement;
+        public String source;
+
+        /**
+         * No args constructor
+         */
+        public ShoppingItemBasic() {}
+
+        /**
+         * Constructor for a shopping item
+         * @param checked whether we bought it or not
+         * @param ingredient the ingredient
+         * @param measurement how much of the ingredient
+         * @param source provenience source
+         */
+        public ShoppingItemBasic(boolean checked, Ingredient ingredient,
+                                 Measurement measurement, String source) {
+            this.checked = checked;
+            this.ingredient = ingredient;
+            this.measurement = measurement;
+            this.source = source;
+        }
+    }
 }
+
