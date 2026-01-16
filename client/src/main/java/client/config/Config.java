@@ -238,6 +238,7 @@ public class Config {
                 : new ArrayList<>();
     }
 
+    /*
      * Getter for the shopping list
      * @return the shopping list (with ShoppingItemBasic objects)
      */
