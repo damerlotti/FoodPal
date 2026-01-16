@@ -27,6 +27,7 @@ public class Config {
     private int configVersion = CURRENT_VERSION;
     private String prefLocale = "";
     private Set<Long> favoriteRecipeIds = new HashSet<>();
+    private List<String> selectedRecipeLanguages = new ArrayList<>();
     private List<ShoppingItemBasic> shoppingList = new ArrayList<>();
 
     /**
@@ -220,6 +221,24 @@ public class Config {
     }
 
     /**
+     * Get the list of selected recipe language tags.
+     * @return the selected recipe language tags
+     */
+    public List<String> getSelectedRecipeLanguages() {
+        return selectedRecipeLanguages;
+    }
+
+    /**
+     * Set the list of selected recipe language tags.
+     * @param selectedRecipeLanguages the language tags to set
+     */
+    public void setSelectedRecipeLanguages(List<String> selectedRecipeLanguages) {
+        this.selectedRecipeLanguages = selectedRecipeLanguages != null
+                ? new ArrayList<>(selectedRecipeLanguages)
+                : new ArrayList<>();
+    }
+
+    /**
      * Getter for the shopping list
      * @return the shopping list (with ShoppingItemBasic objects)
      */
@@ -262,3 +281,4 @@ public class Config {
         }
     }
 }
+
