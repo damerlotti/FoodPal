@@ -4,8 +4,12 @@ import commons.Ingredient;
 import commons.Measurement;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.util.Callback;
+
+import java.util.Optional;
 
 /**
  * Custom CellFactory for the Shopping List ListView.
@@ -33,7 +37,9 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
         private final CheckBox checkBox;
         private final Text nameText;
         private final Label sourceLabel;
+        private final Button editButton;
         private final Button deleteButton;
+        private final Region spacer;
 
         /**
          * Constructor: Initializes the UI components (checkbox, text, button etc)
@@ -51,7 +57,20 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                     "-fx-font-size: 0.9em;"); //very cutely shows where the ingredient
             // comes from in the shopping list
 
+            spacer = new Region();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            editButton = new Button("Edit");
+            editButton.setOnAction(e -> handleEdit());
+
             deleteButton = new Button("Delete");
+            deleteButton.setStyle("-fx-background-color: #ffcccc; -fx-text-fill: red;");
+            deleteButton.setOnAction(e -> {
+                ShoppingItem item = getItem();
+                if (item != null) {
+                    getListView().getItems().remove(item);
+                }
+            });
 
             layout.getChildren().addAll(checkBox, nameText, sourceLabel, deleteButton);
 
@@ -66,6 +85,19 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                 if (item != null) {
                     getListView().getItems().remove(item);
                 }
+            });
+        }
+
+        private void handleEdit() {
+            ShoppingItem item = getItem();
+            if (item == null) {
+                return;
+            }
+
+            Optional<Measurement> result = IngredientDialog.showEditAmount(item.getMeasurement());
+            result.ifPresent(newMeasurement -> {
+                item.setMeasurement(newMeasurement);
+                updateItem(item, false);
             });
         }
 
@@ -93,7 +125,7 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                         measurement.getUnit().getHumanReadableName() : "";
                 String nameStr = ingredient.getName();
 
-                nameText.setText(String.format("%s %s %s", amountStr, unitStr, nameStr).trim());
+                nameText.setText(amountStr + " " + unitStr + " " + nameStr);
                 
                 if (item.getSource() != null
                         && !item.getSource().isEmpty()

@@ -3,9 +3,7 @@ package client.scenes;
 import client.MyWebSocketClient;
 import client.i18n.I18n;
 import client.config.Config;
-import client.utils.IngredientDialog;
-import client.utils.RecipeListCellFactory;
-import client.utils.ServerUtils;
+import client.utils.*;
 import com.google.inject.Inject;
 import commons.*;
 import javafx.collections.FXCollections;
@@ -28,6 +26,7 @@ public class RecipesCtrl implements Initializable {
     private final ServerUtils server;
     private final PrimaryCtrl primaryCtrl;
     private final RecipeListCellFactory cellFactory;
+    private final ShoppingListService shoppingListService;
 
     // fxml link, keep in mind that it must match with the id in scene builder
     // that's the left-hand side
@@ -95,13 +94,15 @@ public class RecipesCtrl implements Initializable {
      * @param server      the server utils
      * @param primaryCtrl primaryCtrl
      * @param cellFactory the cell factory to keep favourites local
+     * @param shoppingListService the shopping list manager
      */
     @Inject
     public RecipesCtrl(ServerUtils server, PrimaryCtrl primaryCtrl,
-                       RecipeListCellFactory cellFactory) {
+                       RecipeListCellFactory cellFactory, ShoppingListService shoppingListService) {
         this.server = server;
         this.primaryCtrl = primaryCtrl;
         this.cellFactory = cellFactory;
+        this.shoppingListService = shoppingListService;
     }
 
     // runs immediately when the screen opens
@@ -380,6 +381,50 @@ public class RecipesCtrl implements Initializable {
                 }
             }
         });
+    }
+
+    /**
+     * This will add the selected recipe to the shopping list
+     */
+    @FXML
+    public void addToShoppingList() {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        if (currentRecipe == null) {
+            showAlert("No Recipe Selected", "Please select a recipe to add its ingredients.");
+            return;
+        }
+
+        ObservableList<ShoppingItem> temp = FXCollections.observableArrayList();
+        for (RecipeIngredient ri : currentRecipe.getIngredients()) {
+            ShoppingItem item = new ShoppingItem(
+                    ri.getIngredient(),
+                    ri.getAmount(),
+                    currentRecipe.getName()
+            );
+            item.setChecked(false);
+            temp.add(item);
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add to Shopping List");
+        dialog.setHeaderText("Review items from '" + currentRecipe.getName() + "'");
+
+        ButtonType addButtonType = new ButtonType("Add Items", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+
+        ListView<ShoppingItem> overviewList = new ListView<>();
+        overviewList.setItems(temp);
+        overviewList.setPrefHeight(300);
+        overviewList.setPrefWidth(400);
+        overviewList.setCellFactory(new ShoppingListCellFactory());
+
+        dialog.getDialogPane().setContent(overviewList);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == addButtonType && !temp.isEmpty()) {
+            shoppingListService.addItems(temp);
+        }
     }
 
     /**

@@ -1,6 +1,5 @@
 package client.utils;
 
-import commons.RecipeIngredient;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import com.google.inject.Singleton;
