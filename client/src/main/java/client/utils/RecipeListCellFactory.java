@@ -32,12 +32,16 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
         return new RecipeListCell();
     }
 
-    private class RecipeListCell extends ListCell<Recipe> {
+    public static class RecipeListCell extends ListCell<Recipe> {
         private final HBox hbox = new HBox(8);
         private final Text text = new Text();
         private final Button starButton = new Button();
         private final SVGPath starShape = new SVGPath();
+        private ConfigManager configManager;
 
+        /**
+         * adds a star button that favourites recipe and saves them to config
+         */
         public RecipeListCell() {
             // Configure star SVG
             starShape.setContent("M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19" +
@@ -112,6 +116,22 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
                     }
                 }
             });
+        }
+
+        /**
+         * sets the config manager
+         * @param configManager the config manager to be set
+         */
+        public void setConfigManager(ConfigManager configManager) {
+            this.configManager = configManager;
+        }
+
+        /**
+         * gets the config manager
+         * @return the config manager that you get
+         */
+        public ConfigManager getConfigManager() {
+            return configManager;
         }
 
         @Override

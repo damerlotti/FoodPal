@@ -151,7 +151,9 @@ public class RecipesCtrl implements Initializable {
         recipeList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showRecipeDetails(newValue)
         );
-        recipeList.setCellFactory(cellFactory);
+        recipeList.setCellFactory(listView -> {
+            return new RecipeListCellWithContextMenu(this, cellFactory.getConfigManager());
+        });
         // the ui list contains our data, currently empty
         refresh();
     }
