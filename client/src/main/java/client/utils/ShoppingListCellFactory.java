@@ -121,12 +121,16 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                 String nameStr = ingredient.getName();
 
                 nameText.setText(amountStr + " " + unitStr + " " + nameStr);
-                
-                if (item.getSource() != null
-                        && !item.getSource().isEmpty()
-                        && !item.getSource().equals("Manual")) {
-                    sourceLabel.setText("(" + item.getSource() + ")");
-                } else {
+
+                long duplicateCount = getListView().getItems().stream()
+                        .filter(i -> i.getIngredient().getName().equalsIgnoreCase(nameStr))
+                        .count();
+
+                if (duplicateCount > 1) {
+                    String source = item.getSource() == null ? "" : item.getSource();
+                    sourceLabel.setText("(" + source + ")");
+                }
+                else {
                     sourceLabel.setText("");
                 }
 
