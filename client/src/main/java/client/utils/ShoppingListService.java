@@ -34,6 +34,16 @@ public class ShoppingListService {
     }
 
     /**
+     * Sorts the list alphabetically by ingredient name
+     */
+    private void sortList() {
+        FXCollections.sort(items, (item1, item2) -> {
+            String name1 = item1.getIngredient().getName();
+            String name2 = item2.getIngredient().getName();
+            return name1.compareToIgnoreCase(name2);
+        });
+    }
+    /**
      * Reads the basic shopping objects and turns them into smart javafx ones
      */
     private void loadFromConfig() {
@@ -49,6 +59,7 @@ public class ShoppingListService {
             }).collect(Collectors.toList());
 
             items.setAll(loadedItems);
+            sortList();
         }
     }
 
@@ -88,6 +99,7 @@ public class ShoppingListService {
             item.measurementProperty().addListener((obs, oldVal, newVal) -> saveToConfig());
         }
         this.items.addAll(newItems);
+        sortList();
     }
 
     /**
