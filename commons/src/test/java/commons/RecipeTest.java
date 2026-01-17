@@ -114,7 +114,9 @@ class RecipeTest {
         Nutrition n1 = new Nutrition(
                 new BigDecimal("10"),
                 new BigDecimal("5"),
-                new BigDecimal("20")
+                new BigDecimal("20"),
+                new BigDecimal("6"),
+                new BigDecimal("7")
         );
         Ingredient i1 = new Ingredient();
         i1.setNutrition(n1);
@@ -126,7 +128,9 @@ class RecipeTest {
         Nutrition n2 = new Nutrition(
                 new BigDecimal("5"),
                 new BigDecimal("5"),
-                new BigDecimal("15")
+                new BigDecimal("15"),
+                new BigDecimal("6"),
+                new BigDecimal("7")
         );
         Ingredient i2 = new Ingredient();
         i2.setNutrition(n2);
