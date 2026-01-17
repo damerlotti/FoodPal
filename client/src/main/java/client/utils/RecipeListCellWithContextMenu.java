@@ -39,10 +39,51 @@ public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeL
             }
         });
 
+        // Clone recipe menu item
+        MenuItem cloneMenuItem = new MenuItem("Clone Recipe");
+        cloneMenuItem.setOnAction(e -> {
+            Recipe recipe = getItem();
+            if (recipe != null) {
+                recipesCtrl.onClonePressed();
+            }
+        });
+
+        // Print recipe menu item
+        MenuItem printMenuItem = new MenuItem("Print Recipe");
+        printMenuItem.setOnAction(e -> {
+            Recipe recipe = getItem();
+            if (recipe != null) {
+                recipesCtrl.onPrintPressed();
+            }
+        });
+
+        // Add to shopping list menu item
+        MenuItem shoppingListMenuItem = new MenuItem("Add to Shopping List");
+        shoppingListMenuItem.setOnAction(e -> {
+            Recipe recipe = getItem();
+            if (recipe != null) {
+                recipesCtrl.addToShoppingList();
+            }
+        });
+
+        // Delete recipe menu item
+        MenuItem deleteMenuItem = new MenuItem("Delete Recipe");
+        deleteMenuItem.setOnAction(e -> {
+            Recipe recipe = getItem();
+            if (recipe != null) {
+                recipesCtrl.onDeleteRecipePressed();
+            }
+        });
+
+
         // Add all items to the context menu
         contextMenu.getItems().addAll(
                 editMenuItem,
-                new SeparatorMenuItem()
+                cloneMenuItem,
+                printMenuItem,
+                shoppingListMenuItem,
+                new SeparatorMenuItem(),
+                deleteMenuItem
         );
     }
 
