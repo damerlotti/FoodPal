@@ -57,98 +57,91 @@ public class DataInitializer implements CommandLineRunner {
      * Initializes all sample ingredients and recipes in the database.
      * Creates 20 common ingredients and 5 sample recipes with their respective
      * ingredients and preparation steps.
+     *
+     * Update: I played a bit with the indentation to prevent Checkstyle from complaining
      */
     private void initializeIngredientsAndRecipes() {
         // Create all ingredients
         Ingredient zucchini = createIngredient("Zucchini",
                 createNutrition(new BigDecimal("0.3"),
-                        new BigDecimal("1.2"),
-                        new BigDecimal("3.1")));
+                        new BigDecimal("1.2"), new BigDecimal("3.1"),
+                        new BigDecimal("2.5"), new BigDecimal("0.008")));
         Ingredient bellPepper = createIngredient("Bell Pepper",
                 createNutrition(new BigDecimal("0.2"),
-                        new BigDecimal("1"),
-                        new BigDecimal("6")));
+                        new BigDecimal("1"), new BigDecimal("6"),
+                        new BigDecimal("4.2"), new BigDecimal("0.003")));
         Ingredient broccoli = createIngredient("Broccoli",
                 createNutrition(new BigDecimal("0.4"),
-                        new BigDecimal("2.8"),
-                        new BigDecimal("7")));
+                        new BigDecimal("2.8"), new BigDecimal("7"),
+                        new BigDecimal("1.8"), new BigDecimal("0.033")));
         Ingredient lettuce = createIngredient("Lettuce",
                 createNutrition(new BigDecimal("0.2"),
-                        new BigDecimal("1.4"),
-                        new BigDecimal("2.9")));
+                        new BigDecimal("1.4"), new BigDecimal("2.9"),
+                        new BigDecimal("1.2"), new BigDecimal("0.01")));
         Ingredient tomato = createIngredient("Tomato",
                 createNutrition(new BigDecimal("0.2"),
-                        new BigDecimal("1"),
-                        new BigDecimal("3.9")));
+                        new BigDecimal("1"), new BigDecimal("3.9"),
+                        new BigDecimal("2.6"), new BigDecimal("0.005")));
         Ingredient onion = createIngredient("Onion",
                 createNutrition(new BigDecimal("0.1"),
-                        new BigDecimal("1.1"),
-                        new BigDecimal("9")));
+                        new BigDecimal("1.1"), new BigDecimal("9"),
+                        new BigDecimal("4"), new BigDecimal("0.004")));
         Ingredient garlic = createIngredient("Garlic",
                 createNutrition(new BigDecimal("0.5"),
-                        new BigDecimal("6.4"),
-                        new BigDecimal("33")));
+                        new BigDecimal("6.4"), new BigDecimal("33"),
+                        new BigDecimal("1"), new BigDecimal("0.017")));
         Ingredient eggs = createIngredient("Eggs",
                 createNutrition(new BigDecimal("10"),
-                        new BigDecimal("12"),
-                        new BigDecimal("1")));
+                        new BigDecimal("12"), new BigDecimal("1"),
+                        new BigDecimal("0.4"), new BigDecimal("0.14")));
         Ingredient chicken = createIngredient("Chicken Breast",
                 createNutrition(new BigDecimal("3.6"),
-                        new BigDecimal("31"),
-                        new BigDecimal("0")));
+                        new BigDecimal("31"), new BigDecimal("0"),
+                        new BigDecimal("0"), new BigDecimal("0.07")));
         Ingredient pancetta = createIngredient("Pancetta",
                 createNutrition(new BigDecimal("45"),
-                        new BigDecimal("37"),
-                        new BigDecimal("1.5")));
+                        new BigDecimal("37"), new BigDecimal("1.5"),
+                        new BigDecimal("0"), new BigDecimal("2.1")));
         Ingredient groundBeef = createIngredient("Ground Beef",
                 createNutrition(new BigDecimal("20"),
-                        new BigDecimal("26"),
-                        new BigDecimal("0")));
+                        new BigDecimal("26"), new BigDecimal("0"),
+                        new BigDecimal("0"), new BigDecimal("0.07")));
         Ingredient parmesan = createIngredient("Parmesan Cheese",
                 createNutrition(new BigDecimal("29"),
-                        new BigDecimal("35"),
-                        new BigDecimal("3.2")));
+                        new BigDecimal("35"), new BigDecimal("3.2"),
+                        new BigDecimal("0"), new BigDecimal("1.8")));
         Ingredient cheese = createIngredient("Cheese",
                 createNutrition(new BigDecimal("25"),
-                        new BigDecimal("27"),
-                        new BigDecimal("1.3")));
+                        new BigDecimal("27"), new BigDecimal("1.3"),
+                        new BigDecimal("0.1"), new BigDecimal("0.62")));
         Ingredient butter = createIngredient("Butter",
                 createNutrition(new BigDecimal("81"),
-                        new BigDecimal("1"),
-                        new BigDecimal("0.1")));
+                        new BigDecimal("1"), new BigDecimal("0.1"),
+                        new BigDecimal("0.1"), new BigDecimal("0.011")));
         Ingredient spaghetti = createIngredient("Spaghetti",
                 createNutrition(new BigDecimal("1.3"),
-                        new BigDecimal("12"),
-                        new BigDecimal("75")));
+                        new BigDecimal("12"), new BigDecimal("75"),
+                        new BigDecimal("2.5"), new BigDecimal("0.006")));
         Ingredient flour = createIngredient("All-purpose Flour",
                 createNutrition(new BigDecimal("1"),
-                        new BigDecimal("10"),
-                        new BigDecimal("76")));
+                        new BigDecimal("10"), new BigDecimal("76"),
+                        new BigDecimal("0.3"), new BigDecimal("0.002")));
         Ingredient sugar = createIngredient("Sugar",
                 createNutrition(BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        new BigDecimal("100")));
+                        BigDecimal.ZERO, new BigDecimal("100"),
+                        new BigDecimal("100"), BigDecimal.ZERO));
         Ingredient bakingSoda = createIngredient("Baking Soda",
                 createNutrition(BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO));
+                        BigDecimal.ZERO, BigDecimal.ZERO,
+                        BigDecimal.ZERO, new BigDecimal("1.250")));
         Ingredient chocolate = createIngredient("Chocolate Chips",
                 createNutrition(new BigDecimal("30"),
-                        new BigDecimal("5"),
-                        new BigDecimal("60")));
+                        new BigDecimal("5"), new BigDecimal("60"),
+                        new BigDecimal("24"), new BigDecimal("0.02")));
         Ingredient soySauce = createIngredient("Soy Sauce",
                 createNutrition(BigDecimal.ZERO,
-                        new BigDecimal("5"),
-                        new BigDecimal("10")));
-        Ingredient cucumber = createIngredient("Cucumber",
-                createNutrition(new BigDecimal("0.1"),
-                        new BigDecimal("0.7"),
-                        new BigDecimal("3.6")));
-
-        Ingredient olives = createIngredient("Kalamata Olives",
-                createNutrition(new BigDecimal("15"),
-                        new BigDecimal("0.8"),
-                        new BigDecimal("3.8")));
+                        new BigDecimal("5"), new BigDecimal("10"),
+                        new BigDecimal("4"), new BigDecimal("5.6")));
 
         // Create recipes
         createSpaghettiCarbonara(spaghetti, eggs, pancetta, parmesan);
@@ -336,7 +329,9 @@ public class DataInitializer implements CommandLineRunner {
             nutrition = new Nutrition(
                     BigDecimal.ZERO, // fat
                     BigDecimal.ZERO, // protein
-                    BigDecimal.ZERO  // carbs
+                    BigDecimal.ZERO,  // carbs
+                    BigDecimal.ZERO, // sugar
+                    BigDecimal.ZERO // sodium
             );
         }
         ingredient.setNutrition(nutrition);
@@ -349,10 +344,13 @@ public class DataInitializer implements CommandLineRunner {
      * @param fat fat in grams per 100g
      * @param protein protein in grams per 100g
      * @param carbs carbohydrates in grams per 100g
+     * @param sugar sugar in grams per 100g
+     * @param sodium sodium in grams per 100g
      * @return a Nutrition object
      */
-    private Nutrition createNutrition(BigDecimal fat, BigDecimal protein, BigDecimal carbs) {
-        return new Nutrition(fat, protein, carbs);
+    private Nutrition createNutrition(BigDecimal fat, BigDecimal protein, BigDecimal carbs,
+                                      BigDecimal sugar, BigDecimal sodium) {
+        return new Nutrition(fat, protein, carbs, sugar, sodium);
     }
 
     /**

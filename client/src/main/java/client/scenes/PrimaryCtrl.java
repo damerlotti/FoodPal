@@ -1,12 +1,11 @@
 package client.scenes;
 
+import commons.Ingredient;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
-
-import java.util.List;
 
 public class PrimaryCtrl {
 
@@ -29,6 +28,9 @@ public class PrimaryCtrl {
     private Scene addIngredientScene;
     private AddIngredientCtrl addIngredientCtrl;
 
+    private Scene editIngredientScene;
+    private EditIngredientCtrl editIngredientCtrl;
+
     private Parent shoppingListNode;
     private ShoppingListCtrl shoppingListCtrl;
 
@@ -40,18 +42,15 @@ public class PrimaryCtrl {
      * @param addRecipe AddRecipe controller
      * @param ingredients Ingredients controller
      * @param ingredientAdd IngredientAdd controller
-     * @param shoppingList ShoppingList controller
      */
     public void init(Stage primaryStage,
                      Pair<MainLayoutCtrl, Parent> mainLayout,
                      Pair<RecipesCtrl, Parent> recipes,
                      Pair<AddRecipeCtrl, Parent> addRecipe,
                      Pair<IngredientsCtrl, Parent> ingredients,
-                     Pair<AddIngredientCtrl, Parent> ingredientAdd,
-                     Pair<ShoppingListCtrl, Parent> shoppingList) {
+                     Pair<AddIngredientCtrl, Parent> ingredientAdd) {
 
         this.primaryStage = primaryStage;
-
         this.mainLayoutCtrl = mainLayout.getKey();
 
         this.recipesCtrl = recipes.getKey();
@@ -68,13 +67,25 @@ public class PrimaryCtrl {
         this.addIngredientNode = ingredientAdd.getValue();
         this.addIngredientScene = new Scene(addIngredientNode);
 
-        this.shoppingListCtrl = shoppingList.getKey();
-        this.shoppingListNode = shoppingList.getValue();
-
         primaryStage.setScene(new Scene(mainLayout.getValue()));
         primaryStage.setTitle("FoodPal");
         showRecipes();
         primaryStage.show();
+    }
+
+    /**
+     * A second temporary init method because
+     * I couldnt figure anything else that satisfied checkstyle
+     * @param ingredientEdit IngredientEdit controller
+     * @param shoppingList ShoppingList controller
+     */
+    public void initEditAndShopping(Pair<EditIngredientCtrl, Parent> ingredientEdit,
+                                    Pair<ShoppingListCtrl, Parent> shoppingList){
+        this.editIngredientCtrl = ingredientEdit.getKey();
+        this.editIngredientScene = new Scene(ingredientEdit.getValue());
+
+        this.shoppingListCtrl = shoppingList.getKey();
+        this.shoppingListNode = shoppingList.getValue();
     }
 
     /**
@@ -125,13 +136,18 @@ public class PrimaryCtrl {
     }
 
     /**
-     * Called when recipe language filter changes.
-     * @param selectedLanguageTags the list of selected language tags
+     * Shows the ingredient edit scene.
+     * @param ingredient ingredient to be edited.
      */
-    public void onRecipeLanguagesChanged(List<String> selectedLanguageTags) {
-        if (recipesCtrl != null) {
-            recipesCtrl.setFilteredLanguages(selectedLanguageTags);
-        }
+    public void showEditIngredient(Ingredient ingredient){
+        Stage p = new Stage();
+        p.initModality(Modality.APPLICATION_MODAL);
+        p.initOwner(primaryStage);
+        p.setScene(editIngredientScene);
+        p.setTitle("Edit Ingredient");
+        editIngredientCtrl.setIngredient(ingredient);
+        p.showAndWait();
+        ingredientsCtrl.refresh();
     }
 
     /**

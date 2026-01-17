@@ -3,9 +3,6 @@ package client.scenes;
 import client.MyWebSocketClient;
 import client.i18n.I18n;
 import client.config.Config;
-import client.utils.ServerUtils;
-import client.utils.search.RecipeSearchMatcher;
-import client.utils.search.SearchQueryParser;
 import client.utils.*;
 import com.google.inject.Inject;
 import commons.*;
@@ -84,15 +81,9 @@ public class RecipesCtrl implements Initializable {
     private Button editStepButton;
     @FXML
     private Button deleteStepButton;
-    @FXML
-    private TextField searchField;
 
     private ObservableList<Recipe> allRecipes;
     private FilteredList<Recipe> filteredRecipes;
-
-    private SearchQueryParser searchParser;
-    private RecipeSearchMatcher searchMatcher;
-    private List<String> filteredLanguages = new ArrayList<>();
 
     private MyWebSocketClient webSocket = new MyWebSocketClient();
     private StompSession.Subscription currentRecipeSubscription;
@@ -161,16 +152,6 @@ public class RecipesCtrl implements Initializable {
                 (observable, oldValue, newValue) -> showRecipeDetails(newValue)
         );
         recipeList.setCellFactory(cellFactory);
-
-        // Initialize search components
-        searchParser = new SearchQueryParser();
-        updateSearchMatcher();
-
-        // Add real-time search filtering
-        searchField.textProperty().addListener((obs, oldText, newText) -> {
-            applySearchFilter();
-        });
-
         // the ui list contains our data, currently empty
         refresh();
     }
@@ -310,9 +291,12 @@ public class RecipesCtrl implements Initializable {
                 showRecipeDetails(newRecipe);
             }
         }
-        // Apply current search/favorites filter
-        applySearchFilter();
-
+        // Same filter in toggleFavoritesFilter
+        if (favoritesToggle.isSelected()) {
+            filteredRecipes.setPredicate(recipe ->
+                    cellFactory.isFavorite(recipe.getId())
+            );
+        }
         Config favConfig = cellFactory.getConfigManager().getConfig();
         Set<Long> favRecipesID = favConfig.getFavoriteRecipeIds();
         ArrayList<Long> favRecipesIDArray = new ArrayList<>(favRecipesID);
@@ -332,86 +316,20 @@ public class RecipesCtrl implements Initializable {
         }
         cellFactory.getConfigManager().save();
     }
-
-    /**
-     * Updates the search matcher with current locale and favorites.
-     */
-    private void updateSearchMatcher() {
-        Config config = cellFactory.getConfigManager().getConfig();
-        String locale = config.getPrefLocale();
-        if (locale == null || locale.isEmpty()) {
-            locale = Locale.getDefault().toLanguageTag();
-        }
-        Set<Long> favorites = config.getFavoriteRecipeIds();
-        searchMatcher = new RecipeSearchMatcher(locale, favorites);
-    }
-
-    /**
-     * Applies the current search filter to the recipe list.
-     */
-    private void applySearchFilter() {
-        String query = searchField.getText();
-        updateSearchMatcher();
-
-        if (query == null || query.trim().isEmpty()) {
-            // No search query - apply language and favorites filter
-            filteredRecipes.setPredicate(recipe -> {
-                // Language filter
-                if (!matchesLanguageFilter(recipe)) {
-                    return false;
-                }
-                // Favorites filter
-                if (favoritesToggle.isSelected() && !cellFactory.isFavorite(recipe.getId())) {
-                    return false;
-                }
-                return true;
-            });
-        } else {
-            // Apply search filter (combined with language filter)
-            var parsedQuery = searchParser.parse(query);
-            filteredRecipes.setPredicate(recipe -> {
-                if (!matchesLanguageFilter(recipe)) {
-                    return false;
-                }
-                return searchMatcher.matches(recipe, parsedQuery);
-            });
-        }
-    }
-
-    /**
-     * Checks if a recipe matches the current language filter.
-     */
-    private boolean matchesLanguageFilter(Recipe recipe) {
-        if (filteredLanguages.isEmpty()) {
-            return false;
-        }
-        String recipeLanguage = recipe.getLanguageTag();
-        if (recipeLanguage == null || recipeLanguage.isEmpty()) {
-            return true; // Recipes without language match all
-        }
-        for (String lang : filteredLanguages) {
-            if (recipeLanguage.toLowerCase().startsWith(lang.toLowerCase().split("-")[0])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Sets the filtered languages from the language menu.
-     * @param languages the list of language tags to filter by
-     */
-    public void setFilteredLanguages(List<String> languages) {
-        this.filteredLanguages = new ArrayList<>(languages);
-        applySearchFilter();
-    }
-
     /**
      * Toggle between showing all recipes and favorites only
      */
     @FXML
     public void toggleFavoritesFilter() {
-        applySearchFilter();
+        if (favoritesToggle.isSelected()) {
+            filteredRecipes.setPredicate(recipe ->
+                    cellFactory.isFavorite(recipe.getId())
+            );
+            // Text is bound via i18n, no manual setting needed
+        } else {
+            filteredRecipes.setPredicate(null);
+            // Text is bound via i18n, no manual setting needed
+        }
     }
     /**
      * Shows the details of a recipe (ingredients, preparation steps)

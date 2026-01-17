@@ -18,6 +18,14 @@ public class Nutrition {
             scale = Measurement.MEASUREMENT_SCALE)
     private BigDecimal carbsPer100g;
 
+    @Column(name = "sugar", precision = Measurement.MEASUREMENT_PRECISION,
+            scale = Measurement.MEASUREMENT_SCALE)
+    private BigDecimal sugarPer100g;
+
+    @Column(name = "sodium", precision = Measurement.MEASUREMENT_PRECISION,
+            scale = Measurement.MEASUREMENT_SCALE)
+    private BigDecimal sodiumPer100g;
+
     @Column(name = "kcal",
             precision = Measurement.MEASUREMENT_PRECISION,
             scale = Measurement.MEASUREMENT_SCALE)
@@ -35,11 +43,16 @@ public class Nutrition {
      * @param fatPer100g Amount of fat per 100 grams of ingredient.
      * @param proteinPer100g Amount of protein per 100 grams of ingredient.
      * @param carbsPer100g Amount of carbs per 100 grams of ingredient.
+     * @param sugarPer100g Amount of sugar per 100 grams of ingredient.
+     * @param sodiumPer100g Amount of sodium per 100 grams of ingredient.
      */
-    public Nutrition(BigDecimal fatPer100g, BigDecimal proteinPer100g, BigDecimal carbsPer100g) {
+    public Nutrition(BigDecimal fatPer100g, BigDecimal proteinPer100g, BigDecimal carbsPer100g,
+                     BigDecimal sugarPer100g, BigDecimal sodiumPer100g) {
         this.fatPer100g = fatPer100g;
         this.proteinPer100g = proteinPer100g;
         this.carbsPer100g = carbsPer100g;
+        this.sugarPer100g = sugarPer100g;
+        this.sodiumPer100g = sodiumPer100g;
         this.kcalPer100g = computeKcalPer100g();
     }
 
@@ -95,6 +108,41 @@ public class Nutrition {
     }
 
     /**
+     * Returns the sugar / 100g.
+     * @return the sugar / 100g.
+     */
+    public BigDecimal getSugarPer100g() {
+        return sugarPer100g;
+    }
+
+    /**
+     * Sets the sugar / 100g.
+     * @param sugarPer100g the sugar / 100g.
+     */
+    public void setSugarPer100g(BigDecimal sugarPer100g) {
+        this.sugarPer100g = sugarPer100g;
+        kcalPer100g = computeKcalPer100g();
+    }
+
+    /**
+     * Returns the sodium / 100g.
+     *
+     * @return the sodium / 100g.
+     */
+    public BigDecimal getSodiumPer100g() {
+        return sodiumPer100g;
+    }
+
+    /**
+     * Sets the sodium / 100g.
+     * @param sodiumPer100g the sodium / 100g.
+     */
+    public void setSodiumPer100g(BigDecimal sodiumPer100g) {
+        this.sodiumPer100g = sodiumPer100g;
+        kcalPer100g = computeKcalPer100g();
+    }
+
+    /**
      * Returns the kilocalories / 100g.
      * @return The kilocalories / 100g.
      */
@@ -111,13 +159,16 @@ public class Nutrition {
     }
 
     /**
-     * Computes the number of kilocalories / 100g based on the given fat, protein and carbs values.
+     * Computes the number of kilocalories / 100g based on the given
+     * fat, protein, carbs sugar and sodium values.
      * @return The number of kilocalories / 100g.
      */
     public BigDecimal computeKcalPer100g() {
         BigDecimal fat = (fatPer100g != null) ? fatPer100g : BigDecimal.ZERO;
         BigDecimal protein = (proteinPer100g != null) ? proteinPer100g : BigDecimal.ZERO;
         BigDecimal carbs = (carbsPer100g != null) ? carbsPer100g : BigDecimal.ZERO;
+        BigDecimal sugar = (sugarPer100g != null) ? sugarPer100g : BigDecimal.ZERO;
+        BigDecimal sodium = (sodiumPer100g != null) ? sodiumPer100g : BigDecimal.ZERO;
         BigDecimal kcal = BigDecimal.ZERO;
         kcal = kcal.add(fat.multiply(BigDecimal.valueOf(9)));
         kcal = kcal.add(protein.multiply(BigDecimal.valueOf(4)));
