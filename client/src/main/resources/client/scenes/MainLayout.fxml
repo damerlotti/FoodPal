@@ -21,7 +21,8 @@
             <Button fx:id="shoppingListButton" mnemonicParsing="false" onAction="#showShoppingList" prefHeight="25.0" prefWidth="100.0" text="Shopping List" />
             <AnchorPane prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
             <MenuButton fx:id="recipeLanguageMenu" prefHeight="25.0" text="All" />
-            <ComboBox fx:id="languageCombo" layoutX="740.0" layoutY="17.0" prefHeight="25.0" prefWidth="40.0" promptText="App Language" />         </children>
+            <ComboBox fx:id="languageCombo" layoutX="740.0" layoutY="17.0" prefHeight="25.0" prefWidth="40.0" promptText="App Language" />         
+         </children>
          <padding>
             <Insets left="20.0" right="20.0" />
          </padding>
