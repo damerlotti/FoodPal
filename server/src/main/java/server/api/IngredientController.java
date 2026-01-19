@@ -5,6 +5,7 @@ import commons.Recipe;
 import server.database.IngredientRepository;
 import org.springframework.web.bind.annotation.*;
 import server.database.RecipeRepository;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class IngredientController {
 
     private final IngredientRepository ingredientRepo;
     private final RecipeRepository recipeRepo;
+    private final SimpMessagingTemplate msg;
 
     /**
      * Constructor which injects the IngredientRepository
@@ -21,9 +23,11 @@ public class IngredientController {
      * @param recipeRepo the recipe repository
      */
     public IngredientController(IngredientRepository ingredientRepo,
-                                RecipeRepository recipeRepo) {
+                                RecipeRepository recipeRepo,
+                                SimpMessagingTemplate msg) {
         this.ingredientRepo = ingredientRepo;
         this.recipeRepo = recipeRepo;
+        this.msg = msg;
     }
 
     /**
@@ -64,6 +68,8 @@ public class IngredientController {
             if(removed) {
                 // Save the recipe
                 Recipe savedRecipe = recipeRepo.save(recipe);
+                msg.convertAndSend("/topic/recipes/" + savedRecipe.getId(), savedRecipe);
+                msg.convertAndSend("/topic/recipes", savedRecipe);
             }
         }
         // Then we delete the ingredient itself by its id
