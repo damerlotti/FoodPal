@@ -231,8 +231,8 @@ public class Config {
      * @return the set of recipe ID's
      */
     public Set<Long> getFavoriteRecipeIds() {
-    return new HashSet<>(favoriteRecipes.keySet());
-}
+        return new HashSet<>(favoriteRecipes.keySet());
+    }
 
     /**
      * Get the list of selected recipe language tags.

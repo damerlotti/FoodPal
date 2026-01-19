@@ -396,7 +396,7 @@ public class RecipesCtrl implements Initializable {
      */
     private boolean matchesLanguageFilter(Recipe recipe) {
         if (filteredLanguages.isEmpty()) {
-            return false;
+            return true;
         }
         String recipeLanguage = recipe.getLanguageTag();
         if (recipeLanguage == null || recipeLanguage.isEmpty()) {
