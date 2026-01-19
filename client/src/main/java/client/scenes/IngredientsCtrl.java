@@ -55,6 +55,7 @@ public class IngredientsCtrl implements Initializable {
     private Label usageLabel;
     @FXML
     private Button addButton;
+
     @FXML
     private Button deleteSelectedButton;
     @FXML
