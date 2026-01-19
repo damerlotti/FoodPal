@@ -157,4 +157,14 @@ public class PrimaryCtrl {
         primaryStage.setTitle("FoodPal - Shopping List");
         mainLayoutCtrl.setCenter(shoppingListNode);
     }
+
+    /**
+     * Called when recipe language filter changes.
+     * @param selectedLanguageTags the list of selected language tags
+     */
+    public void onRecipeLanguagesChanged(List<String> selectedLanguageTags) {
+        if (recipesCtrl != null) {
+            recipesCtrl.setFilteredLanguages(selectedLanguageTags);
+        }
+    }
 }
