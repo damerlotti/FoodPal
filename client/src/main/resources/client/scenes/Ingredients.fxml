@@ -10,8 +10,8 @@
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.IngredientsCtrl">
     <children>
         <ListView fx:id="ingredientsList" layoutX="111.0" layoutY="86.0" prefHeight="247.0" prefWidth="243.0" />
-        <Button layoutX="322.0" layoutY="349.0" mnemonicParsing="false" onAction="#switchToAddIngredient" prefHeight="25.0" prefWidth="81.0" text="Add New" />
-        <Button layoutX="211.0" layoutY="349.0" mnemonicParsing="false" onAction="#removeIngredient" text="Delete Selected" />
+        <Button fx:id="addButton" layoutX="322.0" layoutY="349.0" mnemonicParsing="false" onAction="#switchToAddIngredient" prefHeight="25.0" prefWidth="81.0" text="Add New" />
+        <Button fx:id="deleteSelectedButton" layoutX="211.0" layoutY="349.0" mnemonicParsing="false" onAction="#removeIngredient" text="Delete Selected" />
       <TextField fx:id="fatField" editable="false" layoutX="421.0" layoutY="204.0" prefHeight="25.0" prefWidth="89.0" />
       <TextField fx:id="proteinField" editable="false" layoutX="421.0" layoutY="164.0" prefHeight="25.0" prefWidth="89.0" />
       <TextField fx:id="carbsField" editable="false" layoutX="421.0" layoutY="244.0" prefHeight="25.0" prefWidth="89.0" />
