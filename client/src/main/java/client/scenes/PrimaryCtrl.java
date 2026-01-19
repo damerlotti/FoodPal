@@ -6,6 +6,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
+import java.util.List;
+
 public class PrimaryCtrl {
 
     private Stage primaryStage;
@@ -27,6 +29,9 @@ public class PrimaryCtrl {
     private Scene addIngredientScene;
     private AddIngredientCtrl addIngredientCtrl;
 
+    private Parent shoppingListNode;
+    private ShoppingListCtrl shoppingListCtrl;
+
     /**
      * Initializes  primary controller the scenes
      * @param primaryStage the main application window
@@ -35,13 +40,15 @@ public class PrimaryCtrl {
      * @param addRecipe AddRecipe controller
      * @param ingredients Ingredients controller
      * @param ingredientAdd IngredientAdd controller
+     * @param shoppingList ShoppingList controller
      */
     public void init(Stage primaryStage,
                      Pair<MainLayoutCtrl, Parent> mainLayout,
                      Pair<RecipesCtrl, Parent> recipes,
                      Pair<AddRecipeCtrl, Parent> addRecipe,
                      Pair<IngredientsCtrl, Parent> ingredients,
-                     Pair<AddIngredientCtrl, Parent> ingredientAdd) {
+                     Pair<AddIngredientCtrl, Parent> ingredientAdd,
+                     Pair<ShoppingListCtrl, Parent> shoppingList) {
 
         this.primaryStage = primaryStage;
 
@@ -60,6 +67,9 @@ public class PrimaryCtrl {
         this.addIngredientCtrl = ingredientAdd.getKey();
         this.addIngredientNode = ingredientAdd.getValue();
         this.addIngredientScene = new Scene(addIngredientNode);
+
+        this.shoppingListCtrl = shoppingList.getKey();
+        this.shoppingListNode = shoppingList.getValue();
 
         primaryStage.setScene(new Scene(mainLayout.getValue()));
         primaryStage.setTitle("FoodPal");
@@ -112,5 +122,23 @@ public class PrimaryCtrl {
         p.setTitle("Add Ingredient");
         p.showAndWait();
         ingredientsCtrl.refresh();
+    }
+
+    /**
+     * Called when recipe language filter changes.
+     * @param selectedLanguageTags the list of selected language tags
+     */
+    public void onRecipeLanguagesChanged(List<String> selectedLanguageTags) {
+        if (recipesCtrl != null) {
+            recipesCtrl.setFilteredLanguages(selectedLanguageTags);
+        }
+    }
+
+    /**
+     * Shows the Shopping List scene
+     */
+    public void showShoppingList() {
+        primaryStage.setTitle("FoodPal - Shopping List");
+        mainLayoutCtrl.setCenter(shoppingListNode);
     }
 }

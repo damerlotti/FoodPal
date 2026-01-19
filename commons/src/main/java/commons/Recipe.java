@@ -20,6 +20,9 @@ public class Recipe {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private int servings;
+
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("orderIndex ASC")
     @JsonManagedReference("recipe-ingredients")
@@ -42,14 +45,16 @@ public class Recipe {
      * Creates a new Recipe.
      * @param id The id of the Recipe, used for DB indexing.
      * @param name Display name of the recipe.
+     * @param servings the number of servings
      * @param languageTag The BCP-47 language tag of the recipe.
      * @param ingredients Ordered list of ingredients used by the recipe.
      * @param steps Ordered list of steps to prepare the recipe.
      */
-    public Recipe(long id, String name, String languageTag,
+    public Recipe(long id, String name, int servings, String languageTag,
                   List<RecipeIngredient> ingredients, List<RecipeStep> steps) {
         this.id = id;
         this.name = name;
+        this.servings = servings;
         // We assume English as a default language if the tag is null or blank
         this.languageTag = languageTag == null || languageTag.isBlank()
                 ? Locale.ENGLISH.toLanguageTag()
@@ -88,6 +93,22 @@ public class Recipe {
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Returns the number of servings
+     * @return number of servings
+     */
+    public int getServings() {
+        return servings;
+    }
+
+    /**
+     * Sets the number of servings
+     * @param servings new number of servings
+     */
+    public void setServings(int servings) {
+        this.servings = servings;
     }
 
     /**
@@ -180,7 +201,7 @@ public class Recipe {
     public String toExportableMarkdown() {
         StringBuilder sb = new StringBuilder();
         sb.append("# ").append(name).append("\n\n");
-
+        sb.append("## Servings: ").append(servings).append(".\n");
         sb.append("## Ingredients\n");
         for (RecipeIngredient ingredient : ingredients) {
             sb.append("- ") .append(ingredient.toString()).append("\n");
@@ -202,7 +223,7 @@ public class Recipe {
     public String toExportablePlaintext() {
         StringBuilder sb = new StringBuilder();
         sb.append(name).append("\n\n");
-
+        sb.append("Servings: ").append(servings).append(".\n");
         sb.append("Ingredients\n");
         for (RecipeIngredient ingredient : ingredients) {
             sb.append("- ") .append(ingredient.toString()).append("\n");
@@ -224,7 +245,7 @@ public class Recipe {
     public Recipe cloneRecipe() {
         Recipe r = new Recipe();
         r.setName(name);
-
+        r.setServings(servings);
         r.setLanguageTag(this.languageTag);
 
         List<RecipeStep> rSteps = new ArrayList<>();

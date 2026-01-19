@@ -3,6 +3,8 @@ package client.config;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import commons.Ingredient;
+import commons.Measurement;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -11,9 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
-
+import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -24,6 +24,8 @@ public class Config {
     private int configVersion = CURRENT_VERSION;
     private String prefLocale = "";
     private Map<Long, String> favoriteRecipes = new HashMap<>();
+    private List<String> selectedRecipeLanguages = new ArrayList<>();
+    private List<ShoppingItemBasic> shoppingList = new ArrayList<>();
     /**
      * Create a new Config with default values.
      */
@@ -224,4 +226,73 @@ public class Config {
     public String getFavoriteRecipeName(Long recipeId) {
         return favoriteRecipes.get(recipeId);
     }
+    /**
+     * Get the set of recipe ID's
+     * @return the set of recipe ID's
+     */
+    public Set<Long> getFavoriteRecipeIds() {
+    return new HashSet<>(favoriteRecipes.keySet());
 }
+
+    /**
+     * Get the list of selected recipe language tags.
+     * @return the selected recipe language tags
+     */
+    public List<String> getSelectedRecipeLanguages() {
+        return selectedRecipeLanguages;
+    }
+
+    /**
+     * Set the list of selected recipe language tags.
+     * @param selectedRecipeLanguages the language tags to set
+     */
+    public void setSelectedRecipeLanguages(List<String> selectedRecipeLanguages) {
+        this.selectedRecipeLanguages = selectedRecipeLanguages != null
+                ? new ArrayList<>(selectedRecipeLanguages)
+                : new ArrayList<>();
+    }
+
+    /**
+     * Getter for the shopping list
+     * @return the shopping list (with ShoppingItemBasic objects)
+     */
+    public List<ShoppingItemBasic> getShoppingList() {
+        return shoppingList;
+    }
+
+    /**
+     * Setter for the shopping list
+     * @param shoppingList the shopping list to set
+     */
+    public void setShoppingList(List<ShoppingItemBasic> shoppingList) {
+        this.shoppingList = shoppingList;
+    }
+
+    public static class ShoppingItemBasic {
+        public boolean checked;
+        public Ingredient ingredient;
+        public Measurement measurement;
+        public String source;
+
+        /**
+         * No args constructor
+         */
+        public ShoppingItemBasic() {}
+
+        /**
+         * Constructor for a shopping item
+         * @param checked whether we bought it or not
+         * @param ingredient the ingredient
+         * @param measurement how much of the ingredient
+         * @param source provenience source
+         */
+        public ShoppingItemBasic(boolean checked, Ingredient ingredient,
+                                 Measurement measurement, String source) {
+            this.checked = checked;
+            this.ingredient = ingredient;
+            this.measurement = measurement;
+            this.source = source;
+        }
+    }
+}
+

@@ -1,22 +1,29 @@
 package server.api;
 
 import commons.Ingredient;
+import commons.Recipe;
 import server.database.IngredientRepository;
 import org.springframework.web.bind.annotation.*;
+import server.database.RecipeRepository;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/ingredients")
 public class IngredientController {
 
-    private final IngredientRepository repo;
+    private final IngredientRepository ingredientRepo;
+    private final RecipeRepository recipeRepo;
 
     /**
      * Constructor which injects the IngredientRepository
-     * @param repo the repository
+     * @param ingredientRepo the ingredient repository
+     * @param recipeRepo the recipe repository
      */
-    public IngredientController(IngredientRepository repo) {
-        this.repo = repo;
+    public IngredientController(IngredientRepository ingredientRepo,
+                                RecipeRepository recipeRepo) {
+        this.ingredientRepo = ingredientRepo;
+        this.recipeRepo = recipeRepo;
     }
 
     /**
@@ -25,7 +32,7 @@ public class IngredientController {
      */
     @GetMapping("/")
     public List<Ingredient> getAll() {
-        return repo.findAll();
+        return ingredientRepo.findAll();
     }
 
     /**
@@ -39,7 +46,7 @@ public class IngredientController {
         if (ingredient.getName() == null || ingredient.getName().isEmpty()) {
             return null;
         }
-        return repo.save(ingredient);
+        return ingredientRepo.save(ingredient);
     }
 
     /**
@@ -48,6 +55,18 @@ public class IngredientController {
      */
     @DeleteMapping("/{id}")
     public void delete(@PathVariable("id") long id) {
-        repo.deleteById(id);
+        // We first delete the ingredient from all recipes first
+        List<Recipe> allRecipes = recipeRepo.findAll();
+
+        for(Recipe recipe : allRecipes) {
+            boolean removed = recipe.getIngredients()
+                    .removeIf(ri -> ri.getIngredient().getId() == id);
+            if(removed) {
+                // Save the recipe
+                Recipe savedRecipe = recipeRepo.save(recipe);
+            }
+        }
+        // Then we delete the ingredient itself by its id
+        ingredientRepo.deleteById(id);
     }
 }

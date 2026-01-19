@@ -4,6 +4,9 @@ import client.MyWebSocketClient;
 import client.i18n.I18n;
 import client.config.Config;
 import client.utils.ServerUtils;
+import client.utils.search.RecipeSearchMatcher;
+import client.utils.search.SearchQueryParser;
+import client.utils.*;
 import com.google.inject.Inject;
 import commons.*;
 import javafx.collections.FXCollections;
@@ -26,6 +29,7 @@ public class RecipesCtrl implements Initializable {
     private final ServerUtils server;
     private final PrimaryCtrl primaryCtrl;
     private final RecipeListCellFactory cellFactory;
+    private final ShoppingListService shoppingListService;
 
     // fxml link, keep in mind that it must match with the id in scene builder
     // that's the left-hand side
@@ -46,6 +50,8 @@ public class RecipesCtrl implements Initializable {
     private ListView<RecipeStep> stepsList;
     @FXML
     private ToggleButton favoritesToggle;
+    @FXML
+    private Spinner<Integer> servings;
 
     // i18n buttons and labels
     @FXML
@@ -78,9 +84,15 @@ public class RecipesCtrl implements Initializable {
     private Button editStepButton;
     @FXML
     private Button deleteStepButton;
+    @FXML
+    private TextField searchField;
 
     private ObservableList<Recipe> allRecipes;
     private FilteredList<Recipe> filteredRecipes;
+
+    private SearchQueryParser searchParser;
+    private RecipeSearchMatcher searchMatcher;
+    private List<String> filteredLanguages = new ArrayList<>();
 
     private MyWebSocketClient webSocket = new MyWebSocketClient();
     private StompSession.Subscription currentRecipeSubscription;
@@ -91,20 +103,23 @@ public class RecipesCtrl implements Initializable {
      * @param server      the server utils
      * @param primaryCtrl primaryCtrl
      * @param cellFactory the cell factory to keep favourites local
+     * @param shoppingListService the shopping list manager
      */
     @Inject
     public RecipesCtrl(ServerUtils server, PrimaryCtrl primaryCtrl,
-                       RecipeListCellFactory cellFactory) {
+                       RecipeListCellFactory cellFactory, ShoppingListService shoppingListService) {
         this.server = server;
         this.primaryCtrl = primaryCtrl;
         this.cellFactory = cellFactory;
+        this.shoppingListService = shoppingListService;
     }
 
     // runs immediately when the screen opens
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        initializeRecipeList();
         initializeScaler();
+        initializeServings();
+        initializeRecipeList();
         initializeWebSocket();
         initializeLanguage();
     }
@@ -146,8 +161,32 @@ public class RecipesCtrl implements Initializable {
                 (observable, oldValue, newValue) -> showRecipeDetails(newValue)
         );
         recipeList.setCellFactory(cellFactory);
+
+        // Initialize search components
+        searchParser = new SearchQueryParser();
+        updateSearchMatcher();
+
+        // Add real-time search filtering
+        searchField.textProperty().addListener((obs, oldText, newText) -> {
+            applySearchFilter();
+        });
+
         // the ui list contains our data, currently empty
         refresh();
+    }
+
+    /**
+     * Parse the text inside the spinner
+     * If it's valid, we use that, if not, don't change the value
+     */
+    private void commitScalerValue() {
+        String text = scaler.getEditor().getText();
+        try {
+            Double val = Double.parseDouble(text);
+            scaler.getValueFactory().setValue(val);
+        } catch (NumberFormatException e) {
+            scaler.getEditor().setText(scaler.getValue().toString());
+        }
     }
 
     /**
@@ -157,7 +196,14 @@ public class RecipesCtrl implements Initializable {
         scaler.setValueFactory(
                 new SpinnerValueFactory.DoubleSpinnerValueFactory(0.1, 10.0, 1.0, 0.5)
         );
+        scaler.setEditable(true);
         scaler.getEditor().setTextFormatter(createNumberTextFormatter());
+        scaler.getEditor().setOnAction(e -> commitScalerValue());
+        scaler.getEditor().focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (!isNowFocused) {
+                commitScalerValue();
+            }
+        });
         scaler.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (newVal != null) {
                 Recipe current = recipeList.getSelectionModel().getSelectedItem();
@@ -170,6 +216,23 @@ public class RecipesCtrl implements Initializable {
     }
 
     /**
+     * Initializes the servings spinner
+     */
+    private void initializeServings() {
+        SpinnerValueFactory<Integer> servingsFactory =
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1);
+        servings.setValueFactory(servingsFactory);
+
+        servings.valueProperty().addListener((obs, oldVal, newVal) -> {
+            Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+            if (currentRecipe != null && newVal != null && !newVal.equals(oldVal)) {
+                currentRecipe.setServings(newVal);
+                server.updateRecipe(currentRecipe);
+            }
+        });
+    }
+
+    /**
      * Creates a text formatter that only allows optional decimal point
      * and optional minus sign
      * @return a TextFormatter for numeric validation
@@ -177,7 +240,7 @@ public class RecipesCtrl implements Initializable {
     private TextFormatter<String> createNumberTextFormatter() {
         return new TextFormatter<>(change -> {
             String newText = change.getControlNewText();
-            return newText.matches("-?([0-9]*\\.[0-9]*)?") ? change : null;
+            return newText.matches("-?[0-9]*(\\.[0-9]*)?") ? change : null;
         });
     }
 
@@ -228,8 +291,15 @@ public class RecipesCtrl implements Initializable {
         Recipe selected = recipeList.getSelectionModel().getSelectedItem();
         Long selectedId = (selected != null) ? selected.getId() : null;
         var recipes = server.getRecipes();
-        allRecipes.clear();
-        allRecipes.addAll(recipes);
+        allRecipes.setAll(recipes);
+        // Same filter in toggleFavoritesFilter
+        if (favoritesToggle.isSelected()) {
+            filteredRecipes.setPredicate(recipe ->
+                    cellFactory.isFavorite(recipe.getId())
+            );
+        } else {
+            filteredRecipes.setPredicate(null); // show all if toggle off
+        }
         if (selectedId != null) {
             Recipe newRecipe = recipeList.getItems().stream()
                     .filter(r -> r.getId() == selectedId)
@@ -237,14 +307,12 @@ public class RecipesCtrl implements Initializable {
                     .orElse(null);
             if (newRecipe != null) {
                 recipeList.getSelectionModel().select(newRecipe);
+                showRecipeDetails(newRecipe);
             }
         }
-        // Same filter in toggleFavoritesFilter
-        if (favoritesToggle.isSelected()) {
-            filteredRecipes.setPredicate(recipe ->
-                    cellFactory.isFavorite(recipe.getId())
-            );
-        }
+        // Apply current search/favorites filter
+        applySearchFilter();
+
         Config favConfig = cellFactory.getConfigManager().getConfig();
         Map<Long, String> favRecipes = favConfig.getFavoriteRecipes();
         List<Long> favRecipeIds = new ArrayList<>(favRecipes.keySet());
@@ -277,20 +345,86 @@ public class RecipesCtrl implements Initializable {
         }
         cellFactory.getConfigManager().save();
     }
+
+    /**
+     * Updates the search matcher with current locale and favorites.
+     */
+    private void updateSearchMatcher() {
+        Config config = cellFactory.getConfigManager().getConfig();
+        String locale = config.getPrefLocale();
+        if (locale == null || locale.isEmpty()) {
+            locale = Locale.getDefault().toLanguageTag();
+        }
+        Set<Long> favorites = config.getFavoriteRecipeIds();
+        searchMatcher = new RecipeSearchMatcher(locale, favorites);
+    }
+
+    /**
+     * Applies the current search filter to the recipe list.
+     */
+    private void applySearchFilter() {
+        String query = searchField.getText();
+        updateSearchMatcher();
+
+        if (query == null || query.trim().isEmpty()) {
+            // No search query - apply language and favorites filter
+            filteredRecipes.setPredicate(recipe -> {
+                // Language filter
+                if (!matchesLanguageFilter(recipe)) {
+                    return false;
+                }
+                // Favorites filter
+                if (favoritesToggle.isSelected() && !cellFactory.isFavorite(recipe.getId())) {
+                    return false;
+                }
+                return true;
+            });
+        } else {
+            // Apply search filter (combined with language filter)
+            var parsedQuery = searchParser.parse(query);
+            filteredRecipes.setPredicate(recipe -> {
+                if (!matchesLanguageFilter(recipe)) {
+                    return false;
+                }
+                return searchMatcher.matches(recipe, parsedQuery);
+            });
+        }
+    }
+
+    /**
+     * Checks if a recipe matches the current language filter.
+     */
+    private boolean matchesLanguageFilter(Recipe recipe) {
+        if (filteredLanguages.isEmpty()) {
+            return false;
+        }
+        String recipeLanguage = recipe.getLanguageTag();
+        if (recipeLanguage == null || recipeLanguage.isEmpty()) {
+            return true; // Recipes without language match all
+        }
+        for (String lang : filteredLanguages) {
+            if (recipeLanguage.toLowerCase().startsWith(lang.toLowerCase().split("-")[0])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sets the filtered languages from the language menu.
+     * @param languages the list of language tags to filter by
+     */
+    public void setFilteredLanguages(List<String> languages) {
+        this.filteredLanguages = new ArrayList<>(languages);
+        applySearchFilter();
+    }
+
     /**
      * Toggle between showing all recipes and favorites only
      */
     @FXML
     public void toggleFavoritesFilter() {
-        if (favoritesToggle.isSelected()) {
-            filteredRecipes.setPredicate(recipe ->
-                    cellFactory.isFavorite(recipe.getId())
-            );
-            // Text is bound via i18n, no manual setting needed
-        } else {
-            filteredRecipes.setPredicate(null);
-            // Text is bound via i18n, no manual setting needed
-        }
+        applySearchFilter();
     }
     /**
      * Shows the details of a recipe (ingredients, preparation steps)
@@ -303,6 +437,11 @@ public class RecipesCtrl implements Initializable {
             recipeKcal.setText("");
             ingredientsList.getItems().clear();
             stepsList.getItems().clear();
+
+            recipeKcal.setVisible(false);
+
+            recipeKcal.setText("");
+
             return;
         }
         // we check to see the stored scale value (if not just put 1)
@@ -310,9 +449,20 @@ public class RecipesCtrl implements Initializable {
         scaler.getValueFactory().setValue(savedFactor);  // this will call updateVisuals
 
         recipeTitle.setText(recipe.getName());
-        recipeKcal.setText(I18n.get("recipes.kcal").replace("{0}", recipe.estimatedRecipeKcal()
-                .stripTrailingZeros()
-                .toPlainString()));
+
+        int currentServings = recipe.getServings() > 0 ? recipe.getServings() : 1;
+        servings.getValueFactory().setValue(currentServings);
+        servings.setVisible(true);
+
+        recipeKcal.setText(
+                I18n.get("recipes.kcal").replace(
+                        "{0}",
+                        recipe.estimatedRecipeKcal()
+                                .stripTrailingZeros()
+                                .toPlainString()
+                )
+        );
+        recipeKcal.setVisible(true);
         ingredientsList.getItems().clear();
         for (var ing : recipe.getIngredients()) {
             ingredientsList.getItems().add(ing);  // add RecipeIngredient objects, not strings
@@ -347,6 +497,55 @@ public class RecipesCtrl implements Initializable {
                 }
             }
         });
+    }
+
+    /**
+     * This will add the selected recipe to the shopping list
+     */
+    @FXML
+    public void addToShoppingList() {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        if (currentRecipe == null) {
+            showAlert("No Recipe Selected", "Please select a recipe to add its ingredients.");
+            return;
+        }
+        Double factor = scaler.getValue();
+        if (factor == null) {
+            factor = 1.0;
+        }
+
+        ObservableList<ShoppingItem> temp = FXCollections.observableArrayList();
+        for (RecipeIngredient ri : currentRecipe.getIngredients()) {
+            Measurement m = ri.getAmount().scale(factor).normalizeMeasurement();
+            ShoppingItem item = new ShoppingItem(
+                    ri.getIngredient(),
+                    m,
+                    currentRecipe.getName()
+            );
+            item.setChecked(false);
+            temp.add(item);
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Add to Shopping List");
+        dialog.setHeaderText("Review items from '" + currentRecipe.getName() + "'");
+
+        ButtonType addButtonType = new ButtonType("Add Items", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+
+        ListView<ShoppingItem> overviewList = new ListView<>();
+        overviewList.setItems(temp);
+        overviewList.setPrefHeight(300);
+        overviewList.setPrefWidth(400);
+        overviewList.setCellFactory(new ShoppingListCellFactory());
+
+        dialog.getDialogPane().setContent(overviewList);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == addButtonType && !temp.isEmpty()) {
+            shoppingListService.addItems(temp);
+        }
     }
 
     /**
