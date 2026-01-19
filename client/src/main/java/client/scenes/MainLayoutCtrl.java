@@ -50,7 +50,7 @@ public class MainLayoutCtrl implements Initializable {
     private final List<Locale> selectedRecipeLanguages = new ArrayList<>();
 
     /**
-     * Constructor which injects the PrimaryCtrl, to which we'll tell what to display
+     * Constructor which injects the PrimaryCtrl and ConfigManager.     
      * @param primaryCtrl the primary controller
      * @param configManager the config manager for persisting settings
      */
