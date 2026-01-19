@@ -71,6 +71,10 @@ public class PrimaryCtrl {
         this.shoppingListCtrl = shoppingList.getKey();
         this.shoppingListNode = shoppingList.getValue();
 
+        // initially, we need PrimaryCtrl to tell RecipesCtrl about the filtered languages
+        List<String> initialLangs = mainLayoutCtrl.getSelectedLanguageTags();
+        recipesCtrl.setFilteredLanguages(initialLangs);
+
         primaryStage.setScene(new Scene(mainLayout.getValue()));
         primaryStage.setTitle("FoodPal");
         showRecipes();
