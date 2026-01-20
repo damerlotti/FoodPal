@@ -54,7 +54,6 @@ public class IngredientDialog {
         grid.setHgap(10);  // gap between all the items in the dialog
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));  // padding, clockwise direction(top, right..)
-
         ComboBox<Ingredient> name = new ComboBox<>();
         name.setEditable(true);  // so we can also type sth
         name.getItems().addAll(allIngredients);
@@ -68,7 +67,6 @@ public class IngredientDialog {
         grid.add(new Label(I18n.get("dialog.addIngredient.amount")), 0, 1);
         grid.add(amount, 1, 1);
         grid.add(unit, 2, 1);
-
         TextField fatField = new TextField();
         TextField proteinField = new TextField();
         TextField carbsField = new TextField();
