@@ -95,6 +95,8 @@ public class IngredientDialog {
                 fatField.setText(removeZeros(match.getNutrition().getFatPer100g()));
                 proteinField.setText(removeZeros(match.getNutrition().getProteinPer100g()));
                 carbsField.setText(removeZeros(match.getNutrition().getCarbsPer100g()));
+                sugarField.setText(removeZeros(match.getNutrition().getSugarPer100g()));
+                sodiumField.setText(removeZeros(match.getNutrition().getSodiumPer100g()));
                 setFieldsLocked(true, fatField, proteinField, carbsField, sugarField, sodiumField);
             }
             else {  // new ingredient
