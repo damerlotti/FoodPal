@@ -312,7 +312,6 @@ public class RecipesCtrl implements Initializable {
         }
         // Apply current search/favorites filter
         applySearchFilter();
-
         Config favConfig = cellFactory.getConfigManager().getConfig();
         Map<Long, String> favRecipes = favConfig.getFavoriteRecipes();
         List<Long> favRecipeIds = new ArrayList<>(favRecipes.keySet());

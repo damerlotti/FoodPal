@@ -7,59 +7,71 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.IngredientsCtrl">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="471.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.IngredientsCtrl">
     <children>
-        <ListView fx:id="ingredientsList" layoutX="111.0" layoutY="86.0" prefHeight="247.0" prefWidth="243.0" />
-        <Button fx:id="addButton" layoutX="322.0" layoutY="349.0" mnemonicParsing="false" onAction="#switchToAddIngredient" prefHeight="25.0" prefWidth="81.0" text="Add New" />
-        <Button fx:id="deleteSelectedButton" layoutX="211.0" layoutY="349.0" mnemonicParsing="false" onAction="#removeIngredient" text="Delete Selected" />
-      <TextField fx:id="fatField" editable="false" layoutX="421.0" layoutY="204.0" prefHeight="25.0" prefWidth="89.0" />
-      <TextField fx:id="proteinField" editable="false" layoutX="421.0" layoutY="164.0" prefHeight="25.0" prefWidth="89.0" />
-      <TextField fx:id="carbsField" editable="false" layoutX="421.0" layoutY="244.0" prefHeight="25.0" prefWidth="89.0" />
-      <Label layoutX="130.0" layoutY="47.0" text="Nutritional Values">
+        <ListView fx:id="ingredientsList" layoutX="57.0" layoutY="101.0" prefHeight="291.0" prefWidth="221.0" />
+        <Button fx:id="addButton" layoutX="430.0" layoutY="405.0" mnemonicParsing="false" onAction="#switchToAddIngredient" prefHeight="25.0" prefWidth="148.0" text="Add New" />
+        <Button fx:id="deleteSelectedButton" layoutX="57.0" layoutY="405.0" mnemonicParsing="false" onAction="#removeIngredient" prefHeight="25.0" prefWidth="148.0" text="Delete Selected" />
+      <TextField fx:id="proteinField" editable="false" layoutX="372.0" layoutY="137.0" prefHeight="25.0" prefWidth="171.0" />
+      <TextField fx:id="fatField" editable="false" layoutX="372.0" layoutY="176.0" prefHeight="25.0" prefWidth="171.0" />
+      <TextField fx:id="carbsField" editable="false" layoutX="372.0" layoutY="215.0" prefHeight="25.0" prefWidth="171.0" />
+      <TextField fx:id="sugarField" editable="false" layoutX="372.0" layoutY="255.0" prefHeight="25.0" prefWidth="171.0" />
+      <TextField fx:id="sodiumField" editable="false" layoutX="372.0" layoutY="294.0" prefHeight="25.0" prefWidth="171.0" />
+      <Label fx:id="proteinLabel" layoutX="290.0" layoutY="141.0" prefHeight="17.0" prefWidth="85.0" text="Protein:">
          <font>
-            <Font name="System Bold" size="24.0" />
+            <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label fx:id="usageLabel" layoutX="375.0" layoutY="313.0" text="Used in X recipe(s)">
+      <Label fx:id="fatLabel" layoutX="301.0" layoutY="180.0" prefHeight="17.0" prefWidth="56.0" text="Fat:">
          <font>
-            <Font name="System Italic" size="14.0" />
+            <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="389.0" layoutY="207.0" text="Fat">
+      <Label fx:id="carbsLabel" layoutX="293.0" layoutY="219.0" prefHeight="17.0" prefWidth="156.0" text="Carbs:">
          <font>
-            <Font name="System Bold" size="14.0" />
+            <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="364.0" layoutY="167.0" prefWidth="50.0" text="Protein">
+      <Label fx:id="sugarLabel" layoutX="287.0" layoutY="259.0" prefHeight="17.0" prefWidth="133.0" text="Sugar:">
          <font>
-            <Font name="System Bold" size="14.0" />
+            <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="375.0" layoutY="247.0" text="Carbs">
+      <Label fx:id="sodiumLabel" layoutX="282.0" layoutY="298.0" prefHeight="17.0" prefWidth="115.0" text="Sodium:">
          <font>
-            <Font name="System Bold" size="14.0" />
+            <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="375.0" layoutY="286.0" text="kCal">
+      <Label layoutX="335.0" layoutY="331.0" text="kCal:">
          <font>
-            <Font name="System Bold" size="14.0" />
+            <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="363.0" layoutY="117.0" text="per 100 g">
+      <Label layoutX="82.0" layoutY="63.0" text="Nutritional Values">
          <font>
-            <Font name="System Bold" size="18.0" />
+            <Font name="System Bold" size="20.0" />
          </font>
       </Label>
-      <Label fx:id="nameLabel" layoutX="363.0" layoutY="82.0" text="Name">
+      <Button fx:id="editSelectedButton" layoutX="233.0" layoutY="405.0" mnemonicParsing="false" onAction="#switchToEditIngredient" prefHeight="25.0" prefWidth="171.0" text="Edit Selected" />
+      <Label fx:id="nameLabel" layoutX="311.0" layoutY="63.0" text="Name">
          <font>
-            <Font name="System Bold" size="24.0" />
+            <Font name="System Bold" size="20.0" />
          </font>
       </Label>
-      <Label fx:id="kCalLabel" layoutX="421.0" layoutY="286.0" text="Label">
+      <Label layoutX="312.0" layoutY="93.0" text="per 100g">
          <font>
-            <Font name="System Bold" size="14.0" />
+            <Font name="System Italic" size="18.0" />
          </font>
       </Label>
-      <Button layoutX="111.0" layoutY="349.0" mnemonicParsing="false" onAction="#editIngredient" text="Edit Selected" />
+      <Label fx:id="usageLabel" layoutX="333.0" layoutY="364.0" text="Used in X recipe(s)">
+         <font>
+            <Font name="System Italic" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="kCalLabel" layoutX="372.0" layoutY="331.0" text="kCalLabel">
+         <font>
+            <Font name="System Bold Italic" size="12.0" />
+         </font>
+      </Label>
     </children>
 </AnchorPane>
