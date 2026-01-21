@@ -78,6 +78,8 @@ public class Main extends Application {
         var ingredients = FXML.load(IngredientsCtrl.class, "client", "scenes", "Ingredients.fxml");
         var addIngredient = FXML.load(AddIngredientCtrl.class,
                 "client", "scenes", "AddIngredient.fxml");
+        var editIngredient = FXML.load(EditIngredientCtrl.class, "client",
+                "scenes", "EditIngredient.fxml");
         var shoppingList = FXML.load(ShoppingListCtrl.class,
                 "client", "scenes", "ShoppingList.fxml");
         // Get PrimaryCtrl from Guice
@@ -85,7 +87,8 @@ public class Main extends Application {
 
         // Initialize all scenes inside PrimaryCtrl
         primaryCtrl.init(primaryStage, mainLayout, recipes,
-                addRecipe, ingredients, addIngredient, shoppingList);
+                addRecipe, ingredients, addIngredient);
+        primaryCtrl.initEditAndShopping(editIngredient, shoppingList);
     }
 
     /**
