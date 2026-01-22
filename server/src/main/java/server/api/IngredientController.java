@@ -42,13 +42,25 @@ public class IngredientController {
     }
 
     /**
+     * Handler for GET requests to /ingredients/id
+     * @param id the id of the ingredient to fetch
+     * @return the ingredient if found, otherwise 404
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Ingredient> getById(@PathVariable("id") long id) {
+        if (id < 0 || !ingredientRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(ingredientRepo.findById(id).get());
+    }
+
+    /**
      * Handler for POST requests to /ingredients
      * @param ingredient the JSON body automatically converted to an Ingredient object
      * @return The saved Ingredient
      */
     @PostMapping("/")
     public Ingredient add(@RequestBody Ingredient ingredient) {
-        // TODO: maybe we'll need to check for duplicates here
         if (ingredient.getName() == null || ingredient.getName().isEmpty()) {
             return null;
         }
@@ -72,36 +84,6 @@ public class IngredientController {
         ingredient.setId(id); // set the same id for the updated ingredient
         Ingredient saved = ingredientRepo.save(ingredient);
         msg.convertAndSend("/topic/ingredients", saved);
-        return ResponseEntity.ok(saved);
-    }
-
-    /**
-     * Handler for GET requests to /ingredients/id
-     * @param id the id of the ingredient to fetch
-     * @return the ingredient if found, otherwise 404
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<Ingredient> getById(@PathVariable("id") long id) {
-        if (id < 0 || !ingredientRepo.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(ingredientRepo.findById(id).get());
-    }
-
-    /**
-     * Updates an existing ingredient.
-     * @param id The ID of the ingredient to update
-     * @param ingredient The new data for the ingredient
-     * @return The updated ingredient
-     */
-    @PutMapping("/{id}")
-    public ResponseEntity<Ingredient> updateIngredient(@PathVariable("id") long id,
-                                                       @RequestBody Ingredient ingredient) {
-        if (id < 0 || !ingredientRepo.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        ingredient.setId(id);
-        Ingredient saved = ingredientRepo.save(ingredient);
         return ResponseEntity.ok(saved);
     }
 

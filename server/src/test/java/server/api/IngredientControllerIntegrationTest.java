@@ -11,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
 import server.database.IngredientRepository;
 import server.database.RecipeRepository;
 
@@ -27,8 +26,6 @@ class IngredientControllerIntegrationTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
-    @Autowired
-    private PlatformTransactionManager transactionManager;
 
     @Autowired
     private IngredientRepository ingredientRepository;
@@ -151,7 +148,7 @@ class IngredientControllerIntegrationTest {
     void testDeleteIngredientRemovesItFromAssociatedRecipes() {
         Ingredient flour = new Ingredient();
         flour.setName("Flour");
-        flour = ingredientRepository.save(flour);
+        Ingredient savedFlour = ingredientRepository.save(flour);
 
         Recipe recipe = new Recipe();
         recipe.setName("Cake");
@@ -162,23 +159,36 @@ class IngredientControllerIntegrationTest {
         ri.setAmount(new Measurement(BigDecimal.valueOf(500), Unit.G));
 
         recipe.setIngredients(new ArrayList<>(List.of(ri)));
-        recipe = recipeRepository.save(recipe);
-        final Long recipeId = recipe.getId();
+        Recipe savedRecipe = recipeRepository.save(recipe);
+        restTemplate.delete("/ingredients/" + savedFlour.getId());
+        assertFalse(ingredientRepository.findById(savedFlour.getId()).isPresent());
 
-        new TransactionTemplate(transactionManager).execute(status -> {
-            assertEquals(1, recipeRepository.findById(recipeId).
-                    get().getIngredients().size());
-            return null;
-        });
-        restTemplate.delete("/ingredients/" + flour.getId());
-        assertFalse(ingredientRepository.findById(flour.getId()).isPresent());
+        ResponseEntity<Recipe> response = restTemplate.getForEntity(
+                "/recipes/" + savedRecipe.getId(), Recipe.class);
 
-        new TransactionTemplate(transactionManager).execute(status -> {
-            Recipe updatedRecipe = recipeRepository.findById(recipeId).orElse(null);
-            assertNotNull(updatedRecipe);
-            assertTrue(updatedRecipe.getIngredients().isEmpty(),
-                    "Recipe should have 0 ingredients after the ingredient was deleted");
-            return null;
-        });
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().getIngredients().isEmpty(),
+                "Recipe should have 0 ingredients after the ingredient was deleted");
+    }
+
+    @Test
+    void testUpdateDeletedIngredientReturnsNotFound() {
+        Ingredient ingredient = new Ingredient();
+        ingredient.setName("Temporary Ingredient");
+        Ingredient saved = ingredientRepository.save(ingredient);
+        long id = saved.getId();
+        ingredientRepository.deleteById(id);
+
+        Ingredient updateInfo = new Ingredient();
+        updateInfo.setName("Ghost Update");
+
+        ResponseEntity<Ingredient> response = restTemplate.exchange(
+                "/ingredients/" + id,
+                HttpMethod.PUT,
+                new HttpEntity<>(updateInfo),
+                Ingredient.class
+        );
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 }
