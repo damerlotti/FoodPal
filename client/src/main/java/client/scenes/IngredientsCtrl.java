@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.MyWebSocketClient;
 import client.i18n.I18n;
 import client.utils.ServerUtils;
 import com.google.inject.Inject;
@@ -25,6 +26,8 @@ public class IngredientsCtrl implements Initializable {
 
     @FXML
     private ListView<Ingredient> ingredientsList;
+
+    private MyWebSocketClient webSocket = new MyWebSocketClient();
 
     @FXML
     private TextField fatField;
@@ -78,7 +81,18 @@ public class IngredientsCtrl implements Initializable {
         );
 
         clearNutritionDisplay();
+        initializeWebSocket();
         refresh();
+    }
+
+    private void initializeWebSocket() {
+        webSocket.connect("ws://localhost:8080/websocket");
+        webSocket.subscribe("/topic/ingredients", Object.class, obj -> {
+            System.out.println("Ingredient updated");
+            javafx.application.Platform.runLater(() -> {
+                refresh();
+            });
+        });
     }
 
     /**

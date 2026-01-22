@@ -2,6 +2,7 @@ package server.api;
 
 import commons.Ingredient;
 import commons.Recipe;
+import org.springframework.http.ResponseEntity;
 import server.database.IngredientRepository;
 import org.springframework.web.bind.annotation.*;
 import server.database.RecipeRepository;
@@ -21,6 +22,7 @@ public class IngredientController {
      * Constructor which injects the IngredientRepository
      * @param ingredientRepo the ingredient repository
      * @param recipeRepo the recipe repository
+     * @param msg the messaging template
      */
     public IngredientController(IngredientRepository ingredientRepo,
                                 RecipeRepository recipeRepo,
@@ -50,7 +52,27 @@ public class IngredientController {
         if (ingredient.getName() == null || ingredient.getName().isEmpty()) {
             return null;
         }
-        return ingredientRepo.save(ingredient);
+        Ingredient saved = ingredientRepo.save(ingredient);
+        msg.convertAndSend("/topic/ingredients", saved);
+        return saved;
+    }
+
+    /**
+     * Handler for PUT requests to /ingredients/id
+     * @param id the id of the ingredient to be updated
+     * @param ingredient the new ingredient
+     * @return the http response
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Ingredient> update(@PathVariable("id") long id,
+                                             @RequestBody Ingredient ingredient) {
+        if (!ingredientRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        ingredient.setId(id); // set the same id for the updated ingredient
+        Ingredient saved = ingredientRepo.save(ingredient);
+        msg.convertAndSend("/topic/ingredients", saved);
+        return ResponseEntity.ok(saved);
     }
 
     /**
@@ -74,5 +96,6 @@ public class IngredientController {
         }
         // Then we delete the ingredient itself by its id
         ingredientRepo.deleteById(id);
+        msg.convertAndSend("/topic/ingredients", id);
     }
 }
