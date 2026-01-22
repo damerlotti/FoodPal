@@ -44,10 +44,13 @@ public class MainLayoutCtrl implements Initializable {
     @FXML
     private Button ingredientsButton;
 
+    @FXML
+    private Button shoppingListButton;
+
     private final List<Locale> selectedRecipeLanguages = new ArrayList<>();
 
     /**
-     * Constructor which injects the PrimaryCtrl and ConfigManager.
+     * Constructor which injects the PrimaryCtrl and ConfigManager.     
      * @param primaryCtrl the primary controller
      * @param configManager the config manager for persisting settings
      */
@@ -62,6 +65,7 @@ public class MainLayoutCtrl implements Initializable {
         // Bind button text to i18n
         recipesButton.textProperty().bind(I18n.createStringBinding("nav.recipes"));
         ingredientsButton.textProperty().bind(I18n.createStringBinding("nav.ingredients"));
+        shoppingListButton.textProperty().bind(I18n.createStringBinding("nav.shoppingList"));
 
         // Initialize recipe language multi-select menu
         initializeRecipeLanguageMenu();

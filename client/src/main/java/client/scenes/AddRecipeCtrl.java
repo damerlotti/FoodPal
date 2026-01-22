@@ -11,6 +11,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.TextField;
+import client.i18n.I18nConfig;
+import client.utils.LanguageComboUtils;
+import javafx.util.StringConverter;
+import java.util.Locale;
+
 
 import java.math.BigDecimal;
 import java.net.URL;
@@ -52,6 +57,14 @@ public class AddRecipeCtrl implements Initializable {
     private Button addIngredientButton;
     @FXML
     private Button deleteIngredientButton;
+    @FXML
+    private ComboBox<Locale> languageCombo;
+    @FXML
+    private Label languageLabel;
+    @FXML
+    private Label servingsLabel;
+    private String selectedLanguageTag = Locale.ENGLISH.toLanguageTag();
+
 
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
@@ -70,6 +83,10 @@ public class AddRecipeCtrl implements Initializable {
         titleLabel.textProperty().bind(I18n.createStringBinding("addRecipe.title"));
         ingredientsLabel.textProperty().bind(
                 I18n.createStringBinding("addRecipe.ingredientsLabel"));
+        languageLabel.textProperty().bind(
+                I18n.createStringBinding("addRecipe.languageLabel"));
+        servingsLabel.textProperty().bind(
+                I18n.createStringBinding("addRecipe.servingsLabel"));
         stepsLabel.textProperty().bind(I18n.createStringBinding("addRecipe.stepsLabel"));
         addRecipeButton.textProperty().bind(I18n.createStringBinding("addRecipe.addRecipe"));
         cancelButton.textProperty().bind(I18n.createStringBinding("addRecipe.cancel"));
@@ -78,6 +95,26 @@ public class AddRecipeCtrl implements Initializable {
         addIngredientButton.textProperty().bind(I18n.createStringBinding("addRecipe.add"));
         deleteIngredientButton.textProperty().bind(I18n.createStringBinding("addRecipe.delete"));
         displayServingChoices();
+        languageCombo.getItems().setAll(I18nConfig.SUPPORTED);
+        languageCombo.setCellFactory(_ -> LanguageComboUtils.createFlagCell());
+        languageCombo.setButtonCell(LanguageComboUtils.createFlagCell());
+        languageCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Locale locale) {
+                return locale == null ? "" : locale.getDisplayName(locale);
+            }
+            @Override
+            public Locale fromString(String string) {
+                return null;
+            }
+        });
+        languageCombo.getSelectionModel().select(I18n.getLocale());
+        //The flag selected becomes the languageTag of the recipe
+        languageCombo.valueProperty().addListener((obs, oldLang, newLang) -> {
+            if (newLang != null) {
+                selectedLanguageTag = newLang.toLanguageTag();
+            }
+        });
     }
 
     /**
@@ -149,6 +186,7 @@ public class AddRecipeCtrl implements Initializable {
 
         Recipe r = new Recipe();
         r.setName(title);
+        r.setLanguageTag(selectedLanguageTag);
         r.setServings(servingsField.getValue());
         List<RecipeStep> steps = new ArrayList<>();
         int index = 0;
