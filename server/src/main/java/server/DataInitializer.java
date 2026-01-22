@@ -39,7 +39,7 @@ public class DataInitializer implements CommandLineRunner {
 
         System.out.println("Initializing sample recipes...");
         initializeIngredientsAndRecipes();
-        System.out.println("5 sample recipes initialized successfully!");
+        System.out.println("8 sample recipes initialized successfully!");
     }
 
     /**
@@ -149,6 +149,9 @@ public class DataInitializer implements CommandLineRunner {
         createChocolateChipCookies(flour, butter, sugar, eggs, chocolate, bakingSoda);
         createBeefTacos(groundBeef, onion, garlic, cheese, lettuce, tomato);
         createVegetableLasagna(flour, bellPepper, zucchini, cheese, tomato);
+        stirFry(zucchini, bellPepper, garlic, onion, butter);
+        bake(broccoli, cheese, butter);
+        chickenStirFry(chicken, bellPepper, garlic, soySauce);
     }
 
     /**
@@ -161,6 +164,7 @@ public class DataInitializer implements CommandLineRunner {
     private void createSpaghettiCarbonara(Ingredient spaghetti, Ingredient eggs,
                                           Ingredient pancetta, Ingredient parmesan) {
         Recipe carbonara = createRecipe("Spaghetti Carbonara", 1);
+        carbonara.setLanguageTag(Locale.ENGLISH.toLanguageTag());
         addIngredientToRecipe(carbonara, spaghetti, new BigDecimal("400"), Unit.G);
         addIngredientToRecipe(carbonara, eggs, new BigDecimal("3"), Unit.PIECE);
         addIngredientToRecipe(carbonara, pancetta, new BigDecimal("150"), Unit.G);
@@ -183,6 +187,7 @@ public class DataInitializer implements CommandLineRunner {
     private void createChickenStirFry(Ingredient chicken, Ingredient bellPepper,
                                       Ingredient broccoli, Ingredient soySauce) {
         Recipe stirFry = createRecipe("Chicken Stir Fry", 2);
+        stirFry.setLanguageTag(Locale.forLanguageTag("ro-RO").toLanguageTag());
         addIngredientToRecipe(stirFry, chicken, new BigDecimal("500"), Unit.G);
         addIngredientToRecipe(stirFry, bellPepper, new BigDecimal("2"), Unit.PIECE);
         addIngredientToRecipe(stirFry, broccoli, new BigDecimal("1"), Unit.PIECE);
@@ -207,6 +212,7 @@ public class DataInitializer implements CommandLineRunner {
                                             Ingredient sugar, Ingredient eggs,
                                             Ingredient chocolate, Ingredient bakingSoda) {
         Recipe cookies = createRecipe("Chocolate Chip Cookies", 2);
+        cookies.setLanguageTag(Locale.forLanguageTag("nl-NL").toLanguageTag());
         addIngredientToRecipe(cookies, flour, new BigDecimal("2.5"), Unit.CUP);
         addIngredientToRecipe(cookies, butter, new BigDecimal("1"), Unit.CUP);
         addIngredientToRecipe(cookies, sugar, new BigDecimal("0.75"), Unit.CUP);
@@ -235,6 +241,7 @@ public class DataInitializer implements CommandLineRunner {
                                  Ingredient garlic, Ingredient cheese,
                                  Ingredient lettuce, Ingredient tomato) {
         Recipe tacos = createRecipe("Beef Tacos", 2);
+        tacos.setLanguageTag(Locale.ENGLISH.toLanguageTag());
         addIngredientToRecipe(tacos, groundBeef, new BigDecimal("500"), Unit.G);
         addIngredientToRecipe(tacos, onion, new BigDecimal("1"), Unit.PIECE);
         addIngredientToRecipe(tacos, garlic, new BigDecimal("2"), Unit.PIECE);
@@ -260,6 +267,7 @@ public class DataInitializer implements CommandLineRunner {
                                         Ingredient zucchini, Ingredient cheese,
                                         Ingredient tomato) {
         Recipe lasagna = createRecipe("Vegetable Lasagna", 1);
+        lasagna.setLanguageTag(Locale.forLanguageTag("ro-RO").toLanguageTag());
         addIngredientToRecipe(lasagna, flour, new BigDecimal("12"), Unit.PIECE);
         addIngredientToRecipe(lasagna, bellPepper, new BigDecimal("2"), Unit.PIECE);
         addIngredientToRecipe(lasagna, zucchini, new BigDecimal("2"), Unit.PIECE);
@@ -288,7 +296,7 @@ public class DataInitializer implements CommandLineRunner {
                                          Ingredient onion, Ingredient garlic,
                                          Ingredient cheese) {
         Recipe omelette = createRecipe("Vegetable Omelette", 3);
-
+        omelette.setLanguageTag(Locale.ENGLISH.toLanguageTag());
         // Add ingredients with appropriate amounts
         addIngredientToRecipe(omelette, eggs, new BigDecimal("3"), Unit.PIECE);
         addIngredientToRecipe(omelette, bellPepper, new BigDecimal("0.5"), Unit.PIECE);
@@ -314,6 +322,99 @@ public class DataInitializer implements CommandLineRunner {
         addStepToRecipe(omelette, "Slide onto a plate and serve immediately.", 9);
 
         entityManager.persist(omelette);
+    }
+
+    /**
+     * Creates recipe
+     * @param zucchini zucchini
+     * @param bellPepper bePepper
+     * @param garlic garlic
+     * @param onion onion
+     * @param butter butter
+     */
+    private void stirFry(Ingredient zucchini, Ingredient bellPepper,
+                                                 Ingredient garlic, Ingredient onion,
+                                                 Ingredient butter) {
+        Recipe stirFry = createRecipe("Zucchini and Bell Pepper Stir Fry", 2);
+        stirFry.setLanguageTag(Locale.forLanguageTag("nl-NL").toLanguageTag());
+        addIngredientToRecipe(stirFry, zucchini, new BigDecimal("2"), Unit.PIECE);
+        addIngredientToRecipe(stirFry, bellPepper, new BigDecimal("1"), Unit.PIECE);
+        addIngredientToRecipe(stirFry, garlic, new BigDecimal("2"), Unit.PIECE);
+        addIngredientToRecipe(stirFry, onion, new BigDecimal("1"), Unit.PIECE);
+        addIngredientToRecipe(stirFry, butter, new BigDecimal("2"), Unit.TBSP);
+
+        addStepToRecipe(stirFry, "Slice zucchini and bell pepper into thin strips.", 0);
+        addStepToRecipe(stirFry, "Sauté onion and garlic in butter until fragrant.", 1);
+        addStepToRecipe(stirFry, "Add zucchini and bell pepper, cook for 5-6 minutes.", 2);
+        addStepToRecipe(stirFry, "Serve hot.", 3);
+
+        entityManager.persist(stirFry);
+    }
+
+    /**
+     *  Creates Broccoli Cheese Bake recipe.
+     * @param broccoli broccoli
+     * @param cheese cheese
+     * @param butter butter
+     */
+    private void bake(Ingredient broccoli, Ingredient cheese, Ingredient butter) {
+        Recipe bake = createRecipe("Broccoli Cheese Bake", 2);
+        bake.setLanguageTag(Locale.ENGLISH.toLanguageTag());
+        addIngredientToRecipe(bake, broccoli, new BigDecimal("300"), Unit.G);
+        addIngredientToRecipe(bake, cheese, new BigDecimal("100"), Unit.G);
+        addIngredientToRecipe(bake, butter, new BigDecimal("1"), Unit.TBSP);
+
+        addStepToRecipe(bake, "Boil broccoli for 3-4 minutes.", 0);
+        addStepToRecipe(bake, "Place broccoli in a baking dish and sprinkle cheese on top.", 1);
+        addStepToRecipe(bake, "Add butter and bake at 180°C for 10 minutes.", 2);
+
+        entityManager.persist(bake);
+    }
+
+    /**
+     * Creates recipe
+     * @param chicken chicken
+     * @param bellPepper ballPepper
+     * @param garlic garlic
+     * @param soySauce soySauce
+     */
+    private void chickenStirFry(Ingredient chicken, Ingredient bellPepper,
+                                                Ingredient garlic, Ingredient soySauce) {
+        Recipe stirFry = createRecipe("Chicken and Bell Pepper Stir Fry", 2);
+        stirFry.setLanguageTag(Locale.forLanguageTag("nl-NL").toLanguageTag());
+
+        addIngredientToRecipe(stirFry, chicken, new BigDecimal("500"), Unit.G);
+        addIngredientToRecipe(stirFry, bellPepper, new BigDecimal("2"), Unit.PIECE);
+        addIngredientToRecipe(stirFry, garlic, new BigDecimal("2"), Unit.PIECE);
+        addIngredientToRecipe(stirFry, soySauce, new BigDecimal("3"), Unit.TBSP);
+
+        addStepToRecipe(stirFry, "Slice chicken into strips and season.", 0);
+        addStepToRecipe(stirFry, "Sauté bell pepper and garlic in a pan.", 1);
+        addStepToRecipe(stirFry, "Add chicken and cook until browned.", 2);
+        addStepToRecipe(stirFry, "Pour in soy sauce and cook for 2 more minutes.", 3);
+
+        entityManager.persist(stirFry);
+    }
+
+    /**
+     * Creates recipe
+     * @param lettuce lettuce
+     * @param tomato tomato
+     * @param onion onion
+     */
+    private void createTomatoLettuceSalad(Ingredient lettuce, Ingredient tomato,
+                                          Ingredient onion) {
+        Recipe salad = createRecipe("Tomato and Lettuce Salad", 2);
+        salad.setLanguageTag(Locale.forLanguageTag("ro-RO").toLanguageTag());
+
+        addIngredientToRecipe(salad, lettuce, new BigDecimal("1"), Unit.PIECE);
+        addIngredientToRecipe(salad, tomato, new BigDecimal("3"), Unit.PIECE);
+        addIngredientToRecipe(salad, onion, new BigDecimal("0.5"), Unit.PIECE);
+        addStepToRecipe(salad, "Wash and chop all vegetables.", 0);
+        addStepToRecipe(salad, "Mix vegetables in a large bowl.", 1);
+        addStepToRecipe(salad, "Drizzle with olive oil and serve.", 2);
+
+        entityManager.persist(salad);
     }
 
     /**

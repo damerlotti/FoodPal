@@ -3,6 +3,8 @@ package client.scenes;
 import client.MyWebSocketClient;
 import client.i18n.I18n;
 import client.config.Config;
+import client.i18n.I18nConfig;
+import javafx.util.StringConverter;
 import client.utils.ServerUtils;
 import client.utils.search.RecipeSearchMatcher;
 import client.utils.search.SearchQueryParser;
@@ -86,6 +88,10 @@ public class RecipesCtrl implements Initializable {
     private Button deleteStepButton;
     @FXML
     private TextField searchField;
+    @FXML
+    private Label languageLabel;
+    @FXML
+    private ComboBox<Locale> languageCombo;
 
     private ObservableList<Recipe> allRecipes;
     private FilteredList<Recipe> filteredRecipes;
@@ -100,9 +106,9 @@ public class RecipesCtrl implements Initializable {
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
      *
-     * @param server      the server utils
-     * @param primaryCtrl primaryCtrl
-     * @param cellFactory the cell factory to keep favourites local
+     * @param server              the server utils
+     * @param primaryCtrl         primaryCtrl
+     * @param cellFactory         the cell factory to keep favourites local
      * @param shoppingListService the shopping list manager
      */
     @Inject
@@ -141,6 +147,7 @@ public class RecipesCtrl implements Initializable {
         addStepButton.textProperty().bind(I18n.createStringBinding("recipes.add"));
         editStepButton.textProperty().bind(I18n.createStringBinding("recipes.edit"));
         deleteStepButton.textProperty().bind(I18n.createStringBinding("recipes.delete"));
+        languageLabel.textProperty().bind(I18n.createStringBinding("recipes.languageLabel"));
 
         // Bind favorites toggle to i18n
         favoritesToggle.textProperty().bind(
@@ -148,6 +155,36 @@ public class RecipesCtrl implements Initializable {
                         .then(I18n.createStringBinding("recipes.showAll"))
                         .otherwise(I18n.createStringBinding("recipes.showFavorite"))
         );
+
+        languageCombo.getItems().setAll(I18nConfig.SUPPORTED);
+        languageCombo.setCellFactory(_ -> LanguageComboUtils.createFlagCell());
+        languageCombo.setButtonCell(LanguageComboUtils.createFlagCell());
+        languageCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Locale locale) {
+                return "";
+            }
+
+            @Override
+            public Locale fromString(String string) {
+                return null;
+            }
+        });
+        // listener to update the languageTag of the recipe when the user edits it
+        languageCombo.valueProperty().addListener((obs,
+                                                   oldLang, newLang) -> {
+            Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+            if (currentRecipe != null && newLang != null &&
+                    !newLang.toLanguageTag().equals(currentRecipe.getLanguageTag())) {
+                currentRecipe.setLanguageTag(newLang.toLanguageTag());
+                try {
+                    server.updateRecipe(currentRecipe);
+                } catch (Exception e) {
+                    showAlert(I18n.get("alert.serverError"),
+                            I18n.get("alert.couldNotUpdateRecipe"));
+                }
+            }
+        });
     }
 
     /**
@@ -235,6 +272,7 @@ public class RecipesCtrl implements Initializable {
     /**
      * Creates a text formatter that only allows optional decimal point
      * and optional minus sign
+     *
      * @return a TextFormatter for numeric validation
      */
     private TextFormatter<String> createNumberTextFormatter() {
@@ -265,8 +303,7 @@ public class RecipesCtrl implements Initializable {
                         ("/topic/recipes/" + newVal.getId(), Recipe.class, r -> {
                             showRecipeDetails(r);
                         });
-            }
-            else {
+            } else {
                 showRecipeDetails(null);
             }
         });
@@ -274,7 +311,8 @@ public class RecipesCtrl implements Initializable {
 
     /**
      * shows an alert
-     * @param title the title of the alert
+     *
+     * @param title   the title of the alert
      * @param content the content of the alert
      */
     private void showAlert(String title, String content) {
@@ -411,6 +449,7 @@ public class RecipesCtrl implements Initializable {
 
     /**
      * Sets the filtered languages from the language menu.
+     *
      * @param languages the list of language tags to filter by
      */
     public void setFilteredLanguages(List<String> languages) {
@@ -425,6 +464,7 @@ public class RecipesCtrl implements Initializable {
     public void toggleFavoritesFilter() {
         applySearchFilter();
     }
+
     /**
      * Shows the details of a recipe (ingredients, preparation steps)
      *
@@ -443,6 +483,18 @@ public class RecipesCtrl implements Initializable {
 
             return;
         }
+        String tag = recipe.getLanguageTag();
+        if (tag != null && !tag.isBlank()) {
+            Locale recipeLocale = Locale.forLanguageTag(tag);
+            languageCombo.getItems().stream().filter(l -> l.toLanguageTag()
+                    .equalsIgnoreCase(recipeLocale.toLanguageTag())).findFirst().ifPresentOrElse(
+                            l -> languageCombo.getSelectionModel().select(l),
+                            () -> languageCombo.getSelectionModel().clearSelection()
+            );
+        } else {
+            languageCombo.getSelectionModel().clearSelection();
+        }
+
         // we check to see the stored scale value (if not just put 1)
         Double savedFactor = scalingMap.getOrDefault(recipe.getId(), 1.0);
         scaler.getValueFactory().setValue(savedFactor);  // this will call updateVisuals
@@ -483,10 +535,9 @@ public class RecipesCtrl implements Initializable {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
-                }
-                else {
+                } else {
                     Measurement displayMeasurement = item.getAmount().scale(factor)
-                                                         .normalizeMeasurement();
+                            .normalizeMeasurement();
 
                     RecipeIngredient aux = new RecipeIngredient();
                     aux.setIngredient(item.getIngredient());
@@ -915,6 +966,7 @@ public class RecipesCtrl implements Initializable {
 
     /**
      * given a recipe id, it returns the name of the recipe
+     *
      * @param recipeId the id of the recipe
      * @return the name of the recipe if it exists, else null
      */
