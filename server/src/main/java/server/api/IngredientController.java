@@ -2,6 +2,7 @@ package server.api;
 
 import commons.Ingredient;
 import commons.Recipe;
+import org.springframework.http.ResponseEntity;
 import server.database.IngredientRepository;
 import org.springframework.web.bind.annotation.*;
 import server.database.RecipeRepository;
@@ -47,6 +48,36 @@ public class IngredientController {
             return null;
         }
         return ingredientRepo.save(ingredient);
+    }
+
+    /**
+     * Handler for GET requests to /ingredients/id
+     * @param id the id of the ingredient to fetch
+     * @return the ingredient if found, otherwise 404
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<Ingredient> getById(@PathVariable("id") long id) {
+        if (id < 0 || !ingredientRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(ingredientRepo.findById(id).get());
+    }
+
+    /**
+     * Updates an existing ingredient.
+     * @param id The ID of the ingredient to update
+     * @param ingredient The new data for the ingredient
+     * @return The updated ingredient
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<Ingredient> updateIngredient(@PathVariable("id") long id,
+                                                       @RequestBody Ingredient ingredient) {
+        if (id < 0 || !ingredientRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        ingredient.setId(id);
+        Ingredient saved = ingredientRepo.save(ingredient);
+        return ResponseEntity.ok(saved);
     }
 
     /**
