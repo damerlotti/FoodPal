@@ -19,9 +19,11 @@ import static com.google.inject.Guice.createInjector;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.Locale;
 
 import client.config.Config;
 import client.config.ConfigManager;
+import client.i18n.I18n;
 import client.scenes.*;
 import com.google.inject.Injector;
 
@@ -59,7 +61,15 @@ public class Main extends Application {
         confMngr.init(true);
         Config config = confMngr.getConfig();
 
-        // config initalisation stuff goes here
+        // Load and apply the saved preferred locale
+        if (config.getPrefLocale() != null && !config.getPrefLocale().isEmpty()) {
+            try {
+                Locale savedLocale = Locale.forLanguageTag(config.getPrefLocale());
+                I18n.setLocale(savedLocale);
+            } catch (Exception e) {
+                System.err.println("Failed to load saved locale: " + e.getMessage());
+            }
+        }
     }
 
     @Override

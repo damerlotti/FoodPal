@@ -79,6 +79,9 @@ public class MainLayoutCtrl implements Initializable {
         languageCombo.valueProperty().addListener((obs, oldL, newL) -> {
             if (newL != null) {
                 I18n.setLocale(newL);
+                // Save the language preference to config
+                configManager.getConfig().setPrefLocale(newL.toLanguageTag());
+                configManager.save();
             }
         });
 
@@ -176,10 +179,6 @@ public class MainLayoutCtrl implements Initializable {
     private void updateRecipeLanguageMenuText() {
         if (selectedRecipeLanguages.isEmpty()) {
             recipeLanguageMenu.setText(I18n.get("mainLayout.none"));
-        } else if (selectedRecipeLanguages.size() == I18nConfig.SUPPORTED.size()) {
-            recipeLanguageMenu.setText(I18n.get("mainLayout.all"));
-        } else if (selectedRecipeLanguages.size() == 1) {
-            recipeLanguageMenu.setText(getLanguageDisplayName(selectedRecipeLanguages.get(0)));
         } else {
             String codes = selectedRecipeLanguages.stream()
                     .map(this::getLanguageCode)

@@ -19,6 +19,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -232,6 +233,29 @@ public class RecipesCtrl implements Initializable {
             applySearchFilter();
         });
 
+        // Add Escape key handler to clear search and unfocus
+        searchField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                searchField.clear();
+                searchField.getParent().requestFocus();
+                event.consume();
+            }
+        });
+
+        // Load saved language filter from config
+        List<String> savedLanguages = cellFactory.getConfigManager().getConfig()
+                .getSelectedRecipeLanguages();
+        if (savedLanguages != null && !savedLanguages.isEmpty()) {
+            filteredLanguages = new ArrayList<>(savedLanguages);
+        } else {
+            // Default to all supported languages
+            filteredLanguages = new ArrayList<>(
+                    I18nConfig.SUPPORTED.stream()
+                            .map(Locale::toLanguageTag)
+                            .toList()
+            );
+        }
+
         // the ui list contains our data, currently empty
         refresh();
     }
@@ -444,7 +468,7 @@ public class RecipesCtrl implements Initializable {
      */
     private boolean matchesLanguageFilter(Recipe recipe) {
         if (filteredLanguages.isEmpty()) {
-            return true;
+            return false;
         }
         String recipeLanguage = recipe.getLanguageTag();
         if (recipeLanguage == null || recipeLanguage.isEmpty()) {
