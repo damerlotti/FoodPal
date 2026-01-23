@@ -9,6 +9,8 @@ public class SearchQueryParser {
     private CaseSensitivity globalCaseSensitivity;
     private boolean favouritesOnly;
     private List<String> additionalLanguages;
+    private List<NutritionFilter> nutritionFilters;
+    private Integer servings;
 
     /**
      * Parses a search query string into a SearchQuery object.
@@ -26,6 +28,8 @@ public class SearchQueryParser {
         this.globalCaseSensitivity = CaseSensitivity.INSENSITIVE;
         this.favouritesOnly = false;
         this.additionalLanguages = new ArrayList<>();
+        this.nutritionFilters = new ArrayList<>();
+        this.servings = null;
 
         // First pass: extract global settings (case: and fav)
         extractGlobalSettings();
@@ -55,6 +59,8 @@ public class SearchQueryParser {
                 .globalCaseSensitivity(globalCaseSensitivity)
                 .favouritesOnly(favouritesOnly)
                 .additionalLanguages(additionalLanguages)
+                .nutritionFilters(nutritionFilters)
+                .servings(servings)
                 .build();
     }
 
@@ -231,6 +237,28 @@ public class SearchQueryParser {
             return null;
         }
 
+        // Check for servings filter
+        if (matchesAt(pos, "servings:")) {
+            pos += 9;
+            skipWhitespace();
+            String servingsValue = parseValue();
+            if (servingsValue != null && !servingsValue.isEmpty()) {
+                try {
+                    this.servings = Integer.parseInt(servingsValue.trim());
+                } catch (NumberFormatException e) {
+                    // Ignore invalid servings values
+                }
+            }
+            return null;
+        }
+
+        // Check for nutrition filters
+        NutritionFilter nutritionFilter = tryParseNutritionFilter();
+        if (nutritionFilter != null) {
+            nutritionFilters.add(nutritionFilter);
+            return null;
+        }
+
         // Try to match a field specifier
         SearchField field = null;
         CaseSensitivity localCase = CaseSensitivity.INHERIT;
@@ -385,7 +413,8 @@ public class SearchQueryParser {
                 String prefix = word.toString().toLowerCase();
                 return prefix.equals("title") || prefix.equals("ingr")
                         || prefix.equals("step") || prefix.equals("lang")
-                        || prefix.equals("case");
+                        || prefix.equals("case") || prefix.equals("servings")
+                        || isNutritionFieldName(prefix);
             }
             if (!Character.isLetter(c)) {
                 break;
@@ -394,6 +423,105 @@ public class SearchQueryParser {
             lookAhead++;
         }
         return false;
+    }
+
+    /**
+     * Checks if a string is a nutrition field name.
+     */
+    private boolean isNutritionFieldName(String name) {
+        return name.equals("kcal") || name.equals("fat") || name.equals("protein")
+                || name.equals("carbs") || name.equals("sugar") || name.equals("sodium");
+    }
+
+    /**
+     * Tries to parse a nutrition filter from the current position.
+     * Returns null if no nutrition filter is found.
+     * Format: field[<|=|>]:value or field:value (defaults to =)
+     */
+    private NutritionFilter tryParseNutritionFilter() {
+        NutritionField nutritionField = null;
+        int fieldLength = 0;
+
+        if (matchesAt(pos, "kcal")) {
+            nutritionField = NutritionField.KCAL;
+            fieldLength = 4;
+        } else if (matchesAt(pos, "fat")) {
+            nutritionField = NutritionField.FAT;
+            fieldLength = 3;
+        } else if (matchesAt(pos, "protein")) {
+            nutritionField = NutritionField.PROTEIN;
+            fieldLength = 7;
+        } else if (matchesAt(pos, "carbs")) {
+            nutritionField = NutritionField.CARBS;
+            fieldLength = 5;
+        } else if (matchesAt(pos, "sugar")) {
+            nutritionField = NutritionField.SUGAR;
+            fieldLength = 5;
+        } else if (matchesAt(pos, "sodium")) {
+            nutritionField = NutritionField.SODIUM;
+            fieldLength = 6;
+        }
+
+        if (nutritionField == null) {
+            return null;
+        }
+
+        // Check that next character is operator or colon
+        int checkPos = pos + fieldLength;
+        if (checkPos >= input.length()) {
+            return null;
+        }
+
+        char nextChar = input.charAt(checkPos);
+        ComparisonOperator operator;
+        int operatorLength;
+
+        if (nextChar == '<') {
+            if (checkPos + 1 < input.length() && input.charAt(checkPos + 1) == ':') {
+                operator = ComparisonOperator.LESS_THAN;
+                operatorLength = 2;
+            } else {
+                return null;
+            }
+        } else if (nextChar == '>') {
+            if (checkPos + 1 < input.length() && input.charAt(checkPos + 1) == ':') {
+                operator = ComparisonOperator.GREATER_THAN;
+                operatorLength = 2;
+            } else {
+                return null;
+            }
+        } else if (nextChar == '=') {
+            if (checkPos + 1 < input.length() && input.charAt(checkPos + 1) == ':') {
+                operator = ComparisonOperator.EQUAL;
+                operatorLength = 2;
+            } else {
+                return null;
+            }
+        } else if (nextChar == ':') {
+            // Default to EQUAL
+            operator = ComparisonOperator.EQUAL;
+            operatorLength = 1;
+        } else {
+            return null;
+        }
+
+        // Move position past field and operator
+        pos += fieldLength + operatorLength;
+        skipWhitespace();
+
+        // Parse the numeric value
+        String valueStr = parseValue();
+        if (valueStr == null || valueStr.isEmpty()) {
+            return null;
+        }
+
+        try {
+            int value = Integer.parseInt(valueStr.trim());
+            return new NutritionFilter(nutritionField, operator, value);
+        } catch (NumberFormatException e) {
+            // Invalid number, not a nutrition filter
+            return null;
+        }
     }
 
     private void skipWhitespace() {

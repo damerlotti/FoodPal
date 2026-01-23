@@ -3,6 +3,8 @@ package client.utils.search;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class SearchQueryParserTest {
@@ -124,6 +126,94 @@ class SearchQueryParserTest {
         assertTrue(query.isFavouritesOnly());
         assertEquals(CaseSensitivity.SENSITIVE, query.getGlobalCaseSensitivity());
         assertEquals(SearchQuery.LogicalOperator.AND, query.getOperator());
+        assertEquals(2, query.getChildren().size());
+    }
+
+    @Test
+    void parseKcalFilterLessThan() {
+        SearchQuery query = parser.parse("kcal<: 500 pasta");
+
+        List<NutritionFilter> filters = query.getNutritionFilters();
+        assertEquals(1, filters.size());
+        assertEquals(NutritionField.KCAL, filters.get(0).getField());
+        assertEquals(ComparisonOperator.LESS_THAN, filters.get(0).getOperator());
+        assertEquals(500, filters.get(0).getValue());
+        assertEquals(1, query.getChildren().size());
+    }
+
+    @Test
+    void parseKcalFilterGreaterThan() {
+        SearchQuery query = parser.parse("kcal>: 200");
+
+        List<NutritionFilter> filters = query.getNutritionFilters();
+        assertEquals(1, filters.size());
+        assertEquals(NutritionField.KCAL, filters.get(0).getField());
+        assertEquals(ComparisonOperator.GREATER_THAN, filters.get(0).getOperator());
+        assertEquals(200, filters.get(0).getValue());
+    }
+
+    @Test
+    void parseKcalFilterEqual() {
+        SearchQuery query = parser.parse("kcal=: 300");
+
+        List<NutritionFilter> filters = query.getNutritionFilters();
+        assertEquals(1, filters.size());
+        assertEquals(ComparisonOperator.EQUAL, filters.get(0).getOperator());
+        assertEquals(300, filters.get(0).getValue());
+    }
+
+    @Test
+    void parseKcalFilterDefaultEqual() {
+        SearchQuery query = parser.parse("kcal: 300");
+
+        List<NutritionFilter> filters = query.getNutritionFilters();
+        assertEquals(1, filters.size());
+        assertEquals(ComparisonOperator.EQUAL, filters.get(0).getOperator());
+        assertEquals(300, filters.get(0).getValue());
+    }
+
+    @Test
+    void parseMultipleNutritionFilters() {
+        SearchQuery query = parser.parse("kcal<: 500 fat<: 20 protein>: 30");
+
+        List<NutritionFilter> filters = query.getNutritionFilters();
+        assertEquals(3, filters.size());
+
+        assertEquals(NutritionField.KCAL, filters.get(0).getField());
+        assertEquals(NutritionField.FAT, filters.get(1).getField());
+        assertEquals(NutritionField.PROTEIN, filters.get(2).getField());
+    }
+
+    @Test
+    void parseAllNutritionFieldTypes() {
+        SearchQuery query = parser.parse(
+                "kcal<: 100 fat<: 10 protein<: 20 carbs<: 30 sugar<: 5 sodium<: 500");
+
+        List<NutritionFilter> filters = query.getNutritionFilters();
+        assertEquals(6, filters.size());
+
+        assertEquals(NutritionField.KCAL, filters.get(0).getField());
+        assertEquals(NutritionField.FAT, filters.get(1).getField());
+        assertEquals(NutritionField.PROTEIN, filters.get(2).getField());
+        assertEquals(NutritionField.CARBS, filters.get(3).getField());
+        assertEquals(NutritionField.SUGAR, filters.get(4).getField());
+        assertEquals(NutritionField.SODIUM, filters.get(5).getField());
+    }
+
+    @Test
+    void parseServingsFilter() {
+        SearchQuery query = parser.parse("servings: 4 kcal<: 500");
+
+        assertTrue(query.getServings().isPresent());
+        assertEquals(4, query.getServings().get());
+        assertEquals(1, query.getNutritionFilters().size());
+    }
+
+    @Test
+    void parseNutritionWithTextSearch() {
+        SearchQuery query = parser.parse("kcal<: 500 pasta ingr: cheese");
+
+        assertEquals(1, query.getNutritionFilters().size());
         assertEquals(2, query.getChildren().size());
     }
 }
