@@ -20,7 +20,7 @@
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="20.0">
                     <children>
-                        <Label text="Shopping List">
+                        <Label fx:id="titleLabel" text="Shopping List">
                             <font>
                                 <Font name="System Bold" size="24.0" />
                             </font>
@@ -32,9 +32,9 @@
 
                 <HBox alignment="CENTER_RIGHT" spacing="10.0">
                     <children>
-                        <Button mnemonicParsing="false" onAction="#addManualItem" text="Add Item" />
-                        <Button mnemonicParsing="false" onAction="#resetList" text="Reset List" />
-                        <Button mnemonicParsing="false" onAction="#downloadList" text="Download" />
+                        <Button fx:id="addItemButton" mnemonicParsing="false" onAction="#addManualItem" text="Add Item" />
+                        <Button fx:id="resetListButton" mnemonicParsing="false" onAction="#resetList" text="Reset List" />
+                        <Button fx:id="downloadButton" mnemonicParsing="false" onAction="#downloadList" text="Download" />
                     </children>
                 </HBox>
             </children>

@@ -1,18 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.IngredientsCtrl">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="471.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="client.scenes.IngredientsCtrl">
     <children>
-        <ListView fx:id="ingredientsList" layoutX="46.0" layoutY="43.0" prefHeight="236.0" prefWidth="200.0" />
-        <Button fx:id="addButton" layoutX="375.0" layoutY="336.0" mnemonicParsing="false" onAction="#switchToAddIngredient" prefHeight="25.0" prefWidth="97.0" text="Add" />
-        <Button fx:id="deleteSelectedButton" layoutX="108.0" layoutY="348.0" mnemonicParsing="false" onAction="#removeIngredient" text="Delete Selected" />
-      <TextArea fx:id="fatDisplay" layoutX="386.0" layoutY="54.0" prefHeight="37.0" prefWidth="116.0" />
-      <TextArea fx:id="kCalDisplay" layoutX="386.0" layoutY="218.0" prefHeight="37.0" prefWidth="116.0" />
-      <TextArea fx:id="carbsDisplay" layoutX="386.0" layoutY="161.0" prefHeight="37.0" prefWidth="116.0" />
-      <TextArea fx:id="proteinDisplay" layoutX="386.0" layoutY="111.0" prefHeight="37.0" prefWidth="116.0" />
+        <ListView fx:id="ingredientsList" layoutX="57.0" layoutY="101.0" prefHeight="291.0" prefWidth="221.0" />
+        <Button fx:id="addButton" layoutX="430.0" layoutY="405.0" mnemonicParsing="false" onAction="#switchToAddIngredient" prefHeight="25.0" prefWidth="148.0" text="Add New" />
+        <Button fx:id="deleteSelectedButton" layoutX="57.0" layoutY="405.0" mnemonicParsing="false" onAction="#removeIngredient" prefHeight="25.0" prefWidth="148.0" text="Delete Selected" />
+      <TextField fx:id="proteinField" editable="false" layoutX="372.0" layoutY="137.0" prefHeight="25.0" prefWidth="171.0" />
+      <TextField fx:id="fatField" editable="false" layoutX="372.0" layoutY="176.0" prefHeight="25.0" prefWidth="171.0" />
+      <TextField fx:id="carbsField" editable="false" layoutX="372.0" layoutY="215.0" prefHeight="25.0" prefWidth="171.0" />
+      <TextField fx:id="sugarField" editable="false" layoutX="372.0" layoutY="255.0" prefHeight="25.0" prefWidth="171.0" />
+      <TextField fx:id="sodiumField" editable="false" layoutX="372.0" layoutY="294.0" prefHeight="25.0" prefWidth="171.0" />
+      <Label fx:id="proteinLabel" layoutX="290.0" layoutY="141.0" prefHeight="17.0" prefWidth="85.0" text="Protein:">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="fatLabel" layoutX="301.0" layoutY="180.0" prefHeight="17.0" prefWidth="56.0" text="Fat:">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="carbsLabel" layoutX="293.0" layoutY="219.0" prefHeight="17.0" prefWidth="156.0" text="Carbs:">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="sugarLabel" layoutX="287.0" layoutY="259.0" prefHeight="17.0" prefWidth="133.0" text="Sugar:">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="sodiumLabel" layoutX="282.0" layoutY="298.0" prefHeight="17.0" prefWidth="115.0" text="Sodium:">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="kCalTitleLabel" layoutX="335.0" layoutY="331.0" text="kCal:">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="nutritionalValuesLabel" layoutX="82.0" layoutY="63.0" text="Nutritional Values">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+      </Label>
+      <Button fx:id="editSelectedButton" layoutX="233.0" layoutY="405.0" mnemonicParsing="false" onAction="#switchToEditIngredient" prefHeight="25.0" prefWidth="171.0" text="Edit Selected" />
+      <Label fx:id="nameLabel" layoutX="311.0" layoutY="63.0" text="Name">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+      </Label>
+      <Label fx:id="per100gLabel" layoutX="312.0" layoutY="93.0" text="per 100g">
+         <font>
+            <Font name="System Italic" size="18.0" />
+         </font>
+      </Label>
+      <Label fx:id="usageLabel" layoutX="333.0" layoutY="364.0" text="Used in X recipe(s)">
+         <font>
+            <Font name="System Italic" size="12.0" />
+         </font>
+      </Label>
+      <Label fx:id="kCalLabel" layoutX="372.0" layoutY="331.0" text="kCalLabel">
+         <font>
+            <Font name="System Bold Italic" size="12.0" />
+         </font>
+      </Label>
     </children>
 </AnchorPane>

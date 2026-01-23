@@ -293,4 +293,93 @@ public class Recipe {
         return totalKcal.multiply(BigDecimal.valueOf(100))
                 .divide(totalGrams, 0, RoundingMode.DOWN);
     }
+
+    /**
+     * Calculates the total kcal for the entire recipe.
+     * @return the total kcal as BigDecimal
+     */
+    public BigDecimal calculateTotalKcal() {
+        BigDecimal totalKcal = BigDecimal.ZERO;
+        for (RecipeIngredient ingredient : ingredients) {
+            totalKcal = totalKcal.add(ingredient.calculateKcal());
+        }
+        return totalKcal;
+    }
+
+    /**
+     * Calculates the total fat for the entire recipe.
+     * @return the total fat in grams as BigDecimal
+     */
+    public BigDecimal calculateTotalFat() {
+        return calculateTotalNutrient(nutrition -> nutrition.getFatPer100g());
+    }
+
+    /**
+     * Calculates the total protein for the entire recipe.
+     * @return the total protein in grams as BigDecimal
+     */
+    public BigDecimal calculateTotalProtein() {
+        return calculateTotalNutrient(nutrition -> nutrition.getProteinPer100g());
+    }
+
+    /**
+     * Calculates the total carbs for the entire recipe.
+     * @return the total carbs in grams as BigDecimal
+     */
+    public BigDecimal calculateTotalCarbs() {
+        return calculateTotalNutrient(nutrition -> nutrition.getCarbsPer100g());
+    }
+
+    /**
+     * Calculates the total sugar for the entire recipe.
+     * @return the total sugar in grams as BigDecimal
+     */
+    public BigDecimal calculateTotalSugar() {
+        return calculateTotalNutrient(nutrition -> nutrition.getSugarPer100g());
+    }
+
+    /**
+     * Calculates the total sodium for the entire recipe.
+     * @return the total sodium in grams as BigDecimal
+     */
+    public BigDecimal calculateTotalSodium() {
+        return calculateTotalNutrient(nutrition -> nutrition.getSodiumPer100g());
+    }
+
+    /**
+     * Helper method to calculate total of a specific nutrient.
+     * @param nutrientGetter function to get the nutrient value per 100g from Nutrition
+     * @return the total nutrient value
+     */
+    private BigDecimal calculateTotalNutrient(
+            java.util.function.Function<Nutrition, BigDecimal> nutrientGetter) {
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (RecipeIngredient ri : ingredients) {
+            if (ri.getIngredient() == null || ri.getIngredient().getNutrition() == null
+                    || ri.getAmount() == null) {
+                continue;
+            }
+
+            Nutrition nutrition = ri.getIngredient().getNutrition();
+            BigDecimal valuePer100g = nutrientGetter.apply(nutrition);
+
+            if (valuePer100g == null) {
+                continue;
+            }
+
+            if (!(ri.getAmount().getUnit().isMass() || ri.getAmount().getUnit().isVolume())) {
+                continue;
+            }
+
+            BigDecimal grams = ri.getAmount().toBaseUnit();
+            BigDecimal nutrientAmount = valuePer100g.multiply(grams)
+                    .divide(BigDecimal.valueOf(100),
+                            Measurement.MEASUREMENT_SCALE,
+                            RoundingMode.HALF_UP);
+            total = total.add(nutrientAmount);
+        }
+
+        return total;
+    }
 }

@@ -1,10 +1,13 @@
 package client.scenes;
 
+import client.i18n.I18n;
+import commons.Ingredient;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Pair;
+import java.util.List;
 
 public class PrimaryCtrl {
 
@@ -27,6 +30,9 @@ public class PrimaryCtrl {
     private Scene addIngredientScene;
     private AddIngredientCtrl addIngredientCtrl;
 
+    private Scene editIngredientScene;
+    private EditIngredientCtrl editIngredientCtrl;
+
     private Parent shoppingListNode;
     private ShoppingListCtrl shoppingListCtrl;
 
@@ -38,18 +44,15 @@ public class PrimaryCtrl {
      * @param addRecipe AddRecipe controller
      * @param ingredients Ingredients controller
      * @param ingredientAdd IngredientAdd controller
-     * @param shoppingList ShoppingList controller
      */
     public void init(Stage primaryStage,
                      Pair<MainLayoutCtrl, Parent> mainLayout,
                      Pair<RecipesCtrl, Parent> recipes,
                      Pair<AddRecipeCtrl, Parent> addRecipe,
                      Pair<IngredientsCtrl, Parent> ingredients,
-                     Pair<AddIngredientCtrl, Parent> ingredientAdd,
-                     Pair<ShoppingListCtrl, Parent> shoppingList) {
+                     Pair<AddIngredientCtrl, Parent> ingredientAdd) {
 
         this.primaryStage = primaryStage;
-
         this.mainLayoutCtrl = mainLayout.getKey();
 
         this.recipesCtrl = recipes.getKey();
@@ -66,20 +69,36 @@ public class PrimaryCtrl {
         this.addIngredientNode = ingredientAdd.getValue();
         this.addIngredientScene = new Scene(addIngredientNode);
 
-        this.shoppingListCtrl = shoppingList.getKey();
-        this.shoppingListNode = shoppingList.getValue();
-
         primaryStage.setScene(new Scene(mainLayout.getValue()));
-        primaryStage.setTitle("FoodPal");
+        primaryStage.setTitle(I18n.get("window.main"));
+        
+        // Initialize language filter with the selected languages from MainLayout
+        recipesCtrl.setFilteredLanguages(mainLayoutCtrl.getSelectedLanguageTags());
+        
         showRecipes();
         primaryStage.show();
+    }
+
+    /**
+     * A second temporary init method because
+     * I couldnt figure anything else that satisfied checkstyle
+     * @param ingredientEdit IngredientEdit controller
+     * @param shoppingList ShoppingList controller
+     */
+    public void initEditAndShopping(Pair<EditIngredientCtrl, Parent> ingredientEdit,
+                                    Pair<ShoppingListCtrl, Parent> shoppingList){
+        this.editIngredientCtrl = ingredientEdit.getKey();
+        this.editIngredientScene = new Scene(ingredientEdit.getValue());
+
+        this.shoppingListCtrl = shoppingList.getKey();
+        this.shoppingListNode = shoppingList.getValue();
     }
 
     /**
      * Shows the menu with recipes
      */
     public void showRecipes() {
-        primaryStage.setTitle("FoodPal - Recipes");
+        primaryStage.setTitle(I18n.get("window.recipes"));
         mainLayoutCtrl.setCenter(recipesNode);
         recipesCtrl.refresh();
     }
@@ -95,7 +114,7 @@ public class PrimaryCtrl {
         p.initOwner(primaryStage);
 
         p.setScene(addRecipeScene);
-        p.setTitle("Add Recipe");
+        p.setTitle(I18n.get("window.addRecipe"));
         p.showAndWait();
         recipesCtrl.refresh();
     }
@@ -104,7 +123,7 @@ public class PrimaryCtrl {
      * Shows the menu with ingredients
      */
     public void showIngredients() {
-        primaryStage.setTitle("FoodPal - Ingredients");
+        primaryStage.setTitle(I18n.get("window.ingredients"));
         mainLayoutCtrl.setCenter(ingredientsNode);
         ingredientsCtrl.refresh();
     }
@@ -117,7 +136,22 @@ public class PrimaryCtrl {
         p.initModality(Modality.APPLICATION_MODAL);
         p.initOwner(primaryStage);
         p.setScene(addIngredientScene);
-        p.setTitle("Add Ingredient");
+        p.setTitle(I18n.get("window.addIngredient"));
+        p.showAndWait();
+        ingredientsCtrl.refresh();
+    }
+
+    /**
+     * Shows the ingredient edit scene.
+     * @param ingredient ingredient to be edited.
+     */
+    public void showEditIngredient(Ingredient ingredient){
+        Stage p = new Stage();
+        p.initModality(Modality.APPLICATION_MODAL);
+        p.initOwner(primaryStage);
+        p.setScene(editIngredientScene);
+        p.setTitle(I18n.get("window.editIngredient"));
+        editIngredientCtrl.setIngredient(ingredient);
         p.showAndWait();
         ingredientsCtrl.refresh();
     }
@@ -126,7 +160,17 @@ public class PrimaryCtrl {
      * Shows the Shopping List scene
      */
     public void showShoppingList() {
-        primaryStage.setTitle("FoodPal - Shopping List");
+        primaryStage.setTitle(I18n.get("window.shoppingList"));
         mainLayoutCtrl.setCenter(shoppingListNode);
+    }
+
+    /**
+     * Called when recipe language filter changes.
+     * @param selectedLanguageTags the list of selected language tags
+     */
+    public void onRecipeLanguagesChanged(List<String> selectedLanguageTags) {
+        if (recipesCtrl != null) {
+            recipesCtrl.setFilteredLanguages(selectedLanguageTags);
+        }
     }
 }

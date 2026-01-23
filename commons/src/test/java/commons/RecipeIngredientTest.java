@@ -13,7 +13,9 @@ class RecipeIngredientTest {
         Nutrition nutrition = new Nutrition(
                 new BigDecimal("10"), //fat
                 new BigDecimal("5"),  //protein
-                new BigDecimal("20")  //carbs
+                new BigDecimal("20"),  //carbs
+                new BigDecimal("6"), //sugar
+                new BigDecimal("7") //sodium
         );
         // Kcal per 100g = 10*9 + 5*4 + 20*4 = 90 + 20 + 80 = 190
         Ingredient ingredient = new Ingredient();
@@ -37,7 +39,9 @@ class RecipeIngredientTest {
         Nutrition nutrition = new Nutrition(
                 new BigDecimal("10"), //fat
                 new BigDecimal("5"),  //protein
-                new BigDecimal("20")  //carbs
+                new BigDecimal("20"),  //carbs
+                new BigDecimal("6"), //sugar
+                new BigDecimal("7") //sodium
         );
         // Kcal per 100g = 10*9 + 5*4 + 20*4 = 90 + 20 + 80 = 190
         Ingredient ingredient = new Ingredient();

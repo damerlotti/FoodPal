@@ -68,6 +68,7 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
                 Recipe recipe = getItem();
                 if (recipe != null) {
                     long recipeId = recipe.getId();
+                    String recipeName = recipe.getName();
 
                     // Get config from manager
                     var config = configManager.getConfig();
@@ -77,7 +78,7 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
                         config.removeFavorite(recipeId);
                         starShape.setStyle("-fx-fill: gray; -fx-opacity: 0.6;");
                     } else {
-                        config.addFavorite(recipeId);
+                        config.addFavorite(recipeId, recipeName);
                         starShape.setStyle("-fx-fill: gold;");
                     }
 
@@ -176,8 +177,8 @@ public class RecipeListCellFactory implements Callback<ListView<Recipe>, ListCel
      * Helper method to get all favorite IDs
      * @return returns a set of all recipe's ID of those that are favourite
      */
-    public Set<Long> getFavoriteIds() {  // Remove 'static'
-        return new HashSet<>(configManager.getConfig().getFavoriteRecipeIds());
+    public Set<Long> getFavoriteIds() {
+        return new HashSet<>(configManager.getConfig().getFavoriteRecipes().keySet());
     }
 
     /**
