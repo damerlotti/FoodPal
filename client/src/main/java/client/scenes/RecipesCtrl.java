@@ -3,6 +3,13 @@ package client.scenes;
 import client.MyWebSocketClient;
 import client.i18n.I18n;
 import client.config.Config;
+import client.i18n.I18nConfig;
+import javafx.geometry.Insets;
+import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
+import client.utils.ServerUtils;
+import client.utils.search.RecipeSearchMatcher;
+import client.utils.search.SearchQueryParser;
 import client.utils.*;
 import com.google.inject.Inject;
 import commons.*;
@@ -12,6 +19,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -48,7 +56,7 @@ public class RecipesCtrl implements Initializable {
     @FXML
     private ToggleButton favoritesToggle;
     @FXML
-    private Spinner<Integer> servings;
+    private Label servingsLabel;
 
     // i18n buttons and labels
     @FXML
@@ -81,9 +89,29 @@ public class RecipesCtrl implements Initializable {
     private Button editStepButton;
     @FXML
     private Button deleteStepButton;
+    @FXML
+    private Button shopButton;
+    @FXML
+    private Label scaleTitleLabel;
+    @FXML
+    private Label servingsTitleLabel;
+    @FXML
+    private Button editServingsButton;
+    @FXML
+    private Label servingSizeLabel;
+    @FXML
+    private TextField searchField;
+    @FXML
+    private Label languageLabel;
+    @FXML
+    private ComboBox<Locale> languageCombo;
 
     private ObservableList<Recipe> allRecipes;
     private FilteredList<Recipe> filteredRecipes;
+
+    private SearchQueryParser searchParser;
+    private RecipeSearchMatcher searchMatcher;
+    private List<String> filteredLanguages = new ArrayList<>();
 
     private MyWebSocketClient webSocket = new MyWebSocketClient();
     private StompSession.Subscription currentRecipeSubscription;
@@ -91,9 +119,9 @@ public class RecipesCtrl implements Initializable {
     /**
      * Constructor for the controller with Guice, which gives us the only ServerUtils
      *
-     * @param server      the server utils
-     * @param primaryCtrl primaryCtrl
-     * @param cellFactory the cell factory to keep favourites local
+     * @param server              the server utils
+     * @param primaryCtrl         primaryCtrl
+     * @param cellFactory         the cell factory to keep favourites local
      * @param shoppingListService the shopping list manager
      */
     @Inject
@@ -109,7 +137,6 @@ public class RecipesCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initializeScaler();
-        initializeServings();
         initializeRecipeList();
         initializeWebSocket();
         initializeLanguage();
@@ -132,6 +159,14 @@ public class RecipesCtrl implements Initializable {
         addStepButton.textProperty().bind(I18n.createStringBinding("recipes.add"));
         editStepButton.textProperty().bind(I18n.createStringBinding("recipes.edit"));
         deleteStepButton.textProperty().bind(I18n.createStringBinding("recipes.delete"));
+        languageLabel.textProperty().bind(I18n.createStringBinding("recipes.languageLabel"));
+        shopButton.textProperty().bind(I18n.createStringBinding("recipes.shop"));
+        editServingsButton.textProperty().bind(I18n.createStringBinding("recipes.edit"));
+        scaleTitleLabel.textProperty().bind(I18n.createStringBinding("recipes.scale"));
+        servingsTitleLabel.textProperty().bind(I18n.createStringBinding("recipes.servings"));
+        
+        // Bind recipe title default to i18n
+        recipeTitle.textProperty().bind(I18n.createStringBinding("recipes.selectRecipe"));
 
         // Bind favorites toggle to i18n
         favoritesToggle.textProperty().bind(
@@ -139,6 +174,42 @@ public class RecipesCtrl implements Initializable {
                         .then(I18n.createStringBinding("recipes.showAll"))
                         .otherwise(I18n.createStringBinding("recipes.showFavorite"))
         );
+
+        languageCombo.getItems().setAll(I18nConfig.SUPPORTED);
+        languageCombo.setCellFactory(_ -> LanguageComboUtils.createFlagCell());
+        languageCombo.setButtonCell(LanguageComboUtils.createFlagCell());
+        languageCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Locale locale) {
+                return "";
+            }
+
+            @Override
+            public Locale fromString(String string) {
+                return null;
+            }
+        });
+        // listener to update the languageTag of the recipe when the user edits it
+        languageCombo.valueProperty().addListener((obs,
+                                                   oldLang, newLang) -> {
+            Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+            if (currentRecipe != null && newLang != null &&
+                    !newLang.toLanguageTag().equals(currentRecipe.getLanguageTag())) {
+                currentRecipe.setLanguageTag(newLang.toLanguageTag());
+                try {
+                    server.updateRecipe(currentRecipe);
+                } catch (Exception e) {
+                    showAlert(I18n.get("alert.serverError"),
+                            I18n.get("alert.couldNotUpdateRecipe"));
+                }
+            }
+        });
+        I18n.localeProperty().addListener((obs, oldLocale, newLocale) -> {
+            Recipe current = recipeList.getSelectionModel().getSelectedItem();
+            if (current != null) {
+                showRecipeDetails(current);
+            }
+        });
     }
 
     /**
@@ -154,6 +225,38 @@ public class RecipesCtrl implements Initializable {
         recipeList.setCellFactory(listView -> {
             return new RecipeListCellWithContextMenu(this, cellFactory.getConfigManager());
         });
+
+        // Initialize search components
+        searchParser = new SearchQueryParser();
+        updateSearchMatcher();
+
+        // Add real-time search filtering
+        searchField.textProperty().addListener((obs, oldText, newText) -> {
+            applySearchFilter();
+        });
+
+        // Add Escape key handler to clear search and unfocus
+        searchField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                searchField.clear();
+                searchField.getParent().requestFocus();
+                event.consume();
+            }
+        });
+
+        // Load saved language filter from config
+        List<String> savedLanguages = cellFactory.getConfigManager().getConfig()
+                .getSelectedRecipeLanguages();
+        if (savedLanguages != null && !savedLanguages.isEmpty()) {
+            filteredLanguages = new ArrayList<>(savedLanguages);
+        } else {
+            // Default to all supported languages
+            filteredLanguages = new ArrayList<>(
+                    I18nConfig.SUPPORTED.stream()
+                            .map(Locale::toLanguageTag)
+                            .toList()
+            );
+        }
         // the ui list contains our data, currently empty
         refresh();
     }
@@ -192,32 +295,20 @@ public class RecipesCtrl implements Initializable {
                 Recipe current = recipeList.getSelectionModel().getSelectedItem();
                 if (current != null) {
                     scalingMap.put(current.getId(), newVal);
+                    int baseServings = current.getServings() > 0 ? current.getServings() : 1;
+                    int scaledServings = (int) Math.round(baseServings * newVal);
+                    servingsLabel.setText(String.valueOf(scaledServings));
                 }
                 updateVisuals(newVal);
             }
         });
     }
 
-    /**
-     * Initializes the servings spinner
-     */
-    private void initializeServings() {
-        SpinnerValueFactory<Integer> servingsFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1);
-        servings.setValueFactory(servingsFactory);
-
-        servings.valueProperty().addListener((obs, oldVal, newVal) -> {
-            Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
-            if (currentRecipe != null && newVal != null && !newVal.equals(oldVal)) {
-                currentRecipe.setServings(newVal);
-                server.updateRecipe(currentRecipe);
-            }
-        });
-    }
 
     /**
      * Creates a text formatter that only allows optional decimal point
      * and optional minus sign
+     *
      * @return a TextFormatter for numeric validation
      */
     private TextFormatter<String> createNumberTextFormatter() {
@@ -248,8 +339,7 @@ public class RecipesCtrl implements Initializable {
                         ("/topic/recipes/" + newVal.getId(), Recipe.class, r -> {
                             showRecipeDetails(r);
                         });
-            }
-            else {
+            } else {
                 showRecipeDetails(null);
             }
         });
@@ -257,7 +347,8 @@ public class RecipesCtrl implements Initializable {
 
     /**
      * shows an alert
-     * @param title the title of the alert
+     *
+     * @param title   the title of the alert
      * @param content the content of the alert
      */
     private void showAlert(String title, String content) {
@@ -268,7 +359,7 @@ public class RecipesCtrl implements Initializable {
     }
 
     /**
-     * The logic linked to the refresh button
+     * Refreshes the list of recipes
      */
     public void refresh() {
         Recipe selected = recipeList.getSelectionModel().getSelectedItem();
@@ -293,46 +384,123 @@ public class RecipesCtrl implements Initializable {
                 showRecipeDetails(newRecipe);
             }
         }
-        // Same filter in toggleFavoritesFilter
-        if (favoritesToggle.isSelected()) {
-            filteredRecipes.setPredicate(recipe ->
-                    cellFactory.isFavorite(recipe.getId())
-            );
-        }
+        // Apply current search/favorites filter
+        applySearchFilter();
         Config favConfig = cellFactory.getConfigManager().getConfig();
-        Set<Long> favRecipesID = favConfig.getFavoriteRecipeIds();
-        ArrayList<Long> favRecipesIDArray = new ArrayList<>(favRecipesID);
+        Map<Long, String> favRecipes = favConfig.getFavoriteRecipes();
+        List<Long> favRecipeIds = new ArrayList<>(favRecipes.keySet());
         boolean favRecipeExists;
-        for (int i = 0; i < favRecipesIDArray.size(); i++) {
-            Long recipeID = favRecipesIDArray.get(i);
+        for (Long recipeID : favRecipeIds) {
             favRecipeExists = false;
             for (Recipe recipe : allRecipes) {
                 if (recipe.getId() == recipeID) {
                     favRecipeExists = true;
+                    String currentName = recipe.getName();
+                    String storedName = favRecipes.get(recipeID);
+                    if (!currentName.equals(storedName)) {
+                        favConfig.addFavorite(recipeID, currentName);
+                    }
                     break;
                 }
             }
             if (!favRecipeExists) {
+                String recipeName = favRecipes.get(recipeID);
+                if (recipeName == null) {
+                    recipeName = I18n.get("recipes.defaultRecipeName");
+                }
+
                 favConfig.removeFavorite(recipeID);
+                showAlert(I18n.get("alert.favouriteDeleted"),
+                        I18n.get("alert.mournOverDeletedFavRecipePart1") +
+                                " " + recipeName + " " +
+                                I18n.get("alert.mournOverDeletedFavRecipePart2"));
             }
         }
         cellFactory.getConfigManager().save();
     }
+
+    /**
+     * Updates the search matcher with current locale and favorites.
+     */
+    private void updateSearchMatcher() {
+        Config config = cellFactory.getConfigManager().getConfig();
+        String locale = config.getPrefLocale();
+        if (locale == null || locale.isEmpty()) {
+            locale = Locale.getDefault().toLanguageTag();
+        }
+        Set<Long> favorites = config.getFavoriteRecipeIds();
+        searchMatcher = new RecipeSearchMatcher(locale, favorites);
+    }
+
+    /**
+     * Applies the current search filter to the recipe list.
+     */
+    private void applySearchFilter() {
+        String query = searchField.getText();
+        updateSearchMatcher();
+
+        if (query == null || query.trim().isEmpty()) {
+            // No search query - apply language and favorites filter
+            filteredRecipes.setPredicate(recipe -> {
+                // Language filter
+                if (!matchesLanguageFilter(recipe)) {
+                    return false;
+                }
+                // Favorites filter
+                if (favoritesToggle.isSelected() && !cellFactory.isFavorite(recipe.getId())) {
+                    return false;
+                }
+                return true;
+            });
+        } else {
+            // Apply search filter (combined with language filter)
+            var parsedQuery = searchParser.parse(query);
+            filteredRecipes.setPredicate(recipe -> {
+                if (!matchesLanguageFilter(recipe)) {
+                    return false;
+                }
+                return searchMatcher.matches(recipe, parsedQuery);
+            });
+        }
+    }
+
+    /**
+     * Checks if a recipe matches the current language filter.
+     */
+    private boolean matchesLanguageFilter(Recipe recipe) {
+        if (filteredLanguages.isEmpty()) {
+            return false;
+        }
+        String recipeLanguage = recipe.getLanguageTag();
+        if (recipeLanguage == null || recipeLanguage.isEmpty()) {
+            return true; // Recipes without language match all
+        }
+        for (String lang : filteredLanguages) {
+            if (recipeLanguage.toLowerCase().startsWith(lang.toLowerCase().split("-")[0])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sets the filtered languages from the language menu.
+     *
+     * @param languages the list of language tags to filter by
+     */
+    public void setFilteredLanguages(List<String> languages) {
+        this.filteredLanguages = new ArrayList<>(languages);
+        applySearchFilter();
+    }
+
     /**
      * Toggle between showing all recipes and favorites only
      */
     @FXML
     public void toggleFavoritesFilter() {
-        if (favoritesToggle.isSelected()) {
-            filteredRecipes.setPredicate(recipe ->
-                    cellFactory.isFavorite(recipe.getId())
-            );
-            // Text is bound via i18n, no manual setting needed
-        } else {
-            filteredRecipes.setPredicate(null);
-            // Text is bound via i18n, no manual setting needed
-        }
+        applySearchFilter();
     }
+
     /**
      * Shows the details of a recipe (ingredients, preparation steps)
      *
@@ -340,7 +508,10 @@ public class RecipesCtrl implements Initializable {
      */
     private void showRecipeDetails(Recipe recipe) {
         if (recipe == null) {
-            recipeTitle.setText(I18n.get("recipes.selectRecipe"));
+            // When no recipe is selected, keep the i18n binding active
+            // This ensures the default text updates with language changes
+            recipeTitle.textProperty().unbind();
+            recipeTitle.textProperty().bind(I18n.createStringBinding("recipes.selectRecipe"));
             recipeKcal.setText("");
             ingredientsList.getItems().clear();
             stepsList.getItems().clear();
@@ -351,25 +522,52 @@ public class RecipesCtrl implements Initializable {
 
             return;
         }
+        String tag = recipe.getLanguageTag();
+        if (tag != null && !tag.isBlank()) {
+            Locale recipeLocale = Locale.forLanguageTag(tag);
+            languageCombo.getItems().stream().filter(l -> l.toLanguageTag()
+                    .equalsIgnoreCase(recipeLocale.toLanguageTag())).findFirst().ifPresentOrElse(
+                            l -> languageCombo.getSelectionModel().select(l),
+                            () -> languageCombo.getSelectionModel().clearSelection()
+            );
+        } else {
+            languageCombo.getSelectionModel().clearSelection();
+        }
+
         // we check to see the stored scale value (if not just put 1)
         Double savedFactor = scalingMap.getOrDefault(recipe.getId(), 1.0);
         scaler.getValueFactory().setValue(savedFactor);  // this will call updateVisuals
 
+        // Unbind the default i18n binding and set the recipe name directly
+        recipeTitle.textProperty().unbind();
         recipeTitle.setText(recipe.getName());
 
         int currentServings = recipe.getServings() > 0 ? recipe.getServings() : 1;
-        servings.getValueFactory().setValue(currentServings);
-        servings.setVisible(true);
+        int displayServings = (int) Math.round(currentServings * savedFactor);
+        servingsLabel.setText(String.valueOf(displayServings));
 
-        recipeKcal.setText(
-                I18n.get("recipes.kcal").replace(
-                        "{0}",
-                        recipe.estimatedRecipeKcal()
-                                .stripTrailingZeros()
-                                .toPlainString()
-                )
+        java.math.BigDecimal totalKcal = recipe.estimatedRecipeKcal();
+        recipeKcal.setText(I18n.get("recipes.kcal").replace("{0}",
+                        totalKcal.stripTrailingZeros().toPlainString())
         );
         recipeKcal.setVisible(true);
+
+        int baseServings = recipe.getServings() > 0 ? recipe.getServings() : 1;
+        java.math.BigDecimal kcalPerServing;
+        try {
+            kcalPerServing = totalKcal.divide(
+                    java.math.BigDecimal.valueOf(baseServings),
+                    0,
+                    java.math.RoundingMode.HALF_UP
+            );
+        } catch (Exception e) {
+            kcalPerServing = java.math.BigDecimal.ZERO;
+        }
+        servingSizeLabel.setText(
+                I18n.get("recipes.servingSize").replace("{0}", kcalPerServing.toPlainString())
+        );
+        servingSizeLabel.setVisible(true);
+
         ingredientsList.getItems().clear();
         for (var ing : recipe.getIngredients()) {
             ingredientsList.getItems().add(ing);  // add RecipeIngredient objects, not strings
@@ -391,10 +589,9 @@ public class RecipesCtrl implements Initializable {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
-                }
-                else {
+                } else {
                     Measurement displayMeasurement = item.getAmount().scale(factor)
-                                                         .normalizeMeasurement();
+                            .normalizeMeasurement();
 
                     RecipeIngredient aux = new RecipeIngredient();
                     aux.setIngredient(item.getIngredient());
@@ -413,7 +610,8 @@ public class RecipesCtrl implements Initializable {
     public void addToShoppingList() {
         Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
         if (currentRecipe == null) {
-            showAlert("No Recipe Selected", "Please select a recipe to add its ingredients.");
+            showAlert(I18n.get("dialog.addToShoppingList.noRecipeSelected"),
+                    I18n.get("dialog.addToShoppingList.selectRecipe"));
             return;
         }
         Double factor = scaler.getValue();
@@ -432,27 +630,93 @@ public class RecipesCtrl implements Initializable {
             item.setChecked(false);
             temp.add(item);
         }
+        FXCollections.sort(temp, (i1, i2) ->
+                i1.getIngredient().getName().compareToIgnoreCase(i2.getIngredient().getName())
+        );
 
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Add to Shopping List");
-        dialog.setHeaderText("Review items from '" + currentRecipe.getName() + "'");
-
-        ButtonType addButtonType = new ButtonType("Add Items", ButtonBar.ButtonData.OK_DONE);
-        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+        VBox dialogContent = new VBox(10);
+        dialogContent.setPadding(new Insets(10));
 
         ListView<ShoppingItem> overviewList = new ListView<>();
         overviewList.setItems(temp);
         overviewList.setPrefHeight(300);
         overviewList.setPrefWidth(400);
         overviewList.setCellFactory(new ShoppingListCellFactory());
+        Button addExtraButton = new Button();
+        addExtraButton.textProperty().bind(I18n.createStringBinding("shoppingList.addExtra"));
+        addExtraButton.setMaxWidth(Double.MAX_VALUE);
 
-        dialog.getDialogPane().setContent(overviewList);
+        addExtraButton.setOnAction(e -> {
+            var allIngredients = server.getIngredients();
+            Optional<RecipeIngredient> result = IngredientDialog.show(allIngredients, server);
+            result.ifPresent(ri -> {
+                ShoppingItem newItem = new ShoppingItem(
+                        ri.getIngredient(),
+                        ri.getAmount(),
+                        currentRecipe.getName()
+                );
+                temp.add(newItem);
+                FXCollections.sort(temp, (i1, i2) -> i1.getIngredient().getName()
+                                .compareToIgnoreCase(i2.getIngredient().getName()));
+            });
+        });
+        dialogContent.getChildren().addAll(overviewList, addExtraButton);
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle(I18n.get("dialog.addToShoppingList.title"));
+        dialog.setHeaderText(I18n.get("dialog.addToShoppingList.header")
+                .replace("{0}", currentRecipe.getName()));
+
+        ButtonType addButtonType = new ButtonType(I18n.get("dialog.addToShoppingList.addItems"),
+                ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
+
+        dialog.getDialogPane().setContent(dialogContent);
 
         Optional<ButtonType> result = dialog.showAndWait();
-
         if (result.isPresent() && result.get() == addButtonType && !temp.isEmpty()) {
             shoppingListService.addItems(temp);
         }
+    }
+
+    /**
+     * Edit the number of servings of the recipe
+     */
+    @FXML
+    public void onEditServingsClicked() {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        if (currentRecipe == null) {
+            showAlert(I18n.get("alert.noRecipeSelected"), I18n.get("alert.selectRecipeToEdit"));
+            return;
+        }
+        TextInputDialog dialog = new TextInputDialog(String.valueOf(currentRecipe.getServings()));
+        dialog.setTitle(I18n.get("dialog.editServings.title"));
+        dialog.setHeaderText(I18n.get("dialog.editServings.header"));
+        dialog.setContentText(null);
+        dialog.setGraphic(null);
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(input -> {
+            try {
+                int newServings = Integer.parseInt(input);
+                if (newServings < 1) {
+                    showAlert(I18n.get("alert.invalidInput"),
+                            I18n.get("alert.servingsAtLeast1"));
+                    return;
+                }
+                currentRecipe.setServings(newServings);
+                scalingMap.put(currentRecipe.getId(), 1.0);
+                scaler.getValueFactory().setValue(1.0);
+                try {
+                    server.updateRecipe(currentRecipe);
+                } catch (Exception e) {
+                    showAlert(I18n.get("alert.serverError"),
+                            I18n.get("alert.couldNotUpdateRecipe"));
+                }
+            } catch (NumberFormatException e) {
+                showAlert(I18n.get("alert.invalidInput"),
+                        I18n.get("alert.enterValidNumber"));
+            }
+        });
     }
 
     /**
@@ -771,8 +1035,8 @@ public class RecipesCtrl implements Initializable {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle(I18n.get("alert.saveFailed"));
                 alert.setHeaderText(I18n.get("alert.couldNotSaveFile"));
-                // TODO(calco): Should probably show a more human readable message
-                alert.setContentText("Error: " + e.getMessage());
+                alert.setContentText(I18n.get("alert.errorPrefix")
+                        .replace("{0}", e.getMessage()));
                 alert.showAndWait();
             }
         }
@@ -797,7 +1061,7 @@ public class RecipesCtrl implements Initializable {
         confirm.setHeaderText(I18n.get("dialog.deleteRecipe.header"));
         confirm.setContentText(I18n.get("dialog.deleteRecipe.content"));
         confirm.setGraphic(null);
-        
+
         ButtonType deleteButton = new ButtonType(
                 I18n.get("dialog.deleteRecipe.delete"), ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButton = new ButtonType(
@@ -819,6 +1083,21 @@ public class RecipesCtrl implements Initializable {
             alert.showAndWait();
             return;
         }
+    }
+
+    /**
+     * given a recipe id, it returns the name of the recipe
+     *
+     * @param recipeId the id of the recipe
+     * @return the name of the recipe if it exists, else null
+     */
+    public String findRecipeNameById(long recipeId) {
+        for (Recipe recipe : allRecipes) {
+            if (recipe.getId() == recipeId) {
+                return recipe.getName();
+            }
+        }
+        return null; // or throw exception if not found
     }
 
 }

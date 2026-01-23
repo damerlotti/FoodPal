@@ -9,7 +9,8 @@ public final class Flags {
     public static final Map<String, String> LOCALE_TO_FLAG = Map.of(
             "en", "gb.png",
             "ro-RO", "ro.png",
-            "nl-NL", "nl.png"
+            "nl-NL", "nl.png",
+            "fr-FR", "fr.png"
     );
 
     private Flags() { }

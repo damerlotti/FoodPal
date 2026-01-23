@@ -1,0 +1,294 @@
+{
+  "configVersion" : 1,
+  "favoriteRecipes" : {
+    "3" : "Chocolate Chip Cookies",
+    "5" : "Vegetable Lasagna"
+  },
+  "shoppingList" : [ {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 16,
+      "name" : "All-purpose Flour",
+      "nutrition" : {
+        "fatPer100g" : 1.00000000,
+        "proteinPer100g" : 10.00000000,
+        "carbsPer100g" : 76.00000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 353.00000000
+      }
+    },
+    "measurement" : {
+      "value" : 2.500000000,
+      "unit" : "CUP"
+    },
+    "source" : "Chocolate Chip Cookie"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 16,
+      "name" : "All-purpose Flour",
+      "nutrition" : {
+        "fatPer100g" : 1.00000000,
+        "proteinPer100g" : 10.00000000,
+        "carbsPer100g" : 76.00000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 353.00000000
+      }
+    },
+    "measurement" : {
+      "value" : 2.500000000,
+      "unit" : "CUP"
+    },
+    "source" : "Chocolate Chip Cookies"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 18,
+      "name" : "Baking Soda",
+      "nutrition" : {
+        "fatPer100g" : 0E-8,
+        "proteinPer100g" : 0E-8,
+        "carbsPer100g" : 0E-8,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 0E-8
+      }
+    },
+    "measurement" : {
+      "value" : 1.000000000,
+      "unit" : "TSP"
+    },
+    "source" : "Chocolate Chip Cookie"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 18,
+      "name" : "Baking Soda",
+      "nutrition" : {
+        "fatPer100g" : 0E-8,
+        "proteinPer100g" : 0E-8,
+        "carbsPer100g" : 0E-8,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 0E-8
+      }
+    },
+    "measurement" : {
+      "value" : 1.000000000,
+      "unit" : "TSP"
+    },
+    "source" : "Chocolate Chip Cookies"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 14,
+      "name" : "Butter",
+      "nutrition" : {
+        "fatPer100g" : 81.00000000,
+        "proteinPer100g" : 1.00000000,
+        "carbsPer100g" : 0.10000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 733.40000000
+      }
+    },
+    "measurement" : {
+      "value" : 2,
+      "unit" : "TSP"
+    },
+    "source" : "Chocolate Chip Cookie"
+  }, {
+    "checked" : true,
+    "ingredient" : {
+      "id" : 14,
+      "name" : "Butter",
+      "nutrition" : {
+        "fatPer100g" : 81.00000000,
+        "proteinPer100g" : 1.00000000,
+        "carbsPer100g" : 0.10000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 733.40000000
+      }
+    },
+    "measurement" : {
+      "value" : 1,
+      "unit" : "INFORMAL"
+    },
+    "source" : "Manual"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 14,
+      "name" : "Butter",
+      "nutrition" : {
+        "fatPer100g" : 81.00000000,
+        "proteinPer100g" : 1.00000000,
+        "carbsPer100g" : 0.10000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 733.40000000
+      }
+    },
+    "measurement" : {
+      "value" : 1.000000000,
+      "unit" : "CUP"
+    },
+    "source" : "Chocolate Chip Cookies"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 13,
+      "name" : "Cheese",
+      "nutrition" : {
+        "fatPer100g" : 25.00000000,
+        "proteinPer100g" : 27.00000000,
+        "carbsPer100g" : 1.30000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 338.20000000
+      }
+    },
+    "measurement" : {
+      "value" : 200.00000000,
+      "unit" : "G"
+    },
+    "source" : "Beef Tacos"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 19,
+      "name" : "Chocolate Chips",
+      "nutrition" : {
+        "fatPer100g" : 30.00000000,
+        "proteinPer100g" : 5.00000000,
+        "carbsPer100g" : 60.00000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 530.00000000
+      }
+    },
+    "measurement" : {
+      "value" : 2.000000000,
+      "unit" : "CUP"
+    },
+    "source" : "Chocolate Chip Cookie"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 19,
+      "name" : "Chocolate Chips",
+      "nutrition" : {
+        "fatPer100g" : 30.00000000,
+        "proteinPer100g" : 5.00000000,
+        "carbsPer100g" : 60.00000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 530.00000000
+      }
+    },
+    "measurement" : {
+      "value" : 2.000000000,
+      "unit" : "CUP"
+    },
+    "source" : "Chocolate Chip Cookies"
+  }, {
+    "checked" : true,
+    "ingredient" : {
+      "id" : 8,
+      "name" : "Eggs",
+      "nutrition" : {
+        "fatPer100g" : 10.00000000,
+        "proteinPer100g" : 12.00000000,
+        "carbsPer100g" : 1.00000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 142.00000000
+      }
+    },
+    "measurement" : {
+      "value" : 2.000000000,
+      "unit" : "PIECE"
+    },
+    "source" : "Chocolate Chip Cookie"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 8,
+      "name" : "Eggs",
+      "nutrition" : {
+        "fatPer100g" : 10.00000000,
+        "proteinPer100g" : 12.00000000,
+        "carbsPer100g" : 1.00000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 142.00000000
+      }
+    },
+    "measurement" : {
+      "value" : 2.000000000,
+      "unit" : "PIECE"
+    },
+    "source" : "Chocolate Chip Cookies"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 6,
+      "name" : "Onion",
+      "nutrition" : {
+        "fatPer100g" : 0.10000000,
+        "proteinPer100g" : 1.10000000,
+        "carbsPer100g" : 9.00000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 41.30000000
+      }
+    },
+    "measurement" : {
+      "value" : 35,
+      "unit" : "LB"
+    },
+    "source" : "Manual"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 17,
+      "name" : "Sugar",
+      "nutrition" : {
+        "fatPer100g" : 0E-8,
+        "proteinPer100g" : 0E-8,
+        "carbsPer100g" : 100.00000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 400.00000000
+      }
+    },
+    "measurement" : {
+      "value" : 0.750000000,
+      "unit" : "CUP"
+    },
+    "source" : "Chocolate Chip Cookies"
+  }, {
+    "checked" : false,
+    "ingredient" : {
+      "id" : 5,
+      "name" : "Tomato",
+      "nutrition" : {
+        "fatPer100g" : 0.20000000,
+        "proteinPer100g" : 1.00000000,
+        "carbsPer100g" : 3.90000000,
+        "sugarPer100g" : null,
+        "sodiumPer100g" : null,
+        "kcalPer100g" : 21.40000000
+      }
+    },
+    "measurement" : {
+      "value" : 2.00000000,
+      "unit" : "PIECE"
+    },
+    "source" : "Beef Tacos"
+  } ],
+  "favoriteRecipeIds" : [ 3, 5 ]
+}

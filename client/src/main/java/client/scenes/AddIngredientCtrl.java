@@ -29,6 +29,10 @@ public class AddIngredientCtrl implements Initializable {
     @FXML
     private TextField carbsIngredient;
     @FXML
+    private TextField sugarIngredient;
+    @FXML
+    private TextField sodiumIngredient;
+    @FXML
     private Label titleLabel;
     @FXML
     private Label fatLabel;
@@ -36,6 +40,12 @@ public class AddIngredientCtrl implements Initializable {
     private Label proteinLabel;
     @FXML
     private Label carbsLabel;
+    @FXML
+    private Label sugarLabel;
+    @FXML
+    private Label sodiumLabel;
+    @FXML
+    private Label nameLabel;
     @FXML
     private Button addButton;
 
@@ -52,9 +62,12 @@ public class AddIngredientCtrl implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Bind labels and buttons to i18n
         titleLabel.textProperty().bind(I18n.createStringBinding("addIngredient.title"));
+        nameLabel.textProperty().bind(I18n.createStringBinding("addIngredient.name"));
         fatLabel.textProperty().bind(I18n.createStringBinding("addIngredient.fat"));
         proteinLabel.textProperty().bind(I18n.createStringBinding("addIngredient.protein"));
         carbsLabel.textProperty().bind(I18n.createStringBinding("addIngredient.carbs"));
+        sugarLabel.textProperty().bind(I18n.createStringBinding("addIngredient.sugar"));
+        sodiumLabel.textProperty().bind(I18n.createStringBinding("addIngredient.sodium"));
         addButton.textProperty().bind(I18n.createStringBinding("addIngredient.add"));
     }
 
@@ -68,6 +81,8 @@ public class AddIngredientCtrl implements Initializable {
         String fat = fatIngredient.getText();
         String protein = proteinIngredient.getText();
         String carbs = carbsIngredient.getText();
+        String sugar = sugarIngredient.getText();
+        String sodium = sodiumIngredient.getText();
 
         //verify they are not empty or null
         if (name == null || name.trim().isEmpty() ||
@@ -84,7 +99,9 @@ public class AddIngredientCtrl implements Initializable {
         Nutrition nutrition = new Nutrition(
                 new BigDecimal(fat),
                 new BigDecimal(protein),
-                new BigDecimal(carbs));
+                new BigDecimal(carbs),
+                new BigDecimal(sugar),
+                new BigDecimal(sodium));
         BigDecimal kCal = nutrition.computeKcalPer100g();
         nutrition.setKcalPer100g(kCal);
 
@@ -105,6 +122,8 @@ public class AddIngredientCtrl implements Initializable {
         fatIngredient.clear();
         proteinIngredient.clear();
         carbsIngredient.clear();
+        sugarIngredient.clear();
+        sodiumIngredient.clear();
     }
 
     /**

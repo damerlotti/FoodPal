@@ -9,7 +9,8 @@ public final class I18nConfig {
     public static final List<Locale> SUPPORTED = List.of(
             Locale.ENGLISH,
             Locale.forLanguageTag("ro-RO"),
-            Locale.forLanguageTag("nl-NL")
+            Locale.forLanguageTag("nl-NL"),
+            Locale.forLanguageTag("fr-FR")
     );
     
     private I18nConfig() {}

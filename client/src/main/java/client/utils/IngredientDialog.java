@@ -50,12 +50,10 @@ public class IngredientDialog {
         dialog.setTitle(I18n.get("dialog.addIngredient.title"));
         dialog.setHeaderText(I18n.get("dialog.addIngredient.header"));
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
         GridPane grid = new GridPane();
         grid.setHgap(10);  // gap between all the items in the dialog
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));  // padding, clockwise direction(top, right..)
-
         ComboBox<Ingredient> name = new ComboBox<>();
         name.setEditable(true);  // so we can also type sth
         name.getItems().addAll(allIngredients);
@@ -69,17 +67,21 @@ public class IngredientDialog {
         grid.add(new Label(I18n.get("dialog.addIngredient.amount")), 0, 1);
         grid.add(amount, 1, 1);
         grid.add(unit, 2, 1);
-
         TextField fatField = new TextField();
         TextField proteinField = new TextField();
         TextField carbsField = new TextField();
+        TextField sugarField = new TextField();
+        TextField sodiumField = new TextField();
         grid.add(new Label(I18n.get("dialog.addIngredient.fat")), 0, 2);
         grid.add(fatField, 1, 2);
         grid.add(new Label(I18n.get("dialog.addIngredient.protein")), 0, 3);
         grid.add(proteinField, 1, 3);
         grid.add(new Label(I18n.get("dialog.addIngredient.carbs")), 0, 4);
         grid.add(carbsField, 1, 4);
-
+        grid.add(new Label(I18n.get("dialog.addIngredient.sugar")), 0, 5);
+        grid.add(sugarField, 1, 5);
+        grid.add(new Label(I18n.get("dialog.addIngredient.sodium")), 0, 6);
+        grid.add(sodiumField, 1, 6);
         // this happens when anything changes in the name field
         name.getEditor().textProperty().addListener((obs, oldText, newText) -> {
             // checking if what the user types matches sth from the list of existing ingredients
@@ -91,20 +93,23 @@ public class IngredientDialog {
                 fatField.setText(removeZeros(match.getNutrition().getFatPer100g()));
                 proteinField.setText(removeZeros(match.getNutrition().getProteinPer100g()));
                 carbsField.setText(removeZeros(match.getNutrition().getCarbsPer100g()));
-                setFieldsLocked(true, fatField, proteinField, carbsField);
+                sugarField.setText(removeZeros(match.getNutrition().getSugarPer100g()));
+                sodiumField.setText(removeZeros(match.getNutrition().getSodiumPer100g()));
+                setFieldsLocked(true, fatField, proteinField, carbsField, sugarField, sodiumField);
             }
             else {  // new ingredient
                 if (fatField.isDisable()) {
                     fatField.clear();
                     proteinField.clear();
                     carbsField.clear();
+                    sugarField.clear();
+                    sodiumField.clear();
                 }
-                setFieldsLocked(false, fatField, proteinField, carbsField);  // unlock them
+                setFieldsLocked(false, fatField, proteinField, carbsField,
+                        sugarField, sodiumField);  // unlock them
             }
         });
-
         dialog.getDialogPane().setContent(grid);
-
         // this is returned when the user clicks on 'Add'
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == ButtonType.OK) {
@@ -115,33 +120,29 @@ public class IngredientDialog {
                             .filter(i -> i.getName().equalsIgnoreCase(n))
                             .findFirst()
                             .orElse(null);
-
                     if (existing != null) {  // existing ingredient
                         finalIng = existing;
                     }
                     else {
                         finalIng = new Ingredient();
                         finalIng.setName(n);
-
                         BigDecimal fat = check(fatField.getText());
                         BigDecimal protein = check(proteinField.getText());
                         BigDecimal carbs = check(carbsField.getText());
-
-                        Nutrition nut = new Nutrition(fat, protein, carbs);
+                        BigDecimal sugar = check(sugarField.getText());
+                        BigDecimal sodium = check(sodiumField.getText());
+                        Nutrition nut = new Nutrition(fat, protein, carbs, sugar, sodium);
                         finalIng.setNutrition(nut);
                         finalIng = server.addIngredient(finalIng);
                     }
                     BigDecimal a = check(amount.getText());
                     Measurement m = new Measurement(a, unit.getValue());
-
                     RecipeIngredient ans = new RecipeIngredient();
                     ans.setIngredient(finalIng);
                     ans.setAmount(m);
                     return ans;
-                } catch (Exception e) { return null; }
-            }
-            return null;
-        });
+                } catch (Exception e) { return null; }}
+            return null;});
         return dialog.showAndWait();
     }
 
