@@ -3,6 +3,7 @@ package client.utils.search;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class SearchQuery {
     public enum LogicalOperator {
@@ -22,28 +23,34 @@ public class SearchQuery {
     private final CaseSensitivity globalCaseSensitivity;
     private final boolean favouritesOnly;
     private final List<String> additionalLanguages;
+    private final List<NutritionFilter> nutritionFilters;
+    private final Integer servings;
 
     /**
-     * Private constructor for building queries.
+     * Private constructor for building queries via Builder.
      */
-    private SearchQuery(NodeType nodeType, SearchToken token, LogicalOperator operator,
-                        List<SearchQuery> children, CaseSensitivity globalCaseSensitivity,
-                        boolean favouritesOnly, List<String> additionalLanguages) {
-        this.nodeType = nodeType;
-        this.token = token;
-        this.operator = operator;
-        if (children != null) {
-            this.children = new ArrayList<>(children);
+    private SearchQuery(Builder builder) {
+        this.nodeType = builder.nodeType;
+        this.token = builder.token;
+        this.operator = builder.operator;
+        if (builder.children != null) {
+            this.children = new ArrayList<>(builder.children);
         } else {
             this.children = new ArrayList<>();
         }
-        this.globalCaseSensitivity = globalCaseSensitivity;
-        this.favouritesOnly = favouritesOnly;
-        if (additionalLanguages != null) {
-            this.additionalLanguages = new ArrayList<>(additionalLanguages);
+        this.globalCaseSensitivity = builder.globalCaseSensitivity;
+        this.favouritesOnly = builder.favouritesOnly;
+        if (builder.additionalLanguages != null) {
+            this.additionalLanguages = new ArrayList<>(builder.additionalLanguages);
         } else {
             this.additionalLanguages = new ArrayList<>();
         }
+        if (builder.nutritionFilters != null) {
+            this.nutritionFilters = new ArrayList<>(builder.nutritionFilters);
+        } else {
+            this.nutritionFilters = new ArrayList<>();
+        }
+        this.servings = builder.servings;
     }
 
     /**
@@ -51,8 +58,7 @@ public class SearchQuery {
      * @return an empty search query
      */
     public static SearchQuery empty() {
-        return new SearchQuery(NodeType.GROUP, null, LogicalOperator.AND,
-                new ArrayList<>(), CaseSensitivity.INSENSITIVE, false, new ArrayList<>());
+        return builder().build();
     }
 
     /**
@@ -61,8 +67,7 @@ public class SearchQuery {
      * @return a new token query
      */
     public static SearchQuery token(SearchToken token) {
-        return new SearchQuery(NodeType.TOKEN, token, null,
-                null, CaseSensitivity.INSENSITIVE, false, new ArrayList<>());
+        return builder().token(token).build();
     }
 
     /**
@@ -72,10 +77,8 @@ public class SearchQuery {
      * @return a new group query
      */
     public static SearchQuery group(LogicalOperator operator, List<SearchQuery> children) {
-        return new SearchQuery(NodeType.GROUP, null, operator,
-                children, CaseSensitivity.INSENSITIVE, false, new ArrayList<>());
+        return builder().operator(operator).children(children).build();
     }
-
     /**
      * Creates a builder for constructing complex queries.
      * @return a new query builder
@@ -142,6 +145,22 @@ public class SearchQuery {
     }
 
     /**
+     * Returns the list of nutrition filters.
+     * @return the list of nutrition filters
+     */
+    public List<NutritionFilter> getNutritionFilters() {
+        return new ArrayList<>(nutritionFilters);
+    }
+
+    /**
+     * Returns the number of servings to scale nutrition values by.
+     * @return the servings value, or empty if not specified
+     */
+    public Optional<Integer> getServings() {
+        return Optional.ofNullable(servings);
+    }
+
+    /**
      * Checks if this query is empty (matches everything).
      * @return true if the query has no conditions
      */
@@ -167,13 +186,16 @@ public class SearchQuery {
                 && operator == that.operator
                 && Objects.equals(children, that.children)
                 && globalCaseSensitivity == that.globalCaseSensitivity
-                && Objects.equals(additionalLanguages, that.additionalLanguages);
+                && Objects.equals(additionalLanguages, that.additionalLanguages)
+                && Objects.equals(nutritionFilters, that.nutritionFilters)
+                && Objects.equals(servings, that.servings);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(nodeType, token, operator, children,
-                globalCaseSensitivity, favouritesOnly, additionalLanguages);
+                globalCaseSensitivity, favouritesOnly, additionalLanguages,
+                nutritionFilters, servings);
     }
 
     @Override
@@ -184,7 +206,9 @@ public class SearchQuery {
         return "Query{" + operator + ", children=" + children
                 + ", globalCase=" + globalCaseSensitivity
                 + ", favOnly=" + favouritesOnly
-                + ", langs=" + additionalLanguages + "}";
+                + ", langs=" + additionalLanguages
+                + ", nutritionFilters=" + nutritionFilters
+                + ", servings=" + servings + "}";
     }
 
     /**
@@ -198,6 +222,8 @@ public class SearchQuery {
         private CaseSensitivity globalCaseSensitivity = CaseSensitivity.INSENSITIVE;
         private boolean favouritesOnly = false;
         private List<String> additionalLanguages = new ArrayList<>();
+        private List<NutritionFilter> nutritionFilters = new ArrayList<>();
+        private Integer servings = null;
 
         /**
          * Sets this to a token node.
@@ -283,12 +309,41 @@ public class SearchQuery {
         }
 
         /**
+         * Adds a nutrition filter.
+         * @param filter the nutrition filter to add
+         * @return this builder
+         */
+        public Builder addNutritionFilter(NutritionFilter filter) {
+            this.nutritionFilters.add(filter);
+            return this;
+        }
+
+        /**
+         * Sets all nutrition filters.
+         * @param filters the list of nutrition filters
+         * @return this builder
+         */
+        public Builder nutritionFilters(List<NutritionFilter> filters) {
+            this.nutritionFilters = new ArrayList<>(filters);
+            return this;
+        }
+
+        /**
+         * Sets the number of servings for scaling nutrition values.
+         * @param servings the number of servings
+         * @return this builder
+         */
+        public Builder servings(Integer servings) {
+            this.servings = servings;
+            return this;
+        }
+
+        /**
          * Builds the SearchQuery.
          * @return the constructed SearchQuery
          */
         public SearchQuery build() {
-            return new SearchQuery(nodeType, token, operator, children,
-                    globalCaseSensitivity, favouritesOnly, additionalLanguages);
+            return new SearchQuery(this);
         }
     }
 }

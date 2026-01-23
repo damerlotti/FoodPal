@@ -4,6 +4,8 @@ import commons.Recipe;
 import commons.RecipeIngredient;
 import commons.RecipeStep;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -58,6 +60,11 @@ public class RecipeSearchMatcher {
 
         // Check language filter
         if (!matchesLanguage(recipe, query)) {
+            return false;
+        }
+
+        // Check nutrition filters
+        if (!matchesNutritionFilters(recipe, query)) {
             return false;
         }
 
@@ -127,6 +134,58 @@ public class RecipeSearchMatcher {
 
         // If no additional languages specified, also match default
         return query.getAdditionalLanguages().isEmpty();
+    }
+
+    /**
+     * Checks if a recipe matches all nutrition filters.
+     */
+    private boolean matchesNutritionFilters(Recipe recipe, SearchQuery query) {
+        List<NutritionFilter> filters = query.getNutritionFilters();
+        if (filters.isEmpty()) {
+            return true;
+        }
+
+        // Determine the scaling factor based on servings
+        BigDecimal scalingFactor = BigDecimal.ONE;
+        if (query.getServings().isPresent() && recipe.getServings() > 0) {
+            int queryServings = query.getServings().get();
+            scalingFactor = BigDecimal.valueOf(queryServings)
+                    .divide(BigDecimal.valueOf(recipe.getServings()), 10, RoundingMode.HALF_UP);
+        }
+
+        for (NutritionFilter filter : filters) {
+            BigDecimal rawValue = getNutritionValue(recipe, filter.getField());
+            BigDecimal scaledValue = rawValue.multiply(scalingFactor);
+            int intValue = scaledValue.setScale(0, RoundingMode.HALF_UP).intValue();
+
+            if (!filter.matches(intValue)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Gets the total nutrition value for a specific field from a recipe.
+     */
+    private BigDecimal getNutritionValue(Recipe recipe, NutritionField field) {
+        switch (field) {
+            case KCAL:
+                return recipe.calculateTotalKcal();
+            case FAT:
+                return recipe.calculateTotalFat();
+            case PROTEIN:
+                return recipe.calculateTotalProtein();
+            case CARBS:
+                return recipe.calculateTotalCarbs();
+            case SUGAR:
+                return recipe.calculateTotalSugar();
+            case SODIUM:
+                return recipe.calculateTotalSodium();
+            default:
+                return BigDecimal.ZERO;
+        }
     }
 
     /**
