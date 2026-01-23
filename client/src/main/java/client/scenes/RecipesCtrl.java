@@ -19,6 +19,8 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.KeyCode;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import org.springframework.messaging.simp.stomp.StompSession;
@@ -230,6 +232,15 @@ public class RecipesCtrl implements Initializable {
         // Add real-time search filtering
         searchField.textProperty().addListener((obs, oldText, newText) -> {
             applySearchFilter();
+        });
+
+        // Add Escape key handler to clear search and unfocus
+        searchField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                searchField.clear();
+                searchField.getParent().requestFocus();
+                event.consume();
+            }
         });
 
         // the ui list contains our data, currently empty
