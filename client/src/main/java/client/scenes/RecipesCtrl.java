@@ -243,6 +243,19 @@ public class RecipesCtrl implements Initializable {
             }
         });
 
+        // Load saved language filter from config
+        List<String> savedLanguages = cellFactory.getConfigManager().getConfig().getSelectedRecipeLanguages();
+        if (savedLanguages != null && !savedLanguages.isEmpty()) {
+            filteredLanguages = new ArrayList<>(savedLanguages);
+        } else {
+            // Default to all supported languages
+            filteredLanguages = new ArrayList<>(
+                    I18nConfig.SUPPORTED.stream()
+                            .map(Locale::toLanguageTag)
+                            .toList()
+            );
+        }
+
         // the ui list contains our data, currently empty
         refresh();
     }

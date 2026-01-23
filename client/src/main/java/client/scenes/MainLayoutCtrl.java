@@ -160,6 +160,8 @@ public class MainLayoutCtrl implements Initializable {
         }
 
         updateRecipeLanguageMenuText();
+        // Apply initial language filter when the menu is first set up
+        primaryCtrl.onRecipeLanguagesChanged(getSelectedLanguageTags());
     }
 
     /**
@@ -176,10 +178,6 @@ public class MainLayoutCtrl implements Initializable {
     private void updateRecipeLanguageMenuText() {
         if (selectedRecipeLanguages.isEmpty()) {
             recipeLanguageMenu.setText(I18n.get("mainLayout.none"));
-        } else if (selectedRecipeLanguages.size() == I18nConfig.SUPPORTED.size()) {
-            recipeLanguageMenu.setText(I18n.get("mainLayout.all"));
-        } else if (selectedRecipeLanguages.size() == 1) {
-            recipeLanguageMenu.setText(getLanguageDisplayName(selectedRecipeLanguages.get(0)));
         } else {
             String codes = selectedRecipeLanguages.stream()
                     .map(this::getLanguageCode)
