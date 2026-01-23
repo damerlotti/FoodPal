@@ -175,9 +175,9 @@ public class MainLayoutCtrl implements Initializable {
      */
     private void updateRecipeLanguageMenuText() {
         if (selectedRecipeLanguages.isEmpty()) {
-            recipeLanguageMenu.setText("—");
+            recipeLanguageMenu.setText(I18n.get("mainLayout.none"));
         } else if (selectedRecipeLanguages.size() == I18nConfig.SUPPORTED.size()) {
-            recipeLanguageMenu.setText("All");
+            recipeLanguageMenu.setText(I18n.get("mainLayout.all"));
         } else if (selectedRecipeLanguages.size() == 1) {
             recipeLanguageMenu.setText(getLanguageDisplayName(selectedRecipeLanguages.get(0)));
         } else {

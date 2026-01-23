@@ -163,6 +163,9 @@ public class RecipesCtrl implements Initializable {
         editServingsButton.textProperty().bind(I18n.createStringBinding("recipes.edit"));
         scaleTitleLabel.textProperty().bind(I18n.createStringBinding("recipes.scale"));
         servingsTitleLabel.textProperty().bind(I18n.createStringBinding("recipes.servings"));
+        
+        // Bind recipe title default to i18n
+        recipeTitle.textProperty().bind(I18n.createStringBinding("recipes.selectRecipe"));
 
         // Bind favorites toggle to i18n
         favoritesToggle.textProperty().bind(
@@ -378,7 +381,7 @@ public class RecipesCtrl implements Initializable {
             if (!favRecipeExists) {
                 String recipeName = favRecipes.get(recipeID);
                 if (recipeName == null) {
-                    recipeName = "Standard Recipe";
+                    recipeName = I18n.get("recipes.defaultRecipeName");
                 }
 
                 favConfig.removeFavorite(recipeID);
@@ -480,7 +483,10 @@ public class RecipesCtrl implements Initializable {
      */
     private void showRecipeDetails(Recipe recipe) {
         if (recipe == null) {
-            recipeTitle.setText(I18n.get("recipes.selectRecipe"));
+            // When no recipe is selected, keep the i18n binding active
+            // This ensures the default text updates with language changes
+            recipeTitle.textProperty().unbind();
+            recipeTitle.textProperty().bind(I18n.createStringBinding("recipes.selectRecipe"));
             recipeKcal.setText("");
             ingredientsList.getItems().clear();
             stepsList.getItems().clear();
@@ -507,6 +513,8 @@ public class RecipesCtrl implements Initializable {
         Double savedFactor = scalingMap.getOrDefault(recipe.getId(), 1.0);
         scaler.getValueFactory().setValue(savedFactor);  // this will call updateVisuals
 
+        // Unbind the default i18n binding and set the recipe name directly
+        recipeTitle.textProperty().unbind();
         recipeTitle.setText(recipe.getName());
 
         int currentServings = recipe.getServings() > 0 ? recipe.getServings() : 1;
@@ -577,7 +585,8 @@ public class RecipesCtrl implements Initializable {
     public void addToShoppingList() {
         Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
         if (currentRecipe == null) {
-            showAlert("No Recipe Selected", "Please select a recipe to add its ingredients.");
+            showAlert(I18n.get("dialog.addToShoppingList.noRecipeSelected"),
+                    I18n.get("dialog.addToShoppingList.selectRecipe"));
             return;
         }
         Double factor = scaler.getValue();
@@ -629,10 +638,12 @@ public class RecipesCtrl implements Initializable {
         dialogContent.getChildren().addAll(overviewList, addExtraButton);
 
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Add to Shopping List");
-        dialog.setHeaderText("Review items from '" + currentRecipe.getName() + "'");
+        dialog.setTitle(I18n.get("dialog.addToShoppingList.title"));
+        dialog.setHeaderText(I18n.get("dialog.addToShoppingList.header")
+                .replace("{0}", currentRecipe.getName()));
 
-        ButtonType addButtonType = new ButtonType("Add Items", ButtonBar.ButtonData.OK_DONE);
+        ButtonType addButtonType = new ButtonType(I18n.get("dialog.addToShoppingList.addItems"),
+                ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
 
         dialog.getDialogPane().setContent(dialogContent);
@@ -663,7 +674,8 @@ public class RecipesCtrl implements Initializable {
             try {
                 int newServings = Integer.parseInt(input);
                 if (newServings < 1) {
-                    showAlert("Invalid Input", "Servings must be at least 1.");
+                    showAlert(I18n.get("alert.invalidInput"),
+                            I18n.get("alert.servingsAtLeast1"));
                     return;
                 }
                 currentRecipe.setServings(newServings);
@@ -676,7 +688,8 @@ public class RecipesCtrl implements Initializable {
                             I18n.get("alert.couldNotUpdateRecipe"));
                 }
             } catch (NumberFormatException e) {
-                showAlert("Invalid Input", "Please enter a valid number.");
+                showAlert(I18n.get("alert.invalidInput"),
+                        I18n.get("alert.enterValidNumber"));
             }
         });
     }
@@ -997,8 +1010,8 @@ public class RecipesCtrl implements Initializable {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle(I18n.get("alert.saveFailed"));
                 alert.setHeaderText(I18n.get("alert.couldNotSaveFile"));
-                // TODO(calco): Should probably show a more human readable message
-                alert.setContentText("Error: " + e.getMessage());
+                alert.setContentText(I18n.get("alert.errorPrefix")
+                        .replace("{0}", e.getMessage()));
                 alert.showAndWait();
             }
         }

@@ -1,5 +1,6 @@
 package client.scenes;
 
+import client.i18n.I18n;
 import commons.Ingredient;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -69,7 +70,7 @@ public class PrimaryCtrl {
         this.addIngredientScene = new Scene(addIngredientNode);
 
         primaryStage.setScene(new Scene(mainLayout.getValue()));
-        primaryStage.setTitle("FoodPal");
+        primaryStage.setTitle(I18n.get("window.main"));
         showRecipes();
         primaryStage.show();
     }
@@ -93,7 +94,7 @@ public class PrimaryCtrl {
      * Shows the menu with recipes
      */
     public void showRecipes() {
-        primaryStage.setTitle("FoodPal - Recipes");
+        primaryStage.setTitle(I18n.get("window.recipes"));
         mainLayoutCtrl.setCenter(recipesNode);
         recipesCtrl.refresh();
     }
@@ -109,7 +110,7 @@ public class PrimaryCtrl {
         p.initOwner(primaryStage);
 
         p.setScene(addRecipeScene);
-        p.setTitle("Add Recipe");
+        p.setTitle(I18n.get("window.addRecipe"));
         p.showAndWait();
         recipesCtrl.refresh();
     }
@@ -118,7 +119,7 @@ public class PrimaryCtrl {
      * Shows the menu with ingredients
      */
     public void showIngredients() {
-        primaryStage.setTitle("FoodPal - Ingredients");
+        primaryStage.setTitle(I18n.get("window.ingredients"));
         mainLayoutCtrl.setCenter(ingredientsNode);
         ingredientsCtrl.refresh();
     }
@@ -131,7 +132,7 @@ public class PrimaryCtrl {
         p.initModality(Modality.APPLICATION_MODAL);
         p.initOwner(primaryStage);
         p.setScene(addIngredientScene);
-        p.setTitle("Add Ingredient");
+        p.setTitle(I18n.get("window.addIngredient"));
         p.showAndWait();
         ingredientsCtrl.refresh();
     }
@@ -145,7 +146,7 @@ public class PrimaryCtrl {
         p.initModality(Modality.APPLICATION_MODAL);
         p.initOwner(primaryStage);
         p.setScene(editIngredientScene);
-        p.setTitle("Edit Ingredient");
+        p.setTitle(I18n.get("window.editIngredient"));
         editIngredientCtrl.setIngredient(ingredient);
         p.showAndWait();
         ingredientsCtrl.refresh();
@@ -155,7 +156,7 @@ public class PrimaryCtrl {
      * Shows the Shopping List scene
      */
     public void showShoppingList() {
-        primaryStage.setTitle("FoodPal - Shopping List");
+        primaryStage.setTitle(I18n.get("window.shoppingList"));
         mainLayoutCtrl.setCenter(shoppingListNode);
     }
 

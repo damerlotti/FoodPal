@@ -57,6 +57,12 @@ public class IngredientsCtrl implements Initializable {
     @FXML
     private Label usageLabel;
     @FXML
+    private Label kCalTitleLabel;
+    @FXML
+    private Label nutritionalValuesLabel;
+    @FXML
+    private Label per100gLabel;
+    @FXML
     private Button addButton;
 
     @FXML
@@ -89,6 +95,10 @@ public class IngredientsCtrl implements Initializable {
         carbsLabel.textProperty().bind(I18n.createStringBinding("ingredients.carbs"));
         sodiumLabel.textProperty().bind(I18n.createStringBinding("ingredients.sodium"));
         sugarLabel.textProperty().bind(I18n.createStringBinding("ingredients.sugar"));
+        kCalTitleLabel.textProperty().bind(I18n.createStringBinding("ingredients.kCal"));
+        nutritionalValuesLabel.textProperty().bind(
+                I18n.createStringBinding("ingredients.nutritionalValues"));
+        per100gLabel.textProperty().bind(I18n.createStringBinding("ingredients.per100g"));
 
         // special javafx list that updates the UI automatically
         data = FXCollections.observableArrayList();
@@ -250,7 +260,8 @@ public class IngredientsCtrl implements Initializable {
             }
             if(usageLabel != null) {
                 int count = countUsage(ingredient);
-                usageLabel.setText("Used in " + count + " recipes");
+                usageLabel.setText(I18n.get("ingredients.usedInRecipes")
+                        .replace("{0}", String.valueOf(count)));
             }
         }
     }
