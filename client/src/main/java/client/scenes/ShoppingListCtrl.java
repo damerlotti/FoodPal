@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -35,6 +36,7 @@ public class ShoppingListCtrl implements Initializable {
     @FXML private Button addItemButton;
     @FXML private Button resetListButton;
     @FXML private Button downloadButton;
+    @FXML private Label titleLabel;
 
     /**
      * Constructs the controller via dependency injection.
@@ -67,6 +69,7 @@ public class ShoppingListCtrl implements Initializable {
      * Binding the buttons to their ids
      */
     private void initializeLanguage() {
+        titleLabel.textProperty().bind(I18n.createStringBinding("shoppingList.title"));
         addItemButton.textProperty().bind(I18n.createStringBinding("shoppingList.addItem"));
         resetListButton.textProperty().bind(I18n.createStringBinding("shoppingList.reset"));
         downloadButton.textProperty().bind(I18n.createStringBinding("shoppingList.download"));
@@ -84,7 +87,7 @@ public class ShoppingListCtrl implements Initializable {
             ShoppingItem newItem = new ShoppingItem(
                     recipeIngredient.getIngredient(),
                     recipeIngredient.getAmount(),
-                    "Manual"
+                    I18n.get("shoppingList.manualSource")
             );
             shoppingListService.addItems(java.util.List.of(newItem));
         });
@@ -106,14 +109,14 @@ public class ShoppingListCtrl implements Initializable {
     public void downloadList(){
         if (shoppingListService.getItems().isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Empty List");
+            alert.setTitle(I18n.get("shoppingList.emptyList"));
             alert.setHeaderText(null);
-            alert.setContentText("Your shopping list is empty.");
+            alert.setContentText(I18n.get("shoppingList.listIsEmpty"));
             alert.showAndWait();
             return;
         }
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Shopping List");
+        fileChooser.setTitle(I18n.get("fileChooser.saveShoppingList"));
         fileChooser.setInitialFileName("shopping_list.txt");
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("Text Files (*.txt)", "*.txt"),
@@ -128,7 +131,7 @@ public class ShoppingListCtrl implements Initializable {
 
     private void saveToFile(File file) {
         try (PrintWriter writer = new PrintWriter(file, StandardCharsets.UTF_8)) {
-            writer.println("SHOPPING LIST");
+            writer.println(I18n.get("shoppingList.fileTitle"));
             writer.println("=============");
             writer.println();
             for (ShoppingItem item : shoppingListService.getItems()) {
@@ -147,8 +150,8 @@ public class ShoppingListCtrl implements Initializable {
             }
         } catch (IOException e) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Could not save file");
+            alert.setTitle(I18n.get("shoppingList.error"));
+            alert.setHeaderText(I18n.get("shoppingList.couldNotSaveFile"));
             alert.setContentText(e.getMessage());
             alert.showAndWait();
         }

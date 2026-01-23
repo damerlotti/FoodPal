@@ -42,12 +42,12 @@
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="335.0" layoutY="331.0" text="kCal:">
+      <Label fx:id="kCalTitleLabel" layoutX="335.0" layoutY="331.0" text="kCal:">
          <font>
             <Font name="System Bold" size="12.0" />
          </font>
       </Label>
-      <Label layoutX="82.0" layoutY="63.0" text="Nutritional Values">
+      <Label fx:id="nutritionalValuesLabel" layoutX="82.0" layoutY="63.0" text="Nutritional Values">
          <font>
             <Font name="System Bold" size="20.0" />
          </font>
@@ -58,7 +58,7 @@
             <Font name="System Bold" size="20.0" />
          </font>
       </Label>
-      <Label layoutX="312.0" layoutY="93.0" text="per 100g">
+      <Label fx:id="per100gLabel" layoutX="312.0" layoutY="93.0" text="per 100g">
          <font>
             <Font name="System Italic" size="18.0" />
          </font>
