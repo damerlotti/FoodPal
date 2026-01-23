@@ -79,6 +79,9 @@ public class MainLayoutCtrl implements Initializable {
         languageCombo.valueProperty().addListener((obs, oldL, newL) -> {
             if (newL != null) {
                 I18n.setLocale(newL);
+                // Save the language preference to config
+                configManager.getConfig().setPrefLocale(newL.toLanguageTag());
+                configManager.save();
             }
         });
 
@@ -160,8 +163,6 @@ public class MainLayoutCtrl implements Initializable {
         }
 
         updateRecipeLanguageMenuText();
-        // Apply initial language filter when the menu is first set up
-        primaryCtrl.onRecipeLanguagesChanged(getSelectedLanguageTags());
     }
 
     /**

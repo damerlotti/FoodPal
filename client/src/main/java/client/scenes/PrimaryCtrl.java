@@ -71,6 +71,10 @@ public class PrimaryCtrl {
 
         primaryStage.setScene(new Scene(mainLayout.getValue()));
         primaryStage.setTitle(I18n.get("window.main"));
+        
+        // Initialize language filter with the selected languages from MainLayout
+        recipesCtrl.setFilteredLanguages(mainLayoutCtrl.getSelectedLanguageTags());
+        
         showRecipes();
         primaryStage.show();
     }
