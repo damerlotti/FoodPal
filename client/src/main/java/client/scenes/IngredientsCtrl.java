@@ -118,6 +118,9 @@ public class IngredientsCtrl implements Initializable {
      */
     public void refresh() {
         var list = server.getIngredients();
+        list.sort((i1, i2) ->
+                i1.getName().compareToIgnoreCase(i2.getName())
+        );
         data.clear();
         data.addAll(list);
     }

@@ -1,5 +1,6 @@
 package client.utils;
 
+import client.i18n.I18n;
 import commons.Ingredient;
 import commons.Measurement;
 import javafx.scene.control.*;
@@ -54,10 +55,12 @@ public class ShoppingListCellFactory implements Callback<ListView<ShoppingItem>,
                     "-fx-font-size: 0.9em;"); //very cutely shows where the ingredient
             // comes from in the shopping list
 
-            editButton = new Button("Edit");
+            editButton = new Button();
+            editButton.textProperty().bind(I18n.createStringBinding("recipes.edit"));
             editButton.setOnAction(e -> handleEdit());
 
-            deleteButton = new Button("Delete");
+            deleteButton = new Button();
+            deleteButton.textProperty().bind(I18n.createStringBinding("recipes.delete"));
             deleteButton.setStyle("-fx-background-color: #ffcccc; -fx-text-fill: red;");
             deleteButton.setOnAction(e -> {
                 ShoppingItem item = getItem();

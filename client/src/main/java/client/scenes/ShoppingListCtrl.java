@@ -1,11 +1,13 @@
 package client.scenes;
 
+import client.i18n.I18n;
 import client.utils.*;
 import com.google.inject.Inject;
 import commons.RecipeIngredient;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -30,6 +32,9 @@ public class ShoppingListCtrl implements Initializable {
 
     @FXML
     private ListView<ShoppingItem> shoppingListView;
+    @FXML private Button addItemButton;
+    @FXML private Button resetListButton;
+    @FXML private Button downloadButton;
 
     /**
      * Constructs the controller via dependency injection.
@@ -55,6 +60,16 @@ public class ShoppingListCtrl implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         shoppingListView.setItems(shoppingListService.getItems());
         shoppingListView.setCellFactory(new ShoppingListCellFactory());
+        initializeLanguage();
+    }
+
+    /**
+     * Binding the buttons to their ids
+     */
+    private void initializeLanguage() {
+        addItemButton.textProperty().bind(I18n.createStringBinding("shoppingList.addItem"));
+        resetListButton.textProperty().bind(I18n.createStringBinding("shoppingList.reset"));
+        downloadButton.textProperty().bind(I18n.createStringBinding("shoppingList.download"));
     }
 
     /**

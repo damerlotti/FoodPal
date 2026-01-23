@@ -4,6 +4,8 @@ import client.MyWebSocketClient;
 import client.i18n.I18n;
 import client.config.Config;
 import client.i18n.I18nConfig;
+import javafx.geometry.Insets;
+import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 import client.utils.ServerUtils;
 import client.utils.search.RecipeSearchMatcher;
@@ -53,7 +55,7 @@ public class RecipesCtrl implements Initializable {
     @FXML
     private ToggleButton favoritesToggle;
     @FXML
-    private Spinner<Integer> servings;
+    private Label servingsLabel;
 
     // i18n buttons and labels
     @FXML
@@ -86,6 +88,16 @@ public class RecipesCtrl implements Initializable {
     private Button editStepButton;
     @FXML
     private Button deleteStepButton;
+    @FXML
+    private Button shopButton;
+    @FXML
+    private Label scaleTitleLabel;
+    @FXML
+    private Label servingsTitleLabel;
+    @FXML
+    private Button editServingsButton;
+    @FXML
+    private Label servingSizeLabel;
     @FXML
     private TextField searchField;
     @FXML
@@ -124,7 +136,6 @@ public class RecipesCtrl implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         initializeScaler();
-        initializeServings();
         initializeRecipeList();
         initializeWebSocket();
         initializeLanguage();
@@ -148,6 +159,10 @@ public class RecipesCtrl implements Initializable {
         editStepButton.textProperty().bind(I18n.createStringBinding("recipes.edit"));
         deleteStepButton.textProperty().bind(I18n.createStringBinding("recipes.delete"));
         languageLabel.textProperty().bind(I18n.createStringBinding("recipes.languageLabel"));
+        shopButton.textProperty().bind(I18n.createStringBinding("recipes.shop"));
+        editServingsButton.textProperty().bind(I18n.createStringBinding("recipes.edit"));
+        scaleTitleLabel.textProperty().bind(I18n.createStringBinding("recipes.scale"));
+        servingsTitleLabel.textProperty().bind(I18n.createStringBinding("recipes.servings"));
 
         // Bind favorites toggle to i18n
         favoritesToggle.textProperty().bind(
@@ -183,6 +198,12 @@ public class RecipesCtrl implements Initializable {
                     showAlert(I18n.get("alert.serverError"),
                             I18n.get("alert.couldNotUpdateRecipe"));
                 }
+            }
+        });
+        I18n.localeProperty().addListener((obs, oldLocale, newLocale) -> {
+            Recipe current = recipeList.getSelectionModel().getSelectedItem();
+            if (current != null) {
+                showRecipeDetails(current);
             }
         });
     }
@@ -246,28 +267,15 @@ public class RecipesCtrl implements Initializable {
                 Recipe current = recipeList.getSelectionModel().getSelectedItem();
                 if (current != null) {
                     scalingMap.put(current.getId(), newVal);
+                    int baseServings = current.getServings() > 0 ? current.getServings() : 1;
+                    int scaledServings = (int) Math.round(baseServings * newVal);
+                    servingsLabel.setText(String.valueOf(scaledServings));
                 }
                 updateVisuals(newVal);
             }
         });
     }
 
-    /**
-     * Initializes the servings spinner
-     */
-    private void initializeServings() {
-        SpinnerValueFactory<Integer> servingsFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 20, 1);
-        servings.setValueFactory(servingsFactory);
-
-        servings.valueProperty().addListener((obs, oldVal, newVal) -> {
-            Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
-            if (currentRecipe != null && newVal != null && !newVal.equals(oldVal)) {
-                currentRecipe.setServings(newVal);
-                server.updateRecipe(currentRecipe);
-            }
-        });
-    }
 
     /**
      * Creates a text formatter that only allows optional decimal point
@@ -323,7 +331,7 @@ public class RecipesCtrl implements Initializable {
     }
 
     /**
-     * The logic linked to the refresh button
+     * Refreshes the list of recipes
      */
     public void refresh() {
         Recipe selected = recipeList.getSelectionModel().getSelectedItem();
@@ -502,18 +510,31 @@ public class RecipesCtrl implements Initializable {
         recipeTitle.setText(recipe.getName());
 
         int currentServings = recipe.getServings() > 0 ? recipe.getServings() : 1;
-        servings.getValueFactory().setValue(currentServings);
-        servings.setVisible(true);
+        int displayServings = (int) Math.round(currentServings * savedFactor);
+        servingsLabel.setText(String.valueOf(displayServings));
 
-        recipeKcal.setText(
-                I18n.get("recipes.kcal").replace(
-                        "{0}",
-                        recipe.estimatedRecipeKcal()
-                                .stripTrailingZeros()
-                                .toPlainString()
-                )
+        java.math.BigDecimal totalKcal = recipe.estimatedRecipeKcal();
+        recipeKcal.setText(I18n.get("recipes.kcal").replace("{0}",
+                        totalKcal.stripTrailingZeros().toPlainString())
         );
         recipeKcal.setVisible(true);
+
+        int baseServings = recipe.getServings() > 0 ? recipe.getServings() : 1;
+        java.math.BigDecimal kcalPerServing;
+        try {
+            kcalPerServing = totalKcal.divide(
+                    java.math.BigDecimal.valueOf(baseServings),
+                    0,
+                    java.math.RoundingMode.HALF_UP
+            );
+        } catch (Exception e) {
+            kcalPerServing = java.math.BigDecimal.ZERO;
+        }
+        servingSizeLabel.setText(
+                I18n.get("recipes.servingSize").replace("{0}", kcalPerServing.toPlainString())
+        );
+        servingSizeLabel.setVisible(true);
+
         ingredientsList.getItems().clear();
         for (var ing : recipe.getIngredients()) {
             ingredientsList.getItems().add(ing);  // add RecipeIngredient objects, not strings
@@ -575,6 +596,37 @@ public class RecipesCtrl implements Initializable {
             item.setChecked(false);
             temp.add(item);
         }
+        FXCollections.sort(temp, (i1, i2) ->
+                i1.getIngredient().getName().compareToIgnoreCase(i2.getIngredient().getName())
+        );
+
+        VBox dialogContent = new VBox(10);
+        dialogContent.setPadding(new Insets(10));
+
+        ListView<ShoppingItem> overviewList = new ListView<>();
+        overviewList.setItems(temp);
+        overviewList.setPrefHeight(300);
+        overviewList.setPrefWidth(400);
+        overviewList.setCellFactory(new ShoppingListCellFactory());
+        Button addExtraButton = new Button();
+        addExtraButton.textProperty().bind(I18n.createStringBinding("shoppingList.addExtra"));
+        addExtraButton.setMaxWidth(Double.MAX_VALUE);
+
+        addExtraButton.setOnAction(e -> {
+            var allIngredients = server.getIngredients();
+            Optional<RecipeIngredient> result = IngredientDialog.show(allIngredients, server);
+            result.ifPresent(ri -> {
+                ShoppingItem newItem = new ShoppingItem(
+                        ri.getIngredient(),
+                        ri.getAmount(),
+                        currentRecipe.getName()
+                );
+                temp.add(newItem);
+                FXCollections.sort(temp, (i1, i2) -> i1.getIngredient().getName()
+                                .compareToIgnoreCase(i2.getIngredient().getName()));
+            });
+        });
+        dialogContent.getChildren().addAll(overviewList, addExtraButton);
 
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Add to Shopping List");
@@ -583,19 +635,50 @@ public class RecipesCtrl implements Initializable {
         ButtonType addButtonType = new ButtonType("Add Items", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(addButtonType, ButtonType.CANCEL);
 
-        ListView<ShoppingItem> overviewList = new ListView<>();
-        overviewList.setItems(temp);
-        overviewList.setPrefHeight(300);
-        overviewList.setPrefWidth(400);
-        overviewList.setCellFactory(new ShoppingListCellFactory());
-
-        dialog.getDialogPane().setContent(overviewList);
+        dialog.getDialogPane().setContent(dialogContent);
 
         Optional<ButtonType> result = dialog.showAndWait();
-
         if (result.isPresent() && result.get() == addButtonType && !temp.isEmpty()) {
             shoppingListService.addItems(temp);
         }
+    }
+
+    /**
+     * Edit the number of servings of the recipe
+     */
+    @FXML
+    public void onEditServingsClicked() {
+        Recipe currentRecipe = recipeList.getSelectionModel().getSelectedItem();
+        if (currentRecipe == null) {
+            showAlert(I18n.get("alert.noRecipeSelected"), I18n.get("alert.selectRecipeToEdit"));
+            return;
+        }
+        TextInputDialog dialog = new TextInputDialog(String.valueOf(currentRecipe.getServings()));
+        dialog.setTitle(I18n.get("dialog.editServings.title"));
+        dialog.setHeaderText(I18n.get("dialog.editServings.header"));
+        dialog.setContentText(null);
+        dialog.setGraphic(null);
+        Optional<String> result = dialog.showAndWait();
+        result.ifPresent(input -> {
+            try {
+                int newServings = Integer.parseInt(input);
+                if (newServings < 1) {
+                    showAlert("Invalid Input", "Servings must be at least 1.");
+                    return;
+                }
+                currentRecipe.setServings(newServings);
+                scalingMap.put(currentRecipe.getId(), 1.0);
+                scaler.getValueFactory().setValue(1.0);
+                try {
+                    server.updateRecipe(currentRecipe);
+                } catch (Exception e) {
+                    showAlert(I18n.get("alert.serverError"),
+                            I18n.get("alert.couldNotUpdateRecipe"));
+                }
+            } catch (NumberFormatException e) {
+                showAlert("Invalid Input", "Please enter a valid number.");
+            }
+        });
     }
 
     /**
