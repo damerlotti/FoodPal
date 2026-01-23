@@ -19,7 +19,6 @@ import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCode;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -244,7 +243,8 @@ public class RecipesCtrl implements Initializable {
         });
 
         // Load saved language filter from config
-        List<String> savedLanguages = cellFactory.getConfigManager().getConfig().getSelectedRecipeLanguages();
+        List<String> savedLanguages = cellFactory.getConfigManager().getConfig()
+                .getSelectedRecipeLanguages();
         if (savedLanguages != null && !savedLanguages.isEmpty()) {
             filteredLanguages = new ArrayList<>(savedLanguages);
         } else {
