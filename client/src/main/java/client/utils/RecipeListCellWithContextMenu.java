@@ -31,7 +31,7 @@ public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeL
         contextMenu = new ContextMenu();
 
         // Edit recipe menu item
-        MenuItem editMenuItem = new MenuItem("Edit Recipe");
+        MenuItem editMenuItem = new MenuItem(I18n.get("recipes.edit"));
         editMenuItem.setOnAction(e -> {
             Recipe recipe = getItem();
             if (recipe != null) {
