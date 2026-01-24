@@ -8,30 +8,37 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import client.config.ConfigManager;
-// this class has been made with the help of AI
-public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeListCell {
+import client.i18n.I18n;
+
+public class RecipeListCellWithContextMenu extends
+        RecipeListCellFactory.RecipeListCell {
 
     private final RecipesCtrl recipesCtrl;
     private ContextMenu contextMenu;
 
     /**
-     * rawr
-     * @param recipesCtrl rawr
-     * @param configManager rawr
+     * e
+     * @param recipesCtrl e
+     * @param configManager e
      */
-    public RecipeListCellWithContextMenu(RecipesCtrl recipesCtrl, ConfigManager configManager) {
+    public RecipeListCellWithContextMenu(
+            RecipesCtrl recipesCtrl, ConfigManager configManager) {
         this.recipesCtrl = recipesCtrl;
-        // Set the configManager so the parent class can use it
         this.setConfigManager(configManager);
         createContextMenu();
         setupEventHandlers();
     }
 
+    /**
+     * creates the context menu
+     */
     private void createContextMenu() {
         contextMenu = new ContextMenu();
 
         // Edit recipe menu item
-        MenuItem editMenuItem = new MenuItem("Edit Recipe");
+        MenuItem editMenuItem = new MenuItem();
+        editMenuItem.textProperty().
+                bind(I18n.createStringBinding("recipes.edit"));
         editMenuItem.setOnAction(e -> {
             Recipe recipe = getItem();
             if (recipe != null) {
@@ -40,7 +47,9 @@ public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeL
         });
 
         // Clone recipe menu item
-        MenuItem cloneMenuItem = new MenuItem("Clone Recipe");
+        MenuItem cloneMenuItem = new MenuItem();
+        cloneMenuItem.textProperty().
+                bind(I18n.createStringBinding("recipes.clone"));
         cloneMenuItem.setOnAction(e -> {
             Recipe recipe = getItem();
             if (recipe != null) {
@@ -49,7 +58,9 @@ public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeL
         });
 
         // Print recipe menu item
-        MenuItem printMenuItem = new MenuItem("Print Recipe");
+        MenuItem printMenuItem = new MenuItem();
+        printMenuItem.textProperty().
+                bind(I18n.createStringBinding("recipes.print"));
         printMenuItem.setOnAction(e -> {
             Recipe recipe = getItem();
             if (recipe != null) {
@@ -58,7 +69,9 @@ public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeL
         });
 
         // Add to shopping list menu item
-        MenuItem shoppingListMenuItem = new MenuItem("Add to Shopping List");
+        MenuItem shoppingListMenuItem = new MenuItem();
+        shoppingListMenuItem.textProperty().
+                bind(I18n.createStringBinding("recipes.shop"));
         shoppingListMenuItem.setOnAction(e -> {
             Recipe recipe = getItem();
             if (recipe != null) {
@@ -67,14 +80,15 @@ public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeL
         });
 
         // Delete recipe menu item
-        MenuItem deleteMenuItem = new MenuItem("Delete Recipe");
+        MenuItem deleteMenuItem = new MenuItem();
+        deleteMenuItem.textProperty().
+                bind(I18n.createStringBinding("recipes.delete"));
         deleteMenuItem.setOnAction(e -> {
             Recipe recipe = getItem();
             if (recipe != null) {
                 recipesCtrl.onDeleteRecipePressed();
             }
         });
-
 
         // Add all items to the context menu
         contextMenu.getItems().addAll(
@@ -87,6 +101,9 @@ public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeL
         );
     }
 
+    /**
+     * sets up the even handlers
+     */
     private void setupEventHandlers() {
         // Show context menu on right click
         this.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
