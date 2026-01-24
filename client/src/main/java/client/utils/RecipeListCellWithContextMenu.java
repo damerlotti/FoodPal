@@ -8,6 +8,8 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import client.config.ConfigManager;
+import client.i18n.I18n;
+import javafx.beans.binding.StringBinding;
 // this class has been made with the help of AI
 public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeListCell {
 
@@ -31,7 +33,9 @@ public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeL
         contextMenu = new ContextMenu();
 
         // Edit recipe menu item
-        MenuItem editMenuItem = new MenuItem(I18n.get("recipes.edit"));
+        MenuItem editMenuItem = new MenuItem();
+        StringBinding editTextBinding = I18n.createStringBinding("recipes.edit");
+        editMenuItem.textProperty().bind(editTextBinding);
         editMenuItem.setOnAction(e -> {
             Recipe recipe = getItem();
             if (recipe != null) {
