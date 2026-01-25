@@ -9,6 +9,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import client.config.ConfigManager;
 import client.i18n.I18n;
+import javafx.beans.binding.StringBinding;
 
 public class RecipeListCellWithContextMenu extends
         RecipeListCellFactory.RecipeListCell {
@@ -17,13 +18,14 @@ public class RecipeListCellWithContextMenu extends
     private ContextMenu contextMenu;
 
     /**
-     * e
-     * @param recipesCtrl e
-     * @param configManager e
+     * Initliazes the recipeCellContextMenu
+     * @param recipesCtrl the recipe controller
+     * @param configManager the config manager
      */
     public RecipeListCellWithContextMenu(
             RecipesCtrl recipesCtrl, ConfigManager configManager) {
         this.recipesCtrl = recipesCtrl;
+        // Set the configManager so the parent class can use it
         this.setConfigManager(configManager);
         createContextMenu();
         setupEventHandlers();
@@ -37,8 +39,8 @@ public class RecipeListCellWithContextMenu extends
 
         // Edit recipe menu item
         MenuItem editMenuItem = new MenuItem();
-        editMenuItem.textProperty().
-                bind(I18n.createStringBinding("recipes.edit"));
+        StringBinding editTextBinding = I18n.createStringBinding("recipes.edit");
+        editMenuItem.textProperty().bind(editTextBinding);
         editMenuItem.setOnAction(e -> {
             Recipe recipe = getItem();
             if (recipe != null) {
