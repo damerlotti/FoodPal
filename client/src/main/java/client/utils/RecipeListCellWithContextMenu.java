@@ -10,18 +10,20 @@ import javafx.scene.input.MouseEvent;
 import client.config.ConfigManager;
 import client.i18n.I18n;
 import javafx.beans.binding.StringBinding;
-// this class has been made with the help of AI
-public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeListCell {
+
+public class RecipeListCellWithContextMenu extends
+        RecipeListCellFactory.RecipeListCell {
 
     private final RecipesCtrl recipesCtrl;
     private ContextMenu contextMenu;
 
     /**
-     * rawr
-     * @param recipesCtrl rawr
-     * @param configManager rawr
+     * Initliazes the recipeCellContextMenu
+     * @param recipesCtrl the recipe controller
+     * @param configManager the config manager
      */
-    public RecipeListCellWithContextMenu(RecipesCtrl recipesCtrl, ConfigManager configManager) {
+    public RecipeListCellWithContextMenu(
+            RecipesCtrl recipesCtrl, ConfigManager configManager) {
         this.recipesCtrl = recipesCtrl;
         // Set the configManager so the parent class can use it
         this.setConfigManager(configManager);
@@ -29,6 +31,9 @@ public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeL
         setupEventHandlers();
     }
 
+    /**
+     * creates the context menu
+     */
     private void createContextMenu() {
         contextMenu = new ContextMenu();
 
@@ -43,13 +48,64 @@ public class RecipeListCellWithContextMenu extends RecipeListCellFactory.RecipeL
             }
         });
 
+        // Clone recipe menu item
+        MenuItem cloneMenuItem = new MenuItem();
+        cloneMenuItem.textProperty().
+                bind(I18n.createStringBinding("recipes.clone"));
+        cloneMenuItem.setOnAction(e -> {
+            Recipe recipe = getItem();
+            if (recipe != null) {
+                recipesCtrl.onClonePressed();
+            }
+        });
+
+        // Print recipe menu item
+        MenuItem printMenuItem = new MenuItem();
+        printMenuItem.textProperty().
+                bind(I18n.createStringBinding("recipes.print"));
+        printMenuItem.setOnAction(e -> {
+            Recipe recipe = getItem();
+            if (recipe != null) {
+                recipesCtrl.onPrintPressed();
+            }
+        });
+
+        // Add to shopping list menu item
+        MenuItem shoppingListMenuItem = new MenuItem();
+        shoppingListMenuItem.textProperty().
+                bind(I18n.createStringBinding("recipes.shop"));
+        shoppingListMenuItem.setOnAction(e -> {
+            Recipe recipe = getItem();
+            if (recipe != null) {
+                recipesCtrl.addToShoppingList();
+            }
+        });
+
+        // Delete recipe menu item
+        MenuItem deleteMenuItem = new MenuItem();
+        deleteMenuItem.textProperty().
+                bind(I18n.createStringBinding("recipes.delete"));
+        deleteMenuItem.setOnAction(e -> {
+            Recipe recipe = getItem();
+            if (recipe != null) {
+                recipesCtrl.onDeleteRecipePressed();
+            }
+        });
+
         // Add all items to the context menu
         contextMenu.getItems().addAll(
                 editMenuItem,
-                new SeparatorMenuItem()
+                cloneMenuItem,
+                printMenuItem,
+                shoppingListMenuItem,
+                new SeparatorMenuItem(),
+                deleteMenuItem
         );
     }
 
+    /**
+     * sets up the even handlers
+     */
     private void setupEventHandlers() {
         // Show context menu on right click
         this.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {

@@ -92,3 +92,7 @@ Ingredients which are marked in the overview will still be marked in the shoppin
 ### 4.6 Live Language Switch
 
 As an adition to this epic, we implemented support for a 4th language, leading to our app supporting full localisation in English, Dutch, Romanian and French.
+
+### General
+
+Right clicking a recipe in the main scene shows a contextual menu for easy access.

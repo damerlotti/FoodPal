@@ -257,6 +257,7 @@ public class RecipesCtrl implements Initializable {
                             .toList()
             );
         }
+
         // the ui list contains our data, currently empty
         refresh();
     }
