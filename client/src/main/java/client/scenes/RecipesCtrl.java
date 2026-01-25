@@ -222,7 +222,9 @@ public class RecipesCtrl implements Initializable {
         recipeList.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showRecipeDetails(newValue)
         );
-        recipeList.setCellFactory(cellFactory);
+        recipeList.setCellFactory(listView -> {
+            return new RecipeListCellWithContextMenu(this, cellFactory.getConfigManager());
+        });
 
         // Initialize search components
         searchParser = new SearchQueryParser();
@@ -255,7 +257,6 @@ public class RecipesCtrl implements Initializable {
                             .toList()
             );
         }
-
         // the ui list contains our data, currently empty
         refresh();
     }
